@@ -1,2 +1,2 @@
-# SmartAgenda
-Projeto do curso de Desenvolvimento de Sistemas - Sistema de Agendamento online 
+# PsiManager
+Projeto 2 do curso de Desenvolvimento de Sistemas - Sistema de Agendamento online 
