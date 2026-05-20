@@ -1,0 +1,69 @@
+.fc {
+  font-family: Arial, sans-serif;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.fc .fc-button {
+  background: #1976d2 !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-weight: 600 !important;
+}
+
+.fc .fc-button:hover {
+  background: #1565c0 !important;
+}
+
+.fc .fc-button:disabled {
+  background: #90caf9 !important;
+}
+
+.fc .fc-daygrid-day-frame,
+.fc .fc-timegrid-slot,
+.fc .fc-scrollgrid {
+  background: #fff;
+}
+
+.fc .fc-col-header-cell {
+  background: #f8faff;
+  color: #374151;
+  font-weight: 700;
+  padding: 10px 0;
+}
+
+.fc .fc-daygrid-day-number {
+  color: #374151;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.fc .fc-event {
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 2px 6px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+}
+
+.fc .fc-timegrid-axis,
+.fc .fc-timegrid-slot-label {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.fc .fc-day-today {
+  background: #eef6ff !important;
+}
+
+.fc .fc-scrollgrid {
+  border-radius: 12px !important;
+  overflow: hidden;
+  border: 1px solid #e5e7eb !important;
+}

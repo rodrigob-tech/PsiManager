@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+enum Status {
+  scheduled
+  confirmed
+  pending
+  canceled
+  done
+}
+
+model User {
+  id                    String   @id @default(uuid())
+  name                  String
+  email                 String   @unique
+  password              String
+
+  googleAccessToken     String?
+  googleRefreshToken    String?
+  googleTokenExpiry     DateTime?
+  googleCalendarEmail   String?
+  googleConnected       Boolean  @default(false)
+}
+
+model Client {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  phone        String
+  password     String
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  appointments Appointment[]
+}
+
+model Space {
+  id           String        @id @default(uuid())
+  name         String
+  description  String?
+  appointments Appointment[]
+
+}
+
+model Appointment {
+  id        String   @id @default(uuid())
+  date      DateTime
+  status    Status   @default(scheduled)
+  reminderSent Boolean  @default(false)
+
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id])
+
+  spaceId   String
+  space     Space   @relation(fields: [spaceId], references: [id])
+
+  googleEventId      String?
+  googleCalendarId   String?
+  googleSyncStatus   String?   // ex: pending, synced, failed
+  googleSyncError    String?
+  syncedAt           DateTime?
+}
+
+model BlockedTime {
+  id    String   @id @default(uuid())
+  start DateTime
+  end   DateTime
+}
