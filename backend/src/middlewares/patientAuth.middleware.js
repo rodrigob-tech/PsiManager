@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-export const requireClientAuth = (req, res, next) => {
+export const requirePatientAuth = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -20,13 +20,13 @@ export const requireClientAuth = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.CLIENT_JWT_SECRET);
 
-    if (decoded.type !== "client") {
+    if (decoded.type !== "patient") {
       return res.status(403).json({
-        error: "Token inválido para cliente"
+        error: "Token inválido para Paciente"
       });
     }
 
-    req.client = decoded;
+    req.patient = decoded;
     next();
   } catch (error) {
     return res.status(401).json({

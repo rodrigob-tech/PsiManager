@@ -4,12 +4,12 @@ import {
   createPublicBooking,
   getPublicSpaces
 } from "../controllers/publicBooking.controller.js";
-import { requireClientAuth } from "../middlewares/clientAuth.middleware.js";
+import { requirePatientAuth } from "../middlewares/patientAuth.middleware.js";
 
 const router = Router();
 
 router.get("/spaces", getPublicSpaces);
 router.get("/available-slots", getPublicAvailableSlots);
-router.post("/book", requireClientAuth, createPublicBooking);
+router.post("/book", requirePatientAuth, createPublicBooking);
 
 export default router;

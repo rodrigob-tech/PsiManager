@@ -11,7 +11,7 @@ export const getAppointments = async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
       include: {
-        client: true,
+        patient: true,
         space: true
       },
       orderBy: {
@@ -32,7 +32,7 @@ export const getAppointmentById = async (req, res) => {
     const appointment = await prisma.appointment.findUnique({
       where: { id },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });
@@ -48,11 +48,11 @@ export const getAppointmentById = async (req, res) => {
 };
 export const createAppointment = async (req, res) => {
   try {
-    const { date, status, clientId, spaceId } = req.body;
-    // Validação  de data, clientID, space ID
-    if (!date || !clientId || !spaceId) {
+    const { date, status, patientId, spaceId } = req.body;
+    // Validação  de data, patientId, space ID
+    if (!date || !patientId || !spaceId) {
       return res.status(400).json({
-        error: "date, clientId e spaceId são obrigatórios"
+        error: "date, patientId e spaceId são obrigatórios"
       });
     }
     // Validação  dos status
@@ -66,13 +66,13 @@ export const createAppointment = async (req, res) => {
     if (isNaN(appointmentDate.getTime())) {
       return res.status(400).json({ error: "Data inválida" });
     }
-    // Validando se o cliente existe no DB
-    const clientExists = await prisma.client.findUnique({
-      where: { id: clientId }
+    // Validando se o Paciente existe no DB
+    const patientExists = await prisma.patient.findUnique({
+      where: { id: patientId }
     });
 
-    if (!clientExists) {
-      return res.status(404).json({ error: "Cliente não encontrado" });
+    if (!patientExists) {
+      return res.status(404).json({ error: "Paciente não encontrado" });
     }
 
     // Validando  se o spaceID existe no DB
@@ -125,22 +125,22 @@ export const createAppointment = async (req, res) => {
       data: {
         date: appointmentDate,
         status: status || "scheduled",
-        clientId,
+        patientId,
         // tava spaceId: spaceId
         spaceId
       },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });
     try {
       // usando um job do Bree para enviar o email
-      if (appointment.client?.email) {
+      if (appointment.patient?.email) {
         await sendEmail({
-          to: appointment.client.email,
+          to: appointment.patient.email,
           subject: "Agendamento confirmado",
-          text: `Olá, ${appointment.client.name}. Seu agendamento foi criado para ${new Date(
+          text: `Olá, ${appointment.patient.name}. Seu agendamento foi criado para ${new Date(
             appointment.date
           ).toLocaleString("pt-BR")}. Espaço: ${appointment.space?.name || "Não informado"
             }. Status: ${appointment.status}.`
@@ -182,7 +182,7 @@ export const createAppointment = async (req, res) => {
     const updatedAppointment = await prisma.appointment.findUnique({
       where: { id: appointment.id },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });
@@ -195,12 +195,12 @@ export const createAppointment = async (req, res) => {
 export const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { date, status, clientId, spaceId } = req.body;
+    const { date, status, patientId, spaceId } = req.body;
 
     const appointmentExists = await prisma.appointment.findUnique({
       where: { id },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });
@@ -209,13 +209,13 @@ export const updateAppointment = async (req, res) => {
       return res.status(404).json({ error: "Agendamento não encontrado" });
     }
 
-    if (clientId) {
-      const clientExists = await prisma.client.findUnique({
-        where: { id: clientId }
+    if (patientId) {
+      const patientExists = await prisma.patient.findUnique({
+        where: { id: patientId }
       });
 
-      if (!clientExists) {
-        return res.status(404).json({ error: "Cliente não encontrado" });
+      if (!patientExists) {
+        return res.status(404).json({ error: "Paciente não encontrado" });
       }
     }
 
@@ -277,11 +277,11 @@ export const updateAppointment = async (req, res) => {
       data: {
         ...(date && { date: new Date(date) }),
         ...(status && { status }),
-        ...(clientId && { clientId }),
+        ...(patientId && { patientId }),
         ...(spaceId !== undefined && { spaceId: spaceId || null })
       },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });
@@ -319,7 +319,7 @@ export const updateAppointment = async (req, res) => {
     const finalAppointment = await prisma.appointment.findUnique({
       where: { id: updatedAppointment.id },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });
@@ -337,7 +337,7 @@ export const deleteAppointment = async (req, res) => {
     const appointmentExists = await prisma.appointment.findUnique({
       where: { id },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });

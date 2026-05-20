@@ -30,7 +30,7 @@ model User {
   googleConnected       Boolean  @default(false)
 }
 
-model Client {
+model Patient {
   id           String        @id @default(uuid())
   name         String
   email        String        @unique
@@ -57,8 +57,8 @@ model Appointment {
   status    Status   @default(scheduled)
   reminderSent Boolean  @default(false)
 
-  clientId  String
-  client    Client   @relation(fields: [clientId], references: [id])
+  patientId  String
+  patient    Patient   @relation(fields: [patientId], references: [id])
 
   spaceId   String
   space     Space   @relation(fields: [spaceId], references: [id])

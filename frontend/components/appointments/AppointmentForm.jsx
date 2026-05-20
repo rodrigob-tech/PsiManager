@@ -15,14 +15,14 @@ function formatDateTimeLocal(dateString) {
 }
 
 export default function AppointmentForm({
-  clients,
+  patients,
   spaces,
   onSubmit,
   editingAppointment,
   onCancelEdit
 }) {
   const [formData, setFormData] = useState({
-    clientId: "",
+    patientId: "",
     spaceId: "",
     date: "",
     status: "scheduled"
@@ -31,14 +31,14 @@ export default function AppointmentForm({
   useEffect(() => {
     if (editingAppointment) {
       setFormData({
-        clientId: editingAppointment.clientId || "",
+        patientId: editingAppointment.patientId || "",
         spaceId: editingAppointment.spaceId || "",
         date: formatDateTimeLocal(editingAppointment.date),
         status: editingAppointment.status || "scheduled"
       });
     } else {
       setFormData({
-        clientId: "",
+        patientId: "",
         spaceId: "",
         date: "",
         status: "scheduled"
@@ -61,7 +61,7 @@ export default function AppointmentForm({
 
     if (!editingAppointment) {
       setFormData({
-        clientId: "",
+        patientId: "",
         spaceId: "",
         date: "",
         status: "scheduled"
@@ -87,16 +87,16 @@ export default function AppointmentForm({
       </h3>
 
       <select
-        name="clientId"
-        value={formData.clientId}
+        name="patientId"
+        value={formData.patientId}
         onChange={handleChange}
         required
         style={inputStyle}
       >
-        <option value="">Selecione um cliente</option>
-        {clients.map((client) => (
-          <option key={client.id} value={client.id}>
-            {client.name}
+        <option value="">Selecione um paciente</option>
+        {patients.map((patient) => (
+          <option key={patient.id} value={patient.id}>
+            {patient.name}
           </option>
         ))}
       </select>

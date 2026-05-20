@@ -1,9 +1,9 @@
-export default function ClientList({
-  clients,
+export default function PatientList({
+  patients,
   onEdit,
   onDelete
 }) {
-  if (!clients?.length) {
+  if (!patients?.length) {
     return (
       <div
         style={{
@@ -13,7 +13,7 @@ export default function ClientList({
           color: "#666"
         }}
       >
-        Nenhum cliente cadastrado.
+        Nenhum paciente cadastrado.
       </div>
     );
   }
@@ -25,9 +25,9 @@ export default function ClientList({
         gap: "12px"
       }}
     >
-      {clients.map((client) => (
+      {patients.map((patient) => (
         <div
-          key={client.id}
+          key={patient.id}
           style={{
             border: "1px solid #e5e7eb",
             borderRadius: "12px",
@@ -37,15 +37,15 @@ export default function ClientList({
         >
           <div style={{ display: "grid", gap: "6px" }}>
             <div>
-              <strong>Nome:</strong> {client.name}
+              <strong>Nome:</strong> {patient.name}
             </div>
 
             <div>
-              <strong>Email:</strong> {client.email}
+              <strong>Email:</strong> {patient.email}
             </div>
 
             <div>
-              <strong>Telefone:</strong> {client.phone}
+              <strong>Telefone:</strong> {patient.phone}
             </div>
           </div>
 
@@ -59,7 +59,7 @@ export default function ClientList({
           >
             <button
               type="button"
-              onClick={() => onEdit(client)}
+              onClick={() => onEdit(patient)}
               style={editButton}
             >
               Editar
@@ -67,7 +67,7 @@ export default function ClientList({
 
             <button
               type="button"
-              onClick={() => onDelete(client.id)}
+              onClick={() => onDelete(patient.id)}
               style={deleteButton}
             >
               Excluir

@@ -31,7 +31,7 @@ export const getPublicAvailableSlots = async (req, res) => {
 export const createPublicBooking = async (req, res) => {
   try {
     const { date, spaceId } = req.body;
-    const clientId = req.client.clientId;
+    const patientId = req.patient.patientId;
 
     if (!date || !spaceId) {
       return res.status(400).json({
@@ -39,13 +39,13 @@ export const createPublicBooking = async (req, res) => {
       });
     }
 
-    const client = await prisma.client.findUnique({
-      where: { id: clientId }
+    const patient = await prisma.patient.findUnique({
+      where: { id: patientId }
     });
 
-    if (!client || !client.isActive) {
+    if (!patient || !patient.isActive) {
       return res.status(403).json({
-        error: "Cliente autenticado inválido ou inativo"
+        error: "Paciente autenticado inválido ou inativo"
       });
     }
 
@@ -55,20 +55,20 @@ export const createPublicBooking = async (req, res) => {
       data: {
         date: new Date(date),
         status: "scheduled",
-        clientId: client.id,
+        patientId: patient.id,
         spaceId
       },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });
 
     try {
       await sendEmail({
-        to: appointment.client.email,
+        to: appointment.patient.email,
         subject: "Agendamento confirmado",
-        text: `Olá, ${appointment.client.name}. Seu agendamento foi confirmado para ${new Date(
+        text: `Olá, ${appointment.patient.name}. Seu agendamento foi confirmado para ${new Date(
           appointment.date
         ).toLocaleString("pt-BR")}. Espaço: ${
           appointment.space?.name || "Não informado"
@@ -111,7 +111,7 @@ export const createPublicBooking = async (req, res) => {
     const finalAppointment = await prisma.appointment.findUnique({
       where: { id: appointment.id },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });

@@ -1,4 +1,4 @@
-import { getClientData } from "../../src/services/clientAuthStorage";  
+import { getPatientData } from "../../src/services/patientAuthStorage";  
 
 
 export default function PublicBookingForm({
@@ -8,7 +8,7 @@ export default function PublicBookingForm({
   onSubmit,
   submitting = false
 }) {
-  const client = getClientData();
+  const patient = getPatientData();
 
   const selectedSpace = spaces.find((space) => space.id === spaceId);
 
@@ -64,18 +64,18 @@ export default function PublicBookingForm({
         }}
       >
         <div style={summaryRowStyle}>
-          <strong>Cliente</strong>
-          <span>{client?.name || "Não identificado"}</span>
+          <strong>Paciente</strong>
+          <span>{patient?.name || "Não identificado"}</span>
         </div>
 
         <div style={summaryRowStyle}>
           <strong>Email</strong>
-          <span>{client?.email || "Não informado"}</span>
+          <span>{patient?.email || "Não informado"}</span>
         </div>
 
         <div style={summaryRowStyle}>
           <strong>Telefone</strong>
-          <span>{client?.phone || "Não informado"}</span>
+          <span>{patient?.phone || "Não informado"}</span>
         </div>
 
         <div style={summaryRowStyle}>

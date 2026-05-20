@@ -78,8 +78,8 @@ export default function AppointmentList({
             >
               <div style={{ display: "grid", gap: "6px" }}>
                 <div>
-                  <strong>Cliente:</strong>{" "}
-                  {appointment.client?.name || "Sem nome"}
+                  <strong>Paciente:</strong>{" "}
+                  {appointment.patient?.name || "Sem nome"}
                 </div>
 
                 <div>

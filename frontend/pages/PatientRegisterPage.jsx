@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { saveClientAuth } from "../src/services/clientAuthStorage";
+import { savePatientAuth } from "../src/services/patientAuthStorage";
 import { clearUserAuth } from "../src/services/userAuthStorage";
 
-export default function ClientRegisterPage() {
+export default function PatientRegisterPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -33,13 +33,13 @@ export default function ClientRegisterPage() {
       setError("");
       setLoading(true);
 
-      const response = await api.post("/client-auth/register", formData);
+      const response = await api.post("/patient-auth/register", formData);
 
       clearUserAuth();
 
-      saveClientAuth({
+      savePatientAuth({
         token: response.data.token,
-        client: response.data.client
+        patient: response.data.patient
       });
 
       navigate("/agendar", { replace: true });
@@ -108,7 +108,7 @@ export default function ClientRegisterPage() {
 
         <p style={footerTextStyle}>
           Já tem conta?{" "}
-          <Link to="/login-cliente" style={linkStyle}>
+          <Link to="/login-paciente" style={linkStyle}>
             Entrar
           </Link>
         </p>

@@ -5,10 +5,10 @@ import SpaceSelector from "../components/publicBooking/SpaceSelector";
 import SlotSelector from "../components/publicBooking/SlotSelector";
 import PublicBookingForm from "../components/publicBooking/PublicBookingForm";
 import {
-  getClientToken,
-  getClientData,
-  clearClientAuth
-} from "../src/services/clientAuthStorage";   
+  getPatientToken,
+  getPatientData,
+  clearPatientAuth
+} from "../src/services/patientAuthStorage";   
  
 
 export default function PublicBookingPage() {
@@ -29,7 +29,7 @@ export default function PublicBookingPage() {
 
   const [lastBookedAppointment, setLastBookedAppointment] = useState(null);
 
-  const client = getClientData();
+  const patient = getPatientData();
 
   useEffect(() => {
     loadSpaces();
@@ -104,7 +104,7 @@ export default function PublicBookingPage() {
       setFeedback({ type: "", message: "" });
       setSubmittingBooking(true);
 
-      const token = getClientToken();
+      const token = getPatientToken();
 
       const response = await api.post("/public-booking/book", formData, {
         headers: {

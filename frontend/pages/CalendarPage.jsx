@@ -21,9 +21,9 @@ import {
   createBlockedTime,
   deleteBlockedTime
 } from "../services/blockedTime.service";
-import ClientForm from "../components/appointments/ClientForm";
-import ClientList from "../components/appointments/ClientList";
-import { getClients, createClient,updateClient, deleteClient } from "../services/clientService";
+import PatientForm from "../components/appointments/PatientForm";
+import PatientList from "../components/appointments/PatientList";
+import { getPatients, createPatient, updatePatient, deletePatient } from "../services/patientService";
 
 import SpaceForm from "../components/appointments/SpaceForm";
 import SpaceList from "../components/appointments/SpaceList";
@@ -49,13 +49,13 @@ const sectionCardStyle = {
 
 export default function CalendarPage() {
   const [events, setEvents] = useState([]);
-  const [clients, setClients] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [blockedTimes, setBlockedTimes] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [spaces, setSpaces] = useState([]);
   const [editingSpace, setEditingSpace] = useState(null);
-  const [editingClient, setEditingClient] = useState(null);
+  const [editingPatient, setEditingPatient] = useState(null);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState("all");
   const [selectedSpaceFilter, setSelectedSpaceFilter] = useState("all");
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
@@ -74,12 +74,12 @@ export default function CalendarPage() {
 
       const [
         appointmentsResponse,
-        clientsResponse,
+        patientsResponse,
         blockedTimesResponse,
         spacesResponse
       ] = await Promise.all([
         getAppointments(authHeaders),
-        getClients(authHeaders),
+        getPatients(authHeaders),
         getBlockedTimes(authHeaders),
         getSpaces(authHeaders)
       ]);
@@ -89,7 +89,7 @@ export default function CalendarPage() {
 
       setAppointments(appointmentsResponse.data);
       setEvents([...appointmentEvents, ...blockedEvents]);
-      setClients(clientsResponse.data);
+      setPatients(patientsResponse.data);
       setBlockedTimes(blockedTimesResponse.data);
       setSpaces(spacesResponse.data);
     } catch (error) {
@@ -147,34 +147,38 @@ export default function CalendarPage() {
     }
   };
 
-const handleSubmitClient = async (formData) => {
+const handleSubmitPatient = async (formData) => {
   try {
     const token = getUserToken();
     const authHeaders = {
       Authorization: `Bearer ${token}`
     };
 
-    if (editingClient) {
-      await updateClient(editingClient.id, formData, authHeaders);
-      alert("Cliente atualizado com sucesso");
-      setEditingClient(null);
+    if (editingPatient) {
+      await updatePatient(editingPatient.id, formData, authHeaders);
+      alert("Paciente atualizado com sucesso");
+      setEditingPatient(null);
+      await loadData();
+    } else {
+      await createPatient(formData, authHeaders);
+      alert("Paciente criado com sucesso");
       await loadData();
     }
   } catch (error) {
-    console.error("Erro ao salvar cliente:", error);
+    console.error("Erro ao salvar paciente:", error);
 
     const message =
-      error.response?.data?.error || "Erro ao salvar cliente";
+      error.response?.data?.error || "Erro ao salvar paciente";
 
     alert(message);
   }
 };
 
-  const handleEditClient = (client) => {
-  setEditingClient(client);
+  const handleEditPatient = (patient) => {
+  setEditingPatient(patient);
 };
-const handleDeleteClient = async (id) => {
-  const confirmed = window.confirm("Deseja realmente excluir este cliente?");
+const handleDeletePatient = async (id) => {
+  const confirmed = window.confirm("Deseja realmente excluir este paciente?");
   if (!confirmed) return;
 
   try {
@@ -183,14 +187,14 @@ const handleDeleteClient = async (id) => {
       Authorization: `Bearer ${token}`
     };
 
-    await deleteClient(id, authHeaders);
+    await deletePatient(id, authHeaders);
     await loadData();
-    alert("Cliente removido com sucesso");
+    alert("Paciente removido com sucesso");
   } catch (error) {
-    console.error("Erro ao remover cliente:", error);
+    console.error("Erro ao remover paciente:", error);
 
     const message =
-      error.response?.data?.error || "Erro ao remover cliente";
+      error.response?.data?.error || "Erro ao remover paciente";
 
     alert(message);
   }
@@ -440,12 +444,12 @@ const handleDeleteClient = async (id) => {
           ) : (
             <>
               <div>
-                <strong>Cliente:</strong>{" "}
-                {selectedCalendarEvent.extendedProps?.clientName}
+                <strong>Paciente:</strong>{" "}
+                {selectedCalendarEvent.extendedProps?.patientName}
               </div>
               <div>
                 <strong>Email:</strong>{" "}
-                {selectedCalendarEvent.extendedProps?.clientEmail || "Não informado"}
+                {selectedCalendarEvent.extendedProps?.patientEmail || "Não informado"}
               </div>
               <div>
                 <strong>Espaço:</strong>{" "}
@@ -496,10 +500,10 @@ const handleDeleteClient = async (id) => {
   >
     <button
       type="button"
-      onClick={() => setActiveSection("clients")}
-      style={getTabButtonStyle("clients")}
+      onClick={() => setActiveSection("patients")}
+      style={getTabButtonStyle("patients")}
     >
-      Clientes
+      Pacientes
     </button>
 
     <button
@@ -527,24 +531,20 @@ const handleDeleteClient = async (id) => {
     </button>
   </div>
 
-  {activeSection === "clients" && (
+  {activeSection === "patients" && (
   <div>
-    <h3 style={{ marginTop: 0 }}>Clientes</h3>
+    <h3 style={{ marginTop: 0 }}>Pacientes</h3>
 
-    {editingClient && (
-      <div style={{ marginBottom: "20px" }}>
-        <ClientForm
-          onSubmit={handleSubmitClient}
-          editingClient={editingClient}
-          onCancelEdit={() => setEditingClient(null)}
-        />
-      </div>
-    )}
+    <PatientForm
+      onSubmit={handleSubmitPatient}
+      editingPatient={editingPatient}
+      onCancelEdit={() => setEditingPatient(null)}
+    />
 
-    <ClientList
-      clients={clients}
-      onEdit={handleEditClient}
-      onDelete={handleDeleteClient}
+    <PatientList
+      patients={patients}
+      onEdit={handleEditPatient}
+      onDelete={handleDeletePatient}
     />
   </div>
 )}
@@ -569,7 +569,7 @@ const handleDeleteClient = async (id) => {
     <div>
       <h3 style={{ marginTop: 0 }}>Agendamentos</h3>
       <AppointmentForm
-        clients={clients}
+        patients={patients}
         spaces={spaces}
         onSubmit={handleSubmitAppointment}
         editingAppointment={editingAppointment}

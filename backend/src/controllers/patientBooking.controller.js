@@ -3,11 +3,11 @@ import { deleteGoogleCalendarEvent } from "../services/googleCalendar.service.js
 
 export const getMyAppointments = async (req, res) => {
   try {
-    const clientId = req.client.clientId;
+    const patientId = req.patient.patientId;
 
     const appointments = await prisma.appointment.findMany({
       where: {
-        clientId
+        patientId
       },
       include: {
         space: true
@@ -19,25 +19,25 @@ export const getMyAppointments = async (req, res) => {
 
     res.json(appointments);
   } catch (error) {
-    console.error("Erro ao buscar agendamentos do cliente:", error);
+    console.error("Erro ao buscar agendamentos do Paciente:", error);
     res.status(500).json({
-      error: "Erro ao buscar agendamentos do cliente"
+      error: "Erro ao buscar agendamentos do Paciente"
     });
   }
 };
 
 export const cancelMyAppointment = async (req, res) => {
   try {
-    const clientId = req.client.clientId;
+    const patientId = req.patient.patientId;
     const { id } = req.params;
 
     const appointment = await prisma.appointment.findFirst({
       where: {
         id,
-        clientId
+        patientId
       },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });
@@ -87,7 +87,7 @@ export const cancelMyAppointment = async (req, res) => {
       appointment: updatedAppointment
     });
   } catch (error) {
-    console.error("Erro ao cancelar agendamento do cliente:", error);
+    console.error("Erro ao cancelar agendamento do Paciente:", error);
     res.status(500).json({
       error: "Erro ao cancelar agendamento"
     });

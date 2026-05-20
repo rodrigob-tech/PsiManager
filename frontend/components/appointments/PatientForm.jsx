@@ -6,24 +6,24 @@ const initialState = {
   phone: ""
 };
 
-export default function ClientForm({
+export default function PatientForm({
   onSubmit,
-  editingClient,
+  editingPatient,
   onCancelEdit
 }) {
   const [formData, setFormData] = useState(initialState);
 
   useEffect(() => {
-    if (editingClient) {
+    if (editingPatient) {
       setFormData({
-        name: editingClient.name || "",
-        email: editingClient.email || "",
-        phone: editingClient.phone || ""
+        name: editingPatient.name || "",
+        email: editingPatient.email || "",
+        phone: editingPatient.phone || ""
       });
     } else {
       setFormData(initialState);
     }
-  }, [editingClient]);
+  }, [editingPatient]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -37,11 +37,11 @@ export default function ClientForm({
   const handleSubmit = async (event) => {
     event.preventDefault();
     await onSubmit(formData);
-  };
 
-  if (!editingClient) {
-    return null;
-  }
+    if (!editingPatient) {
+      setFormData(initialState);
+    }
+  };
 
   return (
     <form
@@ -55,12 +55,14 @@ export default function ClientForm({
         borderRadius: "14px"
       }}
     >
-      <h3 style={{ margin: 0 }}>Editar cliente</h3>
+      <h3 style={{ margin: 0 }}>
+        {editingPatient ? "Editar paciente" : "Novo paciente"}
+      </h3>
 
       <input
         type="text"
         name="name"
-        placeholder="Nome do cliente"
+        placeholder="Nome do paciente"
         value={formData.name}
         onChange={handleChange}
         required
@@ -89,16 +91,18 @@ export default function ClientForm({
 
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
         <button type="submit" style={primaryButton}>
-          Salvar alterações
+          {editingPatient ? "Salvar alterações" : "Criar paciente"}
         </button>
 
-        <button
-          type="button"
-          onClick={onCancelEdit}
-          style={secondaryButton}
-        >
-          Cancelar edição
-        </button>
+        {editingPatient && (
+          <button
+            type="button"
+            onClick={onCancelEdit}
+            style={secondaryButton}
+          >
+            Cancelar edição
+          </button>
+        )}
       </div>
     </form>
   );
