@@ -88,7 +88,7 @@ export const loginPatient = async (req, res) => {
       where: { email: normalizedEmail }
     });
 
-    if (!patient) {
+    if (!patient || !patient.password) {
       return res.status(401).json({
         error: "Credenciais inválidas"
       });

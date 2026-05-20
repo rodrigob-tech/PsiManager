@@ -11,6 +11,8 @@ import publicBookingRoutes from "./routes/publicBooking.routes.js";
 import patientAuthRoutes from "./routes/patientAuth.routes.js"
 import patientBookingRoutes from "./routes/patientBooking.routes.js";
 import userAuthRoutes from "./routes/userAuth.routes.js";
+import medicalRecordRoutes from "./routes/medicalRecordRoutes.js";
+import sessionNoteRoutes from "./routes/sessionNoteRoutes.js";
 import { requireUserAuth } from "./middlewares/userAuth.middleware.js";
 const app = express();
 
@@ -22,6 +24,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/patients", requireUserAuth, patientRoutes);
+app.use("/medical-records", requireUserAuth, medicalRecordRoutes);
+app.use("/session-notes", requireUserAuth, sessionNoteRoutes);
 app.use("/appointments", requireUserAuth, appointmentRoutes);
 app.use("/blocked-times", requireUserAuth, blockedTimeRoutes);
 app.use("/spaces", requireUserAuth, spaceRoutes);

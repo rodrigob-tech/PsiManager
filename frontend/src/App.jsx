@@ -8,6 +8,7 @@ import PatientRegisterPage from "../pages/PatientRegisterPage";
 import PatientLoginPage from "../pages/PatientLoginPage";
 import PatientProtectedRoute from "../components/publicBooking/PatientProtectedRoute";
 import UserLoginPage from "../pages/UserLoginPage";
+import MedicalRecordPage from "../pages/MedicalRecordPage";
 import {
   isUserAuthenticated,
   getUserData,
@@ -126,6 +127,15 @@ function AppLayout() {
             element={
               <AdminProtectedRoute>
                 <CalendarPage />
+              </AdminProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/patients/:patientId/prontuario"
+            element={
+              <AdminProtectedRoute>
+                <MedicalRecordPage />
               </AdminProtectedRoute>
             }
           />

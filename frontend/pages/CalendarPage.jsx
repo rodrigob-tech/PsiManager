@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AppointmentForm from "../components/appointments/AppointmentForm";
 import AppointmentCalendar from "../components/appointments/AppointmentCalendar";
 import AppointmentList from "../components/appointments/AppointmentList";
@@ -48,6 +48,7 @@ const sectionCardStyle = {
 };
 
 export default function CalendarPage() {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [patients, setPatients] = useState([]);
   const [blockedTimes, setBlockedTimes] = useState([]);
@@ -63,6 +64,7 @@ export default function CalendarPage() {
   
 
   const admin = getUserData();
+  const canAccessMedicalRecord = admin?.role !== "RECEPTIONIST";
 
   const loadData = async () => {
     try {
@@ -545,6 +547,10 @@ const handleDeletePatient = async (id) => {
       patients={patients}
       onEdit={handleEditPatient}
       onDelete={handleDeletePatient}
+      canAccessMedicalRecord={canAccessMedicalRecord}
+      onOpenMedicalRecord={(patient) =>
+        navigate(`/patients/${patient.id}/prontuario`)
+      }
     />
   </div>
 )}

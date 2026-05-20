@@ -1,7 +1,9 @@
 export default function PatientList({
   patients,
   onEdit,
-  onDelete
+  onDelete,
+  canAccessMedicalRecord = false,
+  onOpenMedicalRecord
 }) {
   if (!patients?.length) {
     return (
@@ -41,11 +43,48 @@ export default function PatientList({
             </div>
 
             <div>
-              <strong>Email:</strong> {patient.email}
+              <strong>Status:</strong> {statusLabel[patient.status] || patient.status}
             </div>
 
             <div>
-              <strong>Telefone:</strong> {patient.phone}
+              <strong>Email:</strong> {patient.email || "Não informado"}
+            </div>
+
+            <div>
+              <strong>Telefone:</strong> {patient.phone || "Não informado"}
+            </div>
+
+            <div>
+              <strong>CPF:</strong> {patient.cpf || "Não informado"}
+            </div>
+
+            <div>
+              <strong>Nascimento:</strong> {formatDate(patient.birthDate)}
+            </div>
+
+            <div>
+              <strong>Gênero:</strong>{" "}
+              {genderLabel[patient.gender] || patient.gender || "Não informado"}
+            </div>
+
+            <div>
+              <strong>Emergência:</strong>{" "}
+              {patient.emergencyName || "Não informado"}
+              {patient.emergencyPhone ? ` - ${patient.emergencyPhone}` : ""}
+            </div>
+
+            <div>
+              <strong>Responsável:</strong>{" "}
+              {patient.guardianName || "Não informado"}
+              {patient.guardianPhone ? ` - ${patient.guardianPhone}` : ""}
+            </div>
+
+            <div>
+              <strong>Endereço:</strong> {patient.address || "Não informado"}
+            </div>
+
+            <div>
+              <strong>Observações:</strong> {patient.notes || "Não informado"}
             </div>
           </div>
 
@@ -72,12 +111,43 @@ export default function PatientList({
             >
               Excluir
             </button>
+
+            {canAccessMedicalRecord && (
+              <button
+                type="button"
+                onClick={() => onOpenMedicalRecord(patient)}
+                style={medicalRecordButton}
+              >
+                Prontuário
+              </button>
+            )}
           </div>
         </div>
       ))}
     </div>
   );
 }
+
+const statusLabel = {
+  ACTIVE: "Ativo",
+  INACTIVE: "Inativo",
+  ARCHIVED: "Arquivado"
+};
+
+const genderLabel = {
+  female: "Feminino",
+  male: "Masculino",
+  non_binary: "Não binário",
+  not_informed: "Não informado"
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "Não informado";
+
+  return new Date(dateString).toLocaleDateString("pt-BR", {
+    timeZone: "UTC"
+  });
+};
 
 const editButton = {
   border: "none",
@@ -92,6 +162,16 @@ const editButton = {
 const deleteButton = {
   border: "none",
   background: "#d32f2f",
+  color: "#fff",
+  padding: "8px 12px",
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontWeight: "600"
+};
+
+const medicalRecordButton = {
+  border: "none",
+  background: "#1976d2",
   color: "#fff",
   padding: "8px 12px",
   borderRadius: "8px",
