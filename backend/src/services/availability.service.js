@@ -42,7 +42,7 @@ export async function getAppointmentsForDay(date, spaceId) {
       }
     },
     include: {
-      client: true,
+      patient: true,
       space: true
     },
     orderBy: { date: "asc" }

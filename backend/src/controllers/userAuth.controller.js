@@ -58,7 +58,8 @@ export const registerUser = async (req, res) => {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     });
   } catch (error) {
@@ -107,7 +108,8 @@ export const loginUser = async (req, res) => {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     });
   } catch (error) {
@@ -126,6 +128,7 @@ export const getAuthenticatedUserProfile = async (req, res) => {
         id: true,
         name: true,
         email: true,
+        role: true,
         googleConnected: true,
         googleCalendarEmail: true,
         googleTokenExpiry: true

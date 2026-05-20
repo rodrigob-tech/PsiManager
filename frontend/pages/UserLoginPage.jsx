@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { saveUserAuth } from "../src/services/userAuthStorage";
-import { clearClientAuth } from "../src/services/clientAuthStorage";
+import { clearPatientAuth } from "../src/services/patientAuthStorage";
 
 export default function UserLoginPage() {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export default function UserLoginPage() {
 
       const response = await api.post("/user-auth/login", formData);
 
-      clearClientAuth();
+      clearPatientAuth();
 
       saveUserAuth({
         token: response.data.token,
@@ -53,7 +53,7 @@ export default function UserLoginPage() {
       <div style={cardStyle}>
         <h1 style={titleStyle}>Login do admin</h1>
         <p style={subtitleStyle}>
-          Acesse o painel administrativo para gerenciar clientes, espaços e agendamentos.
+          Acesse o painel administrativo para gerenciar Pacientes, espaços e agendamentos.
         </p>
 
         {error && <div style={errorStyle}>{error}</div>}

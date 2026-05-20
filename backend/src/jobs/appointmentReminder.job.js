@@ -20,18 +20,18 @@ async function runReminderJob() {
         }
       },
       include: {
-        client: true,
+        patient: true,
         space: true
       }
     });
 
     for (const appointment of appointments) {
-      if (!appointment.client?.email) continue;
+      if (!appointment.patient?.email) continue;
 
       await sendEmail({
-        to: appointment.client.email,
+        to: appointment.patient.email,
         subject: "Lembrete de agendamento",
-        text: `Olá, ${appointment.client.name}. Este é um lembrete do seu agendamento em ${new Date(
+        text: `Olá, ${appointment.patient.name}. Este é um lembrete do seu agendamento em ${new Date(
           appointment.date
         ).toLocaleString("pt-BR")}. Espaço: ${
           appointment.space?.name || "Não informado"

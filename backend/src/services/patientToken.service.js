@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
 
-export function generateClientToken(client) {
+export function generatePatientToken(patient) {
   return jwt.sign(
     {
-      clientId: client.id,
-      email: client.email,
-      type: "client"
+      patientId: patient.id,
+      email: patient.email,
+      type: "patient"
     },
     process.env.CLIENT_JWT_SECRET,
     {

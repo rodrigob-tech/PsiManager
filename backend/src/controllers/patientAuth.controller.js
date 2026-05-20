@@ -1,12 +1,12 @@
 import bcrypt from "bcrypt";
 import prisma from "../prisma/client.js";
-import { generateClientToken } from "../services/clientToken.service.js";
+import { generatePatientToken } from "../services/patientToken.service.js";
 
 const isValidEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
-export const registerClient = async (req, res) => {
+export const registerPatient = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
 
@@ -30,11 +30,11 @@ export const registerClient = async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    const existingClient = await prisma.client.findUnique({
+    const existingPatient = await prisma.patient.findUnique({
       where: { email: normalizedEmail }
     });
 
-    if (existingClient) {
+    if (existingPatient) {
       return res.status(409).json({
         error: "Já existe uma conta com este email"
       });
@@ -42,7 +42,7 @@ export const registerClient = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const client = await prisma.client.create({
+    const patient = await prisma.patient.create({
       data: {
         name: name.trim(),
         email: normalizedEmail,
@@ -52,27 +52,27 @@ export const registerClient = async (req, res) => {
       }
     });
 
-    const token = generateClientToken(client);
+    const token = generatePatientToken(patient);
 
     res.status(201).json({
       message: "Conta criada com sucesso",
       token,
-      client: {
-        id: client.id,
-        name: client.name,
-        email: client.email,
-        phone: client.phone
+      patient: {
+        id: patient.id,
+        name: patient.name,
+        email: patient.email,
+        phone: patient.phone
       }
     });
   } catch (error) {
-    console.error("Erro ao cadastrar cliente:", error);
+    console.error("Erro ao cadastrar paciente:", error);
     res.status(500).json({
-      error: "Erro ao cadastrar cliente"
+      error: "Erro ao cadastrar paciente"
     });
   }
 };
 
-export const loginClient = async (req, res) => {
+export const loginPatient = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -84,23 +84,23 @@ export const loginClient = async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    const client = await prisma.client.findUnique({
+    const patient = await prisma.patient.findUnique({
       where: { email: normalizedEmail }
     });
 
-    if (!client) {
+    if (!patient || !patient.password) {
       return res.status(401).json({
         error: "Credenciais inválidas"
       });
     }
 
-    if (!client.isActive) {
+    if (!patient.isActive) {
       return res.status(403).json({
         error: "Conta desativada"
       });
     }
 
-    const passwordMatches = await bcrypt.compare(password, client.password);
+    const passwordMatches = await bcrypt.compare(password, patient.password);
 
     if (!passwordMatches) {
       return res.status(401).json({
@@ -108,30 +108,30 @@ export const loginClient = async (req, res) => {
       });
     }
 
-    const token = generateClientToken(client);
+    const token = generatePatientToken(patient);
 
     res.json({
       message: "Login realizado com sucesso",
       token,
-      client: {
-        id: client.id,
-        name: client.name,
-        email: client.email,
-        phone: client.phone
+      patient: {
+        id: patient.id,
+        name: patient.name,
+        email: patient.email,
+        phone: patient.phone
       }
     });
   } catch (error) {
-    console.error("Erro ao autenticar cliente:", error);
+    console.error("Erro ao autenticar paciente:", error);
     res.status(500).json({
-      error: "Erro ao autenticar cliente"
+      error: "Erro ao autenticar paciente"
     });
   }
 };
 
-export const getAuthenticatedClientProfile = async (req, res) => {
+export const getAuthenticatedPatientProfile = async (req, res) => {
   try {
-    const client = await prisma.client.findUnique({
-      where: { id: req.client.clientId },
+    const patient = await prisma.patient.findUnique({
+      where: { id: req.patient.patientId },
       select: {
         id: true,
         name: true,
@@ -143,17 +143,17 @@ export const getAuthenticatedClientProfile = async (req, res) => {
       }
     });
 
-    if (!client) {
+    if (!patient) {
       return res.status(404).json({
-        error: "Cliente não encontrado"
+        error: "Paciente não encontrado"
       });
     }
 
-    res.json(client);
+    res.json(patient);
   } catch (error) {
-    console.error("Erro ao buscar perfil do cliente:", error);
+    console.error("Erro ao buscar perfil do paciente:", error);
     res.status(500).json({
-      error: "Erro ao buscar perfil do cliente"
+      error: "Erro ao buscar perfil do paciente"
     });
   }
 };

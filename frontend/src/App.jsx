@@ -4,20 +4,21 @@ import CalendarPage from "../pages/CalendarPage";
 import MyAppointmentsPage from "../pages/MyAppointmentsPage";
 import AdminProtectedRoute from "../components/admin/AdminProtectedRoute";
 import PublicBookingPage from "../pages/PublicBookingPage";
-import ClientRegisterPage from "../pages/ClientRegisterPage";
-import ClientLoginPage from "../pages/ClientLoginPage";
-import ClientProtectedRoute from "../components/publicBooking/ClientProtectedRoute";
+import PatientRegisterPage from "../pages/PatientRegisterPage";
+import PatientLoginPage from "../pages/PatientLoginPage";
+import PatientProtectedRoute from "../components/publicBooking/PatientProtectedRoute";
 import UserLoginPage from "../pages/UserLoginPage";
+import MedicalRecordPage from "../pages/MedicalRecordPage";
 import {
   isUserAuthenticated,
   getUserData,
   clearUserAuth
 } from "./services/userAuthStorage";
 import {
-  isClientAuthenticated,
-  getClientData,
-  clearClientAuth
-} from "./services/clientAuthStorage";
+  isPatientAuthenticated,
+  getPatientData,
+  clearPatientAuth
+} from "./services/patientAuthStorage";
 import "../src/styles/navbar.css"
 
 
@@ -35,16 +36,16 @@ function AppLayout() {
   const location = useLocation();
 
   const [adminLogged, setAdminLogged] = useState(false);
-  const [clientLogged, setClientLogged] = useState(false);
+  const [patientLogged, setPatientLogged] = useState(false);
   const [admin, setAdmin] = useState(null);
-  const [client, setClient] = useState(null);
+  const [patient, setPatient] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     setAdminLogged(isUserAuthenticated());
-    setClientLogged(isClientAuthenticated());
+    setPatientLogged(isPatientAuthenticated());
     setAdmin(getUserData());
-    setClient(getClientData());
+    setPatient(getPatientData());
   }, [location.pathname]);
 
   return (
@@ -52,14 +53,14 @@ function AppLayout() {
       <header className="app-header">
         <div className="app-header-inner">
           <div>
-            <div className="app-brand-title">SmartAgenda</div>
+            <div className="app-brand-title">PsiManager</div>
             <div className="app-brand-subtitle">
               Gestão de atendimentos e autoagendamento
             </div>
           </div>
 
           <nav className="app-nav">
-            {!adminLogged && !clientLogged && (
+            {!adminLogged && !patientLogged && (
               <>
                 <div className="nav-group">
                   <span className="nav-group-label">Admin</span>
@@ -67,9 +68,9 @@ function AppLayout() {
                 </div>
 
                 <div className="nav-group">
-                  <span className="nav-group-label">Cliente</span>
-                  <NavItem to="/cadastro-cliente">Cadastro</NavItem>
-                  <NavItem to="/login-cliente">Login</NavItem>
+                  <span className="nav-group-label">Paciente</span>
+                  <NavItem to="/cadastro-paciente">Cadastro</NavItem>
+                  <NavItem to="/login-paciente">Login</NavItem>
                 </div>
               </>
             )}
@@ -94,10 +95,10 @@ function AppLayout() {
               </div>
             )}
 
-            {clientLogged && (
+            {patientLogged && (
               <div className="nav-group">
                 <span className="nav-group-label">
-                  Cliente{client?.name ? `: ${client.name}` : ""}
+                  Paciente{patient?.name ? `: ${patient.name}` : ""}
                 </span>
                 <NavItem to="/agendar">Agendar</NavItem>
                 <NavItem to="/meus-agendamentos">Meus agendamentos</NavItem>
@@ -105,8 +106,8 @@ function AppLayout() {
                   type="button"
                   className="nav-action-button"
                   onClick={() => {
-                    clearClientAuth();
-                    navigate("/login-cliente", { replace: true });
+                    clearPatientAuth();
+                    navigate("/login-paciente", { replace: true });
                   }}
                 >
                   Sair
@@ -131,25 +132,34 @@ function AppLayout() {
           />
 
           <Route
+            path="/patients/:patientId/prontuario"
+            element={
+              <AdminProtectedRoute>
+                <MedicalRecordPage />
+              </AdminProtectedRoute>
+            }
+          />
+
+          <Route
             path="/agendar"
             element={
-              <ClientProtectedRoute>
+              <PatientProtectedRoute>
                 <PublicBookingPage />
-              </ClientProtectedRoute>
+              </PatientProtectedRoute>
             }
           />
 
           <Route
             path="/meus-agendamentos"
             element={
-              <ClientProtectedRoute>
+              <PatientProtectedRoute>
                 <MyAppointmentsPage />
-              </ClientProtectedRoute>
+              </PatientProtectedRoute>
             }
           />
 
-          <Route path="/cadastro-cliente" element={<ClientRegisterPage />} />
-          <Route path="/login-cliente" element={<ClientLoginPage />} />
+          <Route path="/cadastro-paciente" element={<PatientRegisterPage />} />
+          <Route path="/login-paciente" element={<PatientLoginPage />} />
         </Routes>
       </main>
     </div>

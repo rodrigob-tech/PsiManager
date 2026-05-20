@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
-import { getClientToken, getClientData } from "../src/services/clientAuthStorage";
+import { getPatientToken, getPatientData } from "../src/services/patientAuthStorage";
 
 
 
@@ -40,7 +40,7 @@ export default function MyAppointmentsPage() {
     message: ""
   });
 
-  const client = getClientData();
+  const patient = getPatientData();
 
   useEffect(() => {
     loadAppointments();
@@ -57,9 +57,9 @@ export default function MyAppointmentsPage() {
       setLoading(true);
       setFeedback({ type: "", message: "" });
 
-      const token = getClientToken();
+      const token = getPatientToken();
 
-      const response = await api.get("/client-bookings/me", {
+      const response = await api.get("/patient-bookings/me", {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -87,9 +87,9 @@ export default function MyAppointmentsPage() {
     try {
       setFeedback({ type: "", message: "" });
 
-      const token = getClientToken();
+      const token = getPatientToken();
 
-      await api.patch(`/client-bookings/${appointmentId}/cancel`, null, {
+      await api.patch(`/patient-bookings/${appointmentId}/cancel`, null, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -162,10 +162,10 @@ export default function MyAppointmentsPage() {
               display: "inline-block"
             }}
           >
-            <div style={{ fontSize: "14px", color: "#555" }}>Cliente</div>
-            <div style={{ fontWeight: "600" }}>{client?.name}</div>
+            <div style={{ fontSize: "14px", color: "#555" }}>paciente</div>
+            <div style={{ fontWeight: "600" }}>{patient?.name}</div>
             <div style={{ fontSize: "14px", color: "#555" }}>
-              {client?.email}
+              {patient?.email}
             </div>
           </div>
         </div>

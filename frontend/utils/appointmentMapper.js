@@ -4,7 +4,7 @@ import { STATUS_COLORS } from "../constants/appointmentStatus";
 export function mapAppointmentsToEvents(appointments) {
   return appointments.map((appointment) => ({
     id: appointment.id,
-    title: `${appointment.client?.name || "Sem nome"}${
+    title: `${appointment.patient?.name || "Sem nome"}${
       appointment.space?.name ? ` - ${appointment.space.name}` : ""
     } - ${appointment.status}`,
     start: appointment.date,
@@ -12,8 +12,8 @@ export function mapAppointmentsToEvents(appointments) {
     extendedProps: {
       type: "appointment",
       status: appointment.status,
-      clientName: appointment.client?.name || "Sem nome",
-      clientEmail: appointment.client?.email || "",
+      patientName: appointment.patient?.name || "Sem nome",
+      patientEmail: appointment.patient?.email || "",
       spaceName: appointment.space?.name || "Sem espaço",
       rawAppointment: appointment
     }

@@ -82,12 +82,12 @@ export async function createGoogleCalendarEvent(userId, appointment) {
   const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
   const event = {
-    summary: `Atendimento - ${appointment.client?.name || "Cliente"}`,
+    summary: `Atendimento - ${appointment.patient?.name || "Paciente"}`,
     description: [
       `Status: ${appointment.status}`,
-      `Cliente: ${appointment.client?.name || "Não informado"}`,
-      `Email: ${appointment.client?.email || "Não informado"}`,
-      `Telefone: ${appointment.client?.phone || "Não informado"}`,
+      `Paciente: ${appointment.patient?.name || "Não informado"}`,
+      `Email: ${appointment.patient?.email || "Não informado"}`,
+      `Telefone: ${appointment.patient?.phone || "Não informado"}`,
       `Espaço: ${appointment.space?.name || "Não informado"}`,
       `Appointment ID: ${appointment.id}`
     ].join("\n"),
@@ -121,12 +121,12 @@ export async function updateGoogleCalendarEvent(userId, appointment) {
   const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
   const event = {
-    summary: `Atendimento - ${appointment.client?.name || "Cliente"}`,
+    summary: `Atendimento - ${appointment.patient?.name || "Paciente"}`,
     description: [
       `Status: ${appointment.status}`,
-      `Cliente: ${appointment.client?.name || "Não informado"}`,
-      `Email: ${appointment.client?.email || "Não informado"}`,
-      `Telefone: ${appointment.client?.phone || "Não informado"}`,
+      `Paciente: ${appointment.patient?.name || "Não informado"}`,
+      `Email: ${appointment.patient?.email || "Não informado"}`,
+      `Telefone: ${appointment.patient?.phone || "Não informado"}`,
       `Espaço: ${appointment.space?.name || "Não informado"}`,
       `Appointment ID: ${appointment.id}`
     ].join("\n"),

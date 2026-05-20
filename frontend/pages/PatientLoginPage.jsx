@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { saveClientAuth } from "../src/services/clientAuthStorage";
+import { savePatientAuth } from "../src/services/patientAuthStorage";
 import { clearUserAuth } from "../src/services/userAuthStorage";
 
-export default function ClientLoginPage() {
+export default function PatientLoginPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -31,18 +31,18 @@ export default function ClientLoginPage() {
       setError("");
       setLoading(true);
 
-      const response = await api.post("/client-auth/login", formData);
+      const response = await api.post("/patient-auth/login", formData);
 
       clearUserAuth();
 
-      saveClientAuth({
+      savePatientAuth({
         token: response.data.token,
-        client: response.data.client
+        patient: response.data.patient
       });
 
       navigate("/agendar", { replace: true });
     } catch (error) {
-      setError(error.response?.data?.error || "Erro ao fazer login do cliente");
+      setError(error.response?.data?.error || "Erro ao fazer login do paciente");
     } finally {
       setLoading(false);
     }
@@ -54,14 +54,14 @@ export default function ClientLoginPage() {
         <div style={logoPanelStyle}>
           <div style={logoBoxStyle}>
             <img
-              src=" ../src/img/logotipoSmartAgenda.png"
-              alt="Logo SmartAgenda"
+              src=" ../src/img/logotipoPsiManager.png"
+              alt="Logo PsiManager"
               style={logoImageStyle}
               onError={(event) => {
                 event.currentTarget.style.display = "none";
               }}
             />
-            <div style={logoFallbackStyle}>SmartAgenda</div>
+            <div style={logoFallbackStyle}>PsiManager</div>
           </div>
 
           <h2 style={logoTitleStyle}>Agende seu atendimento com praticidade.</h2>
@@ -71,7 +71,7 @@ export default function ClientLoginPage() {
         </div>
 
         <div style={cardStyle}>
-          <h1 style={titleStyle}>Login do cliente</h1>
+          <h1 style={titleStyle}>Login do paciente</h1>
           <p style={subtitleStyle}>
             Entre para marcar ou acompanhar seus atendimentos.
           </p>
@@ -106,7 +106,7 @@ export default function ClientLoginPage() {
 
           <p style={footerTextStyle}>
             Ainda não tem conta?{" "}
-            <Link to="/cadastro-cliente" style={linkStyle}>
+            <Link to="/cadastro-paciente" style={linkStyle}>
               Criar conta
             </Link>
           </p>

@@ -7,7 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
+enum UserRole {
+  ADMIN
+  PSYCHOLOGIST
+  RECEPTIONIST
+}
 
 enum Status {
   scheduled
@@ -18,29 +22,91 @@ enum Status {
 }
 
 model User {
-  id                    String   @id @default(uuid())
-  name                  String
-  email                 String   @unique
-  password              String
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  password String
+  role     UserRole @default(PSYCHOLOGIST)
+  isActive Boolean  @default(true)
 
-  googleAccessToken     String?
-  googleRefreshToken    String?
-  googleTokenExpiry     DateTime?
-  googleCalendarEmail   String?
-  googleConnected       Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  googleAccessToken   String?
+  googleRefreshToken  String?
+  googleTokenExpiry   DateTime?
+  googleCalendarEmail String?
+  googleConnected     Boolean   @default(false)
+
+  medicalRecords MedicalRecord[]
+  sessionNotes   SessionNote[]
 }
 
-model Client {
-  id           String        @id @default(uuid())
-  name         String
-  email        String        @unique
-  phone        String
-  password     String
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
 
-  appointments Appointment[]
+enum MedicalRecordStatus {
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+model Patient {
+  id             String        @id @default(uuid())
+  name           String
+  email          String?       @unique
+  phone          String?
+  password       String?
+  isActive       Boolean       @default(true)
+  cpf            String?
+  birthDate      DateTime?
+  gender         String?
+  emergencyName  String?
+  emergencyPhone String?
+  guardianName   String?
+  guardianPhone  String?
+  address        String?
+  notes          String?
+  status         PatientStatus @default(ACTIVE)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  appointments  Appointment[]
+  medicalRecord MedicalRecord?
+}
+
+model MedicalRecord {
+  id                  String              @id @default(uuid())
+  patientId           String              @unique
+  patient             Patient             @relation(fields: [patientId], references: [id])
+  psychologistId      String?
+  psychologist        User?               @relation(fields: [psychologistId], references: [id])
+  mainComplaint       String?
+  diagnosisHypothesis String?
+  clinicalNotes       String?
+  status              MedicalRecordStatus @default(OPEN)
+  sessionNotes        SessionNote[]
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+}
+
+model SessionNote {
+  id              String        @id @default(uuid())
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+  appointmentId   String?
+  appointment     Appointment?  @relation(fields: [appointmentId], references: [id])
+  psychologistId  String?
+  psychologist    User?         @relation(fields: [psychologistId], references: [id])
+  sessionDate     DateTime
+  content         String
+  conduct         String?
+  privateNotes    String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model Space {
@@ -48,26 +114,27 @@ model Space {
   name         String
   description  String?
   appointments Appointment[]
-
 }
 
 model Appointment {
-  id        String   @id @default(uuid())
-  date      DateTime
-  status    Status   @default(scheduled)
+  id           String   @id @default(uuid())
+  date         DateTime
+  status       Status   @default(scheduled)
   reminderSent Boolean  @default(false)
 
-  clientId  String
-  client    Client   @relation(fields: [clientId], references: [id])
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
 
-  spaceId   String
-  space     Space   @relation(fields: [spaceId], references: [id])
+  spaceId String
+  space   Space  @relation(fields: [spaceId], references: [id])
 
-  googleEventId      String?
-  googleCalendarId   String?
-  googleSyncStatus   String?   // ex: pending, synced, failed
-  googleSyncError    String?
-  syncedAt           DateTime?
+  googleEventId    String?
+  googleCalendarId String?
+  googleSyncStatus String? // ex: pending, synced, failed
+  googleSyncError  String?
+  syncedAt         DateTime?
+
+  sessionNotes SessionNote[]
 }
 
 model BlockedTime {
