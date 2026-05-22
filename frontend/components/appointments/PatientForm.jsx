@@ -94,14 +94,14 @@ export default function PatientForm({
           value={formData.name}
           onChange={handleChange}
           required
-          style={inputStyle}
+          className="form-control"
         />
 
         <select
           name="status"
           value={formData.status}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-select"
         >
           <option value="ACTIVE">Ativo</option>
           <option value="INACTIVE">Inativo</option>
@@ -114,7 +114,7 @@ export default function PatientForm({
           placeholder="Email"
           value={formData.email}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <input
@@ -123,7 +123,7 @@ export default function PatientForm({
           placeholder="Telefone"
           value={formData.phone}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <input
@@ -132,7 +132,7 @@ export default function PatientForm({
           placeholder="CPF"
           value={formData.cpf}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <input
@@ -140,14 +140,14 @@ export default function PatientForm({
           name="birthDate"
           value={formData.birthDate}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <select
           name="gender"
           value={formData.gender}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-select"
         >
           <option value="">Gênero</option>
           <option value="female">Feminino</option>
@@ -162,7 +162,7 @@ export default function PatientForm({
           placeholder="Contato de emergência"
           value={formData.emergencyName}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <input
@@ -171,7 +171,7 @@ export default function PatientForm({
           placeholder="Telefone de emergência"
           value={formData.emergencyPhone}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <input
@@ -180,7 +180,7 @@ export default function PatientForm({
           placeholder="Responsável"
           value={formData.guardianName}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <input
@@ -189,7 +189,7 @@ export default function PatientForm({
           placeholder="Telefone do responsável"
           value={formData.guardianPhone}
           onChange={handleChange}
-          style={inputStyle}
+          className="form-control"
         />
       </div>
 
@@ -199,7 +199,7 @@ export default function PatientForm({
         value={formData.address}
         onChange={handleChange}
         rows={2}
-        style={textareaStyle}
+        className="form-control"
       />
 
       <textarea
@@ -208,11 +208,11 @@ export default function PatientForm({
         value={formData.notes}
         onChange={handleChange}
         rows={3}
-        style={textareaStyle}
+        className="form-control"
       />
 
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button type="submit" style={primaryButton}>
+        <button type="submit" className="btn btn-primary">
           {editingPatient ? "Salvar alterações" : "Criar paciente"}
         </button>
 
@@ -220,7 +220,7 @@ export default function PatientForm({
           <button
             type="button"
             onClick={onCancelEdit}
-            style={secondaryButton}
+            className="btn btn-outline-secondary"
           >
             Cancelar edição
           </button>
@@ -234,38 +234,4 @@ const gridStyle = {
   display: "grid",
   gap: "10px",
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))"
-};
-
-const inputStyle = {
-  padding: "12px",
-  borderRadius: "10px",
-  border: "1px solid #d0d7e2",
-  fontSize: "14px",
-  background: "#fff"
-};
-
-const textareaStyle = {
-  ...inputStyle,
-  resize: "vertical",
-  fontFamily: "inherit"
-};
-
-const primaryButton = {
-  border: "none",
-  background: "#02af11",
-  color: "#fff",
-  padding: "10px 14px",
-  borderRadius: "10px",
-  cursor: "pointer",
-  fontWeight: "600"
-};
-
-const secondaryButton = {
-  border: "1px solid #d0d7e2",
-  background: "#fff",
-  color: "#333",
-  padding: "10px 14px",
-  borderRadius: "10px",
-  cursor: "pointer",
-  fontWeight: "600"
 };

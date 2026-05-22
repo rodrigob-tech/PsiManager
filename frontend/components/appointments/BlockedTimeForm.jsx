@@ -47,7 +47,7 @@ export default function BlockedTimeForm({ onSubmit }) {
         value={formData.start}
         onChange={handleChange}
         required
-        style={inputStyle}
+        className="form-control"
       />
 
       <input
@@ -56,11 +56,11 @@ export default function BlockedTimeForm({ onSubmit }) {
         value={formData.end}
         onChange={handleChange}
         required
-        style={inputStyle}
+        className="form-control"
       />
 
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button type="submit" style={primaryButton}>
+        <button type="submit" className="btn btn-primary">
           Criar bloqueio
         </button>
       </div>
@@ -68,22 +68,3 @@ export default function BlockedTimeForm({ onSubmit }) {
   );
 }
 
-const inputStyle = {
-  padding: "12px",
-  borderRadius: "10px",
-  border: "1px solid #d0d7e2",
-  fontSize: "14px",
-  background: "#fff"
-};
-
-const primaryButton = {
-  border: "none",
-  background: "#02af11",
-  color: "#fff",
-  padding: "10px 14px",
-  borderRadius: "10px",
-  cursor: "pointer",
-  fontWeight: "600",
-  minWidth: "170px",
-  height: "42px"
-};

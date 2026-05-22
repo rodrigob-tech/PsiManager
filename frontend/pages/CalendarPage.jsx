@@ -34,7 +34,7 @@ import {
   deleteSpace
 } from "../services/spaceService";
 import { getUserToken, getUserData, clearUserAuth } from "../src/services/userAuthStorage";
-
+import { getPsychologists } from "../services/userService";
 
 
 
@@ -61,7 +61,7 @@ export default function CalendarPage() {
   const [selectedSpaceFilter, setSelectedSpaceFilter] = useState("all");
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [activeSection, setActiveSection] = useState("appointments");
-  
+  const [psychologists, setPsychologists] = useState([]);
 
   const admin = getUserData();
   const canAccessMedicalRecord = admin?.role !== "RECEPTIONIST";
@@ -78,12 +78,14 @@ export default function CalendarPage() {
         appointmentsResponse,
         patientsResponse,
         blockedTimesResponse,
-        spacesResponse
+        spacesResponse,
+        psychologistResponse
       ] = await Promise.all([
         getAppointments(authHeaders),
         getPatients(authHeaders),
         getBlockedTimes(authHeaders),
-        getSpaces(authHeaders)
+        getSpaces(authHeaders),
+        getPsychologists(authHeaders)
       ]);
 
       const appointmentEvents = mapAppointmentsToEvents(appointmentsResponse.data);
@@ -94,6 +96,7 @@ export default function CalendarPage() {
       setPatients(patientsResponse.data);
       setBlockedTimes(blockedTimesResponse.data);
       setSpaces(spacesResponse.data);
+      setPsychologists(psychologistResponse.data)
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     }
@@ -149,58 +152,58 @@ export default function CalendarPage() {
     }
   };
 
-const handleSubmitPatient = async (formData) => {
-  try {
-    const token = getUserToken();
-    const authHeaders = {
-      Authorization: `Bearer ${token}`
-    };
+  const handleSubmitPatient = async (formData) => {
+    try {
+      const token = getUserToken();
+      const authHeaders = {
+        Authorization: `Bearer ${token}`
+      };
 
-    if (editingPatient) {
-      await updatePatient(editingPatient.id, formData, authHeaders);
-      alert("Paciente atualizado com sucesso");
-      setEditingPatient(null);
-      await loadData();
-    } else {
-      await createPatient(formData, authHeaders);
-      alert("Paciente criado com sucesso");
-      await loadData();
+      if (editingPatient) {
+        await updatePatient(editingPatient.id, formData, authHeaders);
+        alert("Paciente atualizado com sucesso");
+        setEditingPatient(null);
+        await loadData();
+      } else {
+        await createPatient(formData, authHeaders);
+        alert("Paciente criado com sucesso");
+        await loadData();
+      }
+    } catch (error) {
+      console.error("Erro ao salvar paciente:", error);
+
+      const message =
+        error.response?.data?.error || "Erro ao salvar paciente";
+
+      alert(message);
     }
-  } catch (error) {
-    console.error("Erro ao salvar paciente:", error);
-
-    const message =
-      error.response?.data?.error || "Erro ao salvar paciente";
-
-    alert(message);
-  }
-};
+  };
 
   const handleEditPatient = (patient) => {
-  setEditingPatient(patient);
-};
-const handleDeletePatient = async (id) => {
-  const confirmed = window.confirm("Deseja realmente excluir este paciente?");
-  if (!confirmed) return;
+    setEditingPatient(patient);
+  };
+  const handleDeletePatient = async (id) => {
+    const confirmed = window.confirm("Deseja realmente excluir este paciente?");
+    if (!confirmed) return;
 
-  try {
-    const token = getUserToken();
-    const authHeaders = {
-      Authorization: `Bearer ${token}`
-    };
+    try {
+      const token = getUserToken();
+      const authHeaders = {
+        Authorization: `Bearer ${token}`
+      };
 
-    await deletePatient(id, authHeaders);
-    await loadData();
-    alert("Paciente removido com sucesso");
-  } catch (error) {
-    console.error("Erro ao remover paciente:", error);
+      await deletePatient(id, authHeaders);
+      await loadData();
+      alert("Paciente removido com sucesso");
+    } catch (error) {
+      console.error("Erro ao remover paciente:", error);
 
-    const message =
-      error.response?.data?.error || "Erro ao remover paciente";
+      const message =
+        error.response?.data?.error || "Erro ao remover paciente";
 
-    alert(message);
-  }
-};
+      alert(message);
+    }
+  };
 
   const handleSubmitSpace = async (formData) => {
     try {
@@ -322,15 +325,15 @@ const handleDeletePatient = async (id) => {
     return matchesStatus && matchesSpace;
   });
   const getTabButtonStyle = (section) => ({
-  border: "none",
-  background: activeSection === section ? "#1976d2" : "#e9eef8",
-  color: activeSection === section ? "#fff" : "#334155",
-  padding: "12px 16px",
-  borderRadius: "10px",
-  cursor: "pointer",
-  fontWeight: "600",
-  transition: "0.2s ease"
-});
+    border: "none",
+    background: activeSection === section ? "#1976d2" : "#e9eef8",
+    color: activeSection === section ? "#fff" : "#334155",
+    padding: "12px 16px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "600",
+    transition: "0.2s ease"
+  });
   useEffect(() => {
     loadData();
   }, []);
@@ -351,255 +354,257 @@ const handleDeletePatient = async (id) => {
           gap: "24px"
         }}
       >
-                <div style={sectionCardStyle}>
-  <h2 style={{ marginTop: 0 }}>Calendário geral</h2>
+        <div className="card app-card mb-4">
+          <h2 style={{ marginTop: 0 }}>Calendário geral</h2>
 
-  <div
-    style={{
-      display: "flex",
-      gap: "12px",
-      flexWrap: "wrap",
-      marginBottom: "20px"
-    }}
-  >
-    <select
-      value={selectedStatusFilter}
-      onChange={(e) => setSelectedStatusFilter(e.target.value)}
-      style={{
-        padding: "10px 12px",
-        borderRadius: "10px",
-        border: "1px solid #d0d7e2",
-        background: "#fff"
-      }}
-    >
-      <option value="all">Todos os status</option>
-      <option value="scheduled">Agendado</option>
-      <option value="confirmed">Confirmado</option>
-      <option value="pending">Pendente</option>
-      <option value="canceled">Cancelado</option>
-      <option value="done">Concluído</option>
-      <option value="blocked">Bloqueios</option>
-    </select>
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              flexWrap: "wrap",
+              marginBottom: "20px"
+            }}
+          >
+            <select
+              className="form-select"
+              value={selectedStatusFilter}
+              onChange={(e) => setSelectedStatusFilter(e.target.value)}
+              
+            >
+              <option value="all">Todos os status</option>
+              <option value="scheduled">Agendado</option>
+              <option value="confirmed">Confirmado</option>
+              <option value="pending">Pendente</option>
+              <option value="canceled">Cancelado</option>
+              <option value="done">Concluído</option>
+              <option value="blocked">Bloqueios</option>
+            </select>
 
-    <select
-      value={selectedSpaceFilter}
-      onChange={(e) => setSelectedSpaceFilter(e.target.value)}
-      style={{
-        padding: "10px 12px",
-        borderRadius: "10px",
-        border: "1px solid #d0d7e2",
-        background: "#fff"
-      }}
-    >
-      <option value="all">Todos os espaços</option>
-      {spaces.map((space) => (
-        <option key={space.id} value={space.name}>
-          {space.name}
-        </option>
-      ))}
-    </select>
-  </div>
+            <select
+            className="form-select"
+              value={selectedSpaceFilter}
+              onChange={(e) => setSelectedSpaceFilter(e.target.value)}
+             
+            >
+              <option value="all">Todos os espaços</option>
+              {spaces.map((space) => (
+                <option key={space.id} value={space.name}>
+                  {space.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-  <AppointmentCalendar
-    events={filteredEvents}
-    onEventClick={setSelectedCalendarEvent}
-  />
+          <AppointmentCalendar
+            events={filteredEvents}
+            onEventClick={setSelectedCalendarEvent}
+          />
 
-  {selectedCalendarEvent && (
-    <div
-      style={{
-        marginTop: "20px",
-        background: "#f8faff",
-        border: "1px solid #e1e8f5",
-        borderRadius: "14px",
-        padding: "18px"
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: "16px",
-          flexWrap: "wrap",
-          alignItems: "flex-start"
-        }}
-      >
-        <div style={{ display: "grid", gap: "8px" }}>
-          <h3 style={{ margin: 0 }}>Detalhes do evento</h3>
+          {selectedCalendarEvent && (
+            <div
+              style={{
+                marginTop: "20px",
+                background: "#f8faff",
+                border: "1px solid #e1e8f5",
+                borderRadius: "14px",
+                padding: "18px"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "16px",
+                  flexWrap: "wrap",
+                  alignItems: "flex-start"
+                }}
+              >
+                <div style={{ display: "grid", gap: "8px" }}>
+                  <h3 style={{ margin: 0 }}>Detalhes do evento</h3>
 
-          {selectedCalendarEvent.extendedProps?.type === "blockedTime" ? (
-            <>
-              <div>
-                <strong>Tipo:</strong> Horário bloqueado
+                  {selectedCalendarEvent.extendedProps?.type === "blockedTime" ? (
+                    <>
+                      <div>
+                        <strong>Tipo:</strong> Horário bloqueado
+                      </div>
+                      <div>
+                        <strong>Início:</strong>{" "}
+                        {new Date(selectedCalendarEvent.start).toLocaleString("pt-BR")}
+                      </div>
+                      <div>
+                        <strong>Fim:</strong>{" "}
+                        {selectedCalendarEvent.end
+                          ? new Date(selectedCalendarEvent.end).toLocaleString("pt-BR")
+                          : "Não informado"}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <strong>Paciente:</strong>{" "}
+                        {selectedCalendarEvent.extendedProps?.patientName}
+                      </div>
+                      <div>
+                        <strong>Email:</strong>{" "}
+                        {selectedCalendarEvent.extendedProps?.patientEmail || "Não informado"}
+                      </div>
+                      <div>
+                        <strong>Espaço:</strong>{" "}
+                        {selectedCalendarEvent.extendedProps?.spaceName}
+                      </div>
+                      <div>
+                        <strong>Status:</strong>{" "}
+                        {selectedCalendarEvent.extendedProps?.status}
+                      </div>
+                      <div>
+                        <strong>Data/Hora:</strong>{" "}
+                        {new Date(selectedCalendarEvent.start).toLocaleString("pt-BR")}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedCalendarEvent(null)}
+                  style={{
+                    border: "1px solid #d0d7e2",
+                    background: "#fff",
+                    color: "#333",
+                    padding: "10px 14px",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    fontWeight: "600"
+                  }}
+                >
+                  Fechar
+                </button>
               </div>
-              <div>
-                <strong>Início:</strong>{" "}
-                {new Date(selectedCalendarEvent.start).toLocaleString("pt-BR")}
-              </div>
-              <div>
-                <strong>Fim:</strong>{" "}
-                {selectedCalendarEvent.end
-                  ? new Date(selectedCalendarEvent.end).toLocaleString("pt-BR")
-                  : "Não informado"}
-              </div>
-            </>
-          ) : (
-            <>
-              <div>
-                <strong>Paciente:</strong>{" "}
-                {selectedCalendarEvent.extendedProps?.patientName}
-              </div>
-              <div>
-                <strong>Email:</strong>{" "}
-                {selectedCalendarEvent.extendedProps?.patientEmail || "Não informado"}
-              </div>
-              <div>
-                <strong>Espaço:</strong>{" "}
-                {selectedCalendarEvent.extendedProps?.spaceName}
-              </div>
-              <div>
-                <strong>Status:</strong>{" "}
-                {selectedCalendarEvent.extendedProps?.status}
-              </div>
-              <div>
-                <strong>Data/Hora:</strong>{" "}
-                {new Date(selectedCalendarEvent.start).toLocaleString("pt-BR")}
-              </div>
-            </>
+            </div>
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setSelectedCalendarEvent(null)}
-          style={{
-            border: "1px solid #d0d7e2",
-            background: "#fff",
-            color: "#333",
-            padding: "10px 14px",
-            borderRadius: "10px",
-            cursor: "pointer",
-            fontWeight: "600"
-          }}
-        >
-          Fechar
-        </button>
-      </div>
-    </div>
-  )}
-</div>
+        <div className="card app-card mb-4">
+          <h2 style={{ marginTop: 0 }}>Gerenciamento</h2>
 
-<div style={sectionCardStyle}>
-  <h2 style={{ marginTop: 0 }}>Gerenciamento</h2>
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              flexWrap: "wrap",
+              marginBottom: "24px"
+            }}
+          >
+            <button
+              type="button"
+              className={`btn ${activeSection === "patients" ? "btn-primary" : "btn-outline-primary"
+                }`} onClick={() => setActiveSection("patients")}
+            >
+              Pacientes
+            </button>
 
-  <div
-    style={{
-      display: "flex",
-      gap: "12px",
-      flexWrap: "wrap",
-      marginBottom: "24px"
-    }}
-  >
-    <button
-      type="button"
-      onClick={() => setActiveSection("patients")}
-      style={getTabButtonStyle("patients")}
-    >
-      Pacientes
-    </button>
+            <button
+              type="button"
+              className={`btn ${
+    activeSection === "patients" ? "btn-primary" : "btn-outline-primary"
+  }`}
+              onClick={() => setActiveSection("spaces")}
+              
+            >
+              Espaços
+            </button>
 
-    <button
-      type="button"
-      onClick={() => setActiveSection("spaces")}
-      style={getTabButtonStyle("spaces")}
-    >
-      Espaços
-    </button>
+            <button
+              type="button"
+              className={`btn ${
+    activeSection === "patients" ? "btn-primary" : "btn-outline-primary"
+  }`}
+              onClick={() => setActiveSection("appointments")}
+              
+            >
+              Agendamentos
+            </button>
 
-    <button
-      type="button"
-      onClick={() => setActiveSection("appointments")}
-      style={getTabButtonStyle("appointments")}
-    >
-      Agendamentos
-    </button>
+            <button
+              type="button"
+              className={`btn ${
+    activeSection === "patients" ? "btn-primary" : "btn-outline-primary"
+  }`}
+              onClick={() => setActiveSection("blockedTimes")}
+              
+            >
+              Bloqueios
+            </button>
+          </div>
 
-    <button
-      type="button"
-      onClick={() => setActiveSection("blockedTimes")}
-      style={getTabButtonStyle("blockedTimes")}
-    >
-      Bloqueios
-    </button>
-  </div>
+          {activeSection === "patients" && (
+            <div>
+              <h3 style={{ marginTop: 0 }}>Pacientes</h3>
 
-  {activeSection === "patients" && (
-  <div>
-    <h3 style={{ marginTop: 0 }}>Pacientes</h3>
+              <PatientForm
+                onSubmit={handleSubmitPatient}
+                editingPatient={editingPatient}
+                onCancelEdit={() => setEditingPatient(null)}
+              />
 
-    <PatientForm
-      onSubmit={handleSubmitPatient}
-      editingPatient={editingPatient}
-      onCancelEdit={() => setEditingPatient(null)}
-    />
+              <PatientList
+                patients={patients}
+                onEdit={handleEditPatient}
+                onDelete={handleDeletePatient}
+                canAccessMedicalRecord={canAccessMedicalRecord}
+                onOpenMedicalRecord={(patient) =>
+                  navigate(`/patients/${patient.id}/prontuario`)
+                }
+              />
+            </div>
+          )}
 
-    <PatientList
-      patients={patients}
-      onEdit={handleEditPatient}
-      onDelete={handleDeletePatient}
-      canAccessMedicalRecord={canAccessMedicalRecord}
-      onOpenMedicalRecord={(patient) =>
-        navigate(`/patients/${patient.id}/prontuario`)
-      }
-    />
-  </div>
-)}
+          {activeSection === "spaces" && (
+            <div>
+              <h3 style={{ marginTop: 0 }}>Espaços</h3>
+              <SpaceForm
+                onSubmit={handleSubmitSpace}
+                editingSpace={editingSpace}
+                onCancelEdit={() => setEditingSpace(null)}
+              />
+              <SpaceList
+                spaces={spaces}
+                onEdit={setEditingSpace}
+                onDelete={handleDeleteSpace}
+              />
+            </div>
+          )}
 
-  {activeSection === "spaces" && (
-    <div>
-      <h3 style={{ marginTop: 0 }}>Espaços</h3>
-      <SpaceForm
-        onSubmit={handleSubmitSpace}
-        editingSpace={editingSpace}
-        onCancelEdit={() => setEditingSpace(null)}
-      />
-      <SpaceList
-        spaces={spaces}
-        onEdit={setEditingSpace}
-        onDelete={handleDeleteSpace}
-      />
-    </div>
-  )}
+          {activeSection === "appointments" && (
+            <div>
+              <h3 style={{ marginTop: 0 }}>Agendamentos</h3>
+              <AppointmentForm
+                patients={patients}
+                spaces={spaces}
+                psychologists={psychologists}
+                onSubmit={handleSubmitAppointment}
+                editingAppointment={editingAppointment}
+                onCancelEdit={() => setEditingAppointment(null)}
+              />
+              <AppointmentList
+                appointments={appointments}
+                onDelete={handleDeleteAppointment}
+                onEdit={setEditingAppointment}
+              />
+            </div>
+          )}
 
-  {activeSection === "appointments" && (
-    <div>
-      <h3 style={{ marginTop: 0 }}>Agendamentos</h3>
-      <AppointmentForm
-        patients={patients}
-        spaces={spaces}
-        onSubmit={handleSubmitAppointment}
-        editingAppointment={editingAppointment}
-        onCancelEdit={() => setEditingAppointment(null)}
-      />
-      <AppointmentList
-        appointments={appointments}
-        onDelete={handleDeleteAppointment}
-        onEdit={setEditingAppointment}
-      />
-    </div>
-  )}
-
-  {activeSection === "blockedTimes" && (
-    <div>
-      <h3 style={{ marginTop: 0 }}>Bloqueios de horário</h3>
-      <BlockedTimeForm onSubmit={handleCreateBlockedTime} />
-      <BlockedTimeList
-        blockedTimes={blockedTimes}
-        onDelete={handleDeleteBlockedTime}
-      />
-    </div>
-  )}
-</div>
+          {activeSection === "blockedTimes" && (
+            <div>
+              <h3 style={{ marginTop: 0 }}>Bloqueios de horário</h3>
+              <BlockedTimeForm onSubmit={handleCreateBlockedTime} />
+              <BlockedTimeList
+                blockedTimes={blockedTimes}
+                onDelete={handleDeleteBlockedTime}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

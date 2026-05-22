@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PsiManager</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+ 
+  <style>body { box-sizing: border-box; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    const defaultConfig = {
+      app_title: "PsiManager",
+      hero_title: "Gestão inteligente para clínicas de psicologia",
+      hero_subtitle: "Organize pacientes, agenda, financeiro e relatórios em uma plataforma premium, simples e pronta para crescer com sua clínica.",
+      primary_button_text: "Conhecer plataforma",
+      background_color: "#f6f7fb",
+      surface_color: "#ffffff",
+      text_color: "#172033",
+      primary_color: "#2563eb",
+      secondary_color: "#13b8a6",
+      font_family: "Aptos Display",
+      font_size: 16
+    };
+
+    let activeConfig = { ...defaultConfig };
+
+    function getConfigValue(key) {
+      return activeConfig[key] || defaultConfig[key];
+    }
+
+    function applyConfig(config) {
+      activeConfig = { ...defaultConfig, ...config };
+
+      document.documentElement.style.setProperty("--pm-bg", getConfigValue("background_color"));
+      document.documentElement.style.setProperty("--pm-surface", getConfigValue("surface_color"));
+      document.documentElement.style.setProperty("--pm-text", getConfigValue("text_color"));
+      document.documentElement.style.setProperty("--pm-primary", getConfigValue("primary_color"));
+      document.documentElement.style.setProperty("--pm-accent", getConfigValue("secondary_color"));
+
+      const stack = `${getConfigValue("font_family")}, Avenir Next, Segoe UI, sans-serif`;
+      document.querySelectorAll(".app-shell, .app-shell input, .app-shell button, .app-shell select, .app-shell textarea").forEach((el) => {
+        el.style.fontFamily = stack;
+      });
+
+      const base = Number(getConfigValue("font_size")) || 16;
+      document.querySelectorAll("[data-size='body']").forEach(el => el.style.fontSize = `${base}px`);
+      document.querySelectorAll("[data-size='small']").forEach(el => el.style.fontSize = `${base * 0.82}px`);
+      document.querySelectorAll("[data-size='title']").forEach(el => el.style.fontSize = `${base * 2.35}px`);
+      document.querySelectorAll("[data-size='heading']").forEach(el => el.style.fontSize = `${base * 1.55}px`);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => {
+          applyConfig(config);
+          window.dispatchEvent(new CustomEvent("pm-config-change"));
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["app_title", config.app_title || defaultConfig.app_title],
+          ["hero_title", config.hero_title || defaultConfig.hero_title],
+          ["hero_subtitle", config.hero_subtitle || defaultConfig.hero_subtitle],
+          ["primary_button_text", config.primary_button_text || defaultConfig.primary_button_text]
+        ])
+      });
+    }
+
+    const navItems = [
+      { key: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
+      { key: "agenda", label: "Agenda", icon: "bi-calendar2-week" },
+      { key: "criar-agendamento", label: "Criar agendamento", icon: "bi-calendar-plus" },
+      { key: "pacientes", label: "Pacientes", icon: "bi-people" },
+      { key: "criar-paciente", label: "Criar paciente", icon: "bi-person-plus" },
+      { key: "financeiro", label: "Financeiro", icon: "bi-wallet2" },
+      { key: "relatorios", label: "Relatórios", icon: "bi-bar-chart" },
+      { key: "perfil", label: "Perfil profissional", icon: "bi-person-badge" },
+      { key: "configuracoes", label: "Configurações", icon: "bi-sliders" }
+    ];
+
+    const patients = [
+      { name: "Marina Alves", age: 32, status: "Em acompanhamento", next: "Hoje, 14:00" },
+      { name: "Caio Menezes", age: 27, status: "Triagem", next: "Amanhã, 09:30" },
+      { name: "Fernanda Lima", age: 41, status: "Retorno", next: "Sexta, 16:00" },
+      { name: "Rafael Torres", age: 35, status: "Alta planejada", next: "Segunda, 11:00" }
+    ];
+
+    const appointments = [
+      { time: "09:00", name: "Caio Menezes", type: "Online", status: "Confirmado" },
+      { time: "10:30", name: "Fernanda Lima", type: "Presencial", status: "Aguardando" },
+      { time: "14:00", name: "Marina Alves", type: "Online", status: "Confirmado" },
+      { time: "16:00", name: "Rafael Torres", type: "Presencial", status: "Confirmado" }
+    ];
+
+    function Brand({ compact = false }) {
+      const [tick, setTick] = useState(0);
+      React.useEffect(() => {
+        const fn = () => setTick(t => t + 1);
+        window.addEventListener("pm-config-change", fn);
+        return () => window.removeEventListener("pm-config-change", fn);
+      }, []);
+
+      return (
+        <div className="d-flex align-items-center gap-3">
+          <div className="brand-mark">Ψ</div>
+          {!compact && (
+            <div>
+              <div className="fw-black fw-bold lh-sm" data-size="body">{getConfigValue("app_title")}</div>
+              <div className="text-secondary small" data-size="small">Clinic OS</div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function Landing({ go }) {
+      const [, force] = useState(0);
+      React.useEffect(() => {
+        const fn = () => force(v => v + 1);
+        window.addEventListener("pm-config-change", fn);
+        return () => window.removeEventListener("pm-config-change", fn);
+      }, []);
+
+      return (
+        <main className="app-shell">
+          <nav className="navbar navbar-expand-lg sticky-top glass-nav px-3 px-lg-5 py-3">
+            <div className="container-fluid">
+              <button className="btn p-0 border-0 bg-transparent" onClick={() => go("landing")} aria-label="Ir para início">
+                <Brand />
+              </button>
+
+              <div className="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+                <button className="btn btn-pm-ghost rounded-pill px-4" onClick={() => go("login-admin")}>Acesso admin</button>
+                <button className="btn btn-pm-ghost rounded-pill px-4" onClick={() => go("login-paciente")}>Acesso paciente</button>
+                <button className="btn btn-pm-primary rounded-pill px-4" onClick={() => go("dashboard")}>
+                  Abrir demo
+                </button>
+              </div>
+            </div>
+          </nav>
+
+          <section className="container py-5">
+            <div className="row align-items-center g-5 py-lg-5">
+              <div className="col-lg-6">
+                <span className="status-pill mb-4 d-inline-flex align-items-center gap-2">
+                  <i className="bi bi-stars"></i> SaaS premium para psicologia
+                </span>
+                <h1 className="display-4 fw-bold lh-1 mb-4" data-size="title">
+                  {getConfigValue("hero_title")}
+                </h1>
+                <p className="lead text-secondary mb-4" data-size="body">
+                  {getConfigValue("hero_subtitle")}
+                </p>
+                <div className="d-flex flex-wrap gap-3">
+                  <button className="btn btn-pm-primary btn-lg rounded-pill px-5" onClick={() => go("dashboard")}>
+                    {getConfigValue("primary_button_text")}
+                  </button>
+                  <button className="btn btn-pm-ghost btn-lg rounded-pill px-5" onClick={() => go("cadastro-paciente")}>
+                    Cadastrar paciente
+                  </button>
+                </div>
+
+                <div className="d-flex gap-4 mt-5 flex-wrap">
+                  <div>
+                    <div className="fw-bold fs-3">98%</div>
+                    <div className="text-secondary small">consultas organizadas</div>
+                  </div>
+                  <div>
+                    <div className="fw-bold fs-3">42h</div>
+                    <div className="text-secondary small">economizadas por mês</div>
+                  </div>
+                  <div>
+                    <div className="fw-bold fs-3">360°</div>
+                    <div className="text-secondary small">visão da clínica</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-lg-6">
+                <div className="hero-card p-4 p-lg-5">
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                      <div className="text-secondary small">Dashboard profissional</div>
+                      <h2 className="h4 fw-bold mb-0" data-size="heading">Visão de hoje</h2>
+                    </div>
+                    <div className="avatar">DR</div>
+                  </div>
+
+                  <div className="row g-3 mb-3">
+                    <div className="col-6">
+                      <div className="soft-card p-3">
+                        <div className="metric-icon mb-3"><i className="bi bi-calendar-check"></i></div>
+                        <div className="fs-3 fw-bold">12</div>
+                        <div className="text-secondary small">consultas</div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="soft-card p-3">
+                        <div className="metric-icon mb-3"><i className="bi bi-cash-stack"></i></div>
+                        <div className="fs-3 fw-bold">R$ 8,4k</div>
+                        <div className="text-secondary small">receita mensal</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mini-chart mb-3">
+                    {[52, 74, 46, 90, 68, 82, 58].map((h, i) => (
+                      <div key={i} className="bar" style={{ height: `${h}%` }}></div>
+                    ))}
+                  </div>
+
+                  <div className="soft-card p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                      <div className="fw-bold">Próximo atendimento</div>
+                      <div className="text-secondary small">Marina Alves · 14:00 · Online</div>
+                    </div>
+                    <span className="status-pill">Confirmado</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="row g-4 pb-5">
+              {[
+                ["bi-people", "Gestão de pacientes", "Histórico, status, evolução e cadastro em uma jornada simples."],
+                ["bi-calendar2-week", "Agenda inteligente", "Consultas online ou presenciais com visão semanal e diária."],
+                ["bi-graph-up-arrow", "Financeiro e KPIs", "Receitas, pendências, ticket médio e desempenho da clínica."]
+              ].map((item) => (
+                <div className="col-md-4" key={item[1]}>
+                  <div className="premium-card p-4 h-100">
+                    <div className="metric-icon mb-3"><i className={`bi ${item[0]}`}></i></div>
+                    <h3 className="h5 fw-bold">{item[1]}</h3>
+                    <p className="text-secondary mb-0">{item[2]}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
+      );
+    }
+
+    function AccessPage({ type, go }) {
+      const isAdmin = type === "admin";
+      return (
+        <main className="app-shell d-flex align-items-center justify-content-center p-4">
+          <section className="premium-card p-4 p-lg-5 w-100" style={{ maxWidth: 520 }}>
+            <button className="btn btn-pm-ghost rounded-pill mb-4" onClick={() => go("landing")}>
+              <i className="bi bi-arrow-left me-2"></i>Voltar
+            </button>
+            <Brand />
+            <div className="mt-4 mb-4">
+              <span className="status-pill">{isAdmin ? "Área profissional" : "Portal do paciente"}</span>
+              <h1 className="h2 fw-bold mt-3">
+                {isAdmin ? "Acesso seguro do profissional" : "Acesso seguro do paciente"}
+              </h1>
+              <p className="text-secondary mb-0">
+                Esta tela demonstra o fluxo de entrada sem coletar senha. A autenticação real pode ser integrada depois com backend seguro.
+              </p>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); go(isAdmin ? "dashboard" : "agenda"); }}>
+              <div className="mb-3">
+                <label className="form-label fw-semibold" htmlFor="email-access">E-mail</label>
+                <input id="email-access" className="form-control" type="email" placeholder={isAdmin ? "profissional@clinica.com" : "paciente@email.com"} />
+              </div>
+
+              <button className="btn btn-pm-primary w-100 rounded-pill py-3" type="submit">
+                Entrar na demonstração
+              </button>
+            </form>
+
+            <div className="soft-card p-3 mt-4">
+              <div className="d-flex gap-3">
+                <i className="bi bi-shield-check text-primary fs-4"></i>
+                <p className="mb-0 text-secondary small">
+                  Campos de senha não são exibidos neste protótipo por boas práticas de segurança no Canva Code.
+                </p>
+              </div>
+            </div>
+          </section>
+        </main>
+      );
+    }
+
+    function PublicPatientSignup({ go }) {
+      return (
+        <main className="app-shell p-4">
+          <section className="container py-4">
+            <button className="btn btn-pm-ghost rounded-pill mb-4" onClick={() => go("landing")}>
+              <i className="bi bi-arrow-left me-2"></i>Voltar
+            </button>
+
+            <div className="row justify-content-center">
+              <div className="col-lg-8">
+                <div className="premium-card p-4 p-lg-5">
+                  <span className="status-pill">Cadastro paciente</span>
+                  <h1 className="h2 fw-bold mt-3">Comece seu cadastro</h1>
+                  <p className="text-secondary">Preencha informações básicas para iniciar o atendimento.</p>
+
+                  <PatientForm submitText="Enviar cadastro" onSubmit={() => go("login-paciente")} />
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      );
+    }
+
+    function Sidebar({ current, go }) {
+      return (
+        <aside className="sidebar p-4">
+          <div className="mb-4">
+            <Brand />
+          </div>
+
+          <nav className="sidebar-nav d-grid gap-2" aria-label="Menu principal">
+            {navItems.map(item => (
+              <button
+                key={item.key}
+                className={`sidebar-link ${current === item.key ? "active" : ""}`}
+                onClick={() => go(item.key)}
+              >
+                <i className={`bi ${item.icon}`}></i>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="soft-card p-3 mt-4" style={{ background: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.12)" }}>
+            <div className="small text-white-50 mb-1">Plano atual</div>
+            <div className="fw-bold text-white">Professional</div>
+            <div className="small text-white-50">Clínica com até 8 profissionais</div>
+          </div>
+        </aside>
+      );
+    }
+
+    function Topbar({ title, subtitle, go }) {
+      return (
+        <header className="topbar p-3 p-lg-4 mb-4 d-flex align-items-center justify-content-between gap-3 flex-wrap">
+          <div>
+            <h1 className="h3 fw-bold mb-1" data-size="heading">{title}</h1>
+            <p className="text-secondary mb-0" data-size="body">{subtitle}</p>
+          </div>
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            <button className="btn btn-pm-ghost rounded-pill px-3" onClick={() => go("criar-agendamento")}>
+              <i className="bi bi-calendar-plus me-2"></i>Novo horário
+            </button>
+            <button className="btn btn-pm-primary rounded-pill px-3" onClick={() => go("criar-paciente")}>
+              <i className="bi bi-person-plus me-2"></i>Novo paciente
+            </button>
+            <div className="avatar">AP</div>
+          </div>
+        </header>
+      );
+    }
+
+    function DashboardLayout({ current, go, children, title, subtitle }) {
+      return (
+        <main className="app-shell">
+          <div className="dashboard-layout d-flex h-100 w-100">
+            <Sidebar current={current} go={go} />
+            <section className="flex-grow-1 p-3 p-lg-4 overflow-auto">
+              <Topbar title={title} subtitle={subtitle} go={go} />
+              <div className="route-fade">
+                {children}
+              </div>
+            </section>
+          </div>
+        </main>
+      );
+    }
+
+    function MetricCard({ icon, label, value, trend }) {
+      return (
+        <div className="premium-card p-4 h-100">
+          <div className="d-flex justify-content-between align-items-start">
+            <div className="metric-icon"><i className={`bi ${icon}`}></i></div>
+            <span className="status-pill">{trend}</span>
+          </div>
+          <div className="fs-2 fw-bold mt-3">{value}</div>
+          <div className="text-secondary">{label}</div>
+        </div>
+      );
+    }
+
+    function Dashboard({ go }) {
+      return (
+        <DashboardLayout current="dashboard" go={go} title="Dashboard principal" subtitle="Resumo profissional da clínica em tempo real.">
+          <div className="row g-4 mb-4">
+            <div className="col-md-6 col-xl-3"><MetricCard icon="bi-calendar-check" label="Consultas este mês" value="148" trend="+12%" /></div>
+            <div className="col-md-6 col-xl-3"><MetricCard icon="bi-people" label="Pacientes ativos" value="86" trend="+8%" /></div>
+            <div className="col-md-6 col-xl-3"><MetricCard icon="bi-wallet2" label="Receita mensal" value="R$ 32,8k" trend="+18%" /></div>
+            <div className="col-md-6 col-xl-3"><MetricCard icon="bi-activity" label="Taxa de presença" value="94%" trend="Ótimo" /></div>
+          </div>
+
+          <div className="row g-4 mb-4">
+            <div className="col-xl-8">
+              <div className="premium-card p-4 h-100">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h2 className="h5 fw-bold mb-1">Evolução de atendimentos</h2>
+                    <p className="text-secondary mb-0">Consultas realizadas nos últimos 7 dias</p>
+                  </div>
+                  <span className="status-pill">Semanal</span>
+                </div>
+                <div className="mini-chart">
+                  {[46, 68, 56, 84, 72, 91, 64].map((h, i) => (
+                    <div key={i} className="bar" style={{ height: `${h}%` }}></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-xl-4">
+              <div className="premium-card p-4 h-100 position-relative">
+                <h2 className="h5 fw-bold mb-3">KPIs da clínica</h2>
+                <div className="donut mb-3"><div className="donut-label">94%</div></div>
+                <div className="d-grid gap-2">
+                  <div className="d-flex justify-content-between"><span className="text-secondary">Presença</span><strong>94%</strong></div>
+                  <div className="d-flex justify-content-between"><span className="text-secondary">Ocupação</span><strong>82%</strong></div>
+                  <div className="d-flex justify-content-between"><span className="text-secondary">Pendências</span><strong>6%</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="row g-4">
+            <div className="col-xl-6">
+              <AppointmentsCard />
+            </div>
+            <div className="col-xl-6">
+              <AgendaSummary />
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function AppointmentsCard() {
+      return (
+        <div className="premium-card p-4 h-100">
+          <h2 className="h5 fw-bold mb-3">Próximos atendimentos</h2>
+          <div className="d-grid gap-3">
+            {appointments.map((a) => (
+              <div className="soft-card p-3 d-flex align-items-center justify-content-between gap-3" key={a.time}>
+                <div className="d-flex align-items-center gap-3">
+                  <div className="avatar">{a.name.split(" ").map(n => n[0]).join("").slice(0,2)}</div>
+                  <div>
+                    <div className="fw-bold">{a.name}</div>
+                    <div className="text-secondary small">{a.time} · {a.type}</div>
+                  </div>
+                </div>
+                <span className="status-pill">{a.status}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function AgendaSummary() {
+      return (
+        <div className="premium-card p-4 h-100">
+          <h2 className="h5 fw-bold mb-3">Agenda resumida</h2>
+          <div className="d-grid gap-3">
+            {["Seg", "Ter", "Qua", "Qui", "Sex"].map((day, i) => (
+              <div className="d-flex align-items-center gap-3" key={day}>
+                <div className="fw-bold" style={{ width: 40 }}>{day}</div>
+                <div className="progress flex-grow-1 rounded-pill" style={{ height: 12 }}>
+                  <div className="progress-bar rounded-pill" style={{ width: `${[68, 84, 56, 72, 48][i]}%`, background: "linear-gradient(90deg, var(--pm-primary), var(--pm-accent))" }}></div>
+                </div>
+                <span className="text-secondary small">{[8, 11, 6, 9, 5][i]} sessões</span>
+              </div>
+            ))}
+          </div>
+          <div className="soft-card p-3 mt-4">
+            <div className="fw-bold">Melhor janela disponível</div>
+            <div className="text-secondary small">Quinta-feira, entre 15:00 e 17:00</div>
+          </div>
+        </div>
+      );
+    }
+
+    function Agenda({ go }) {
+      return (
+        <DashboardLayout current="agenda" go={go} title="Agenda" subtitle="Visualize consultas por dia, status e modalidade.">
+          <div className="row g-4">
+            <div className="col-lg-8">
+              <div className="premium-card p-4">
+                <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                  <h2 className="h5 fw-bold mb-0">Hoje</h2>
+                  <button className="btn btn-pm-primary rounded-pill" onClick={() => go("criar-agendamento")}>Criar agendamento</button>
+                </div>
+                <div className="d-grid gap-3">
+                  {appointments.map(a => (
+                    <div className="soft-card p-3 d-flex align-items-center justify-content-between flex-wrap gap-3" key={a.time}>
+                      <div>
+                        <div className="fw-bold fs-5">{a.time}</div>
+                        <div className="text-secondary">{a.name} · {a.type}</div>
+                      </div>
+                      <span className="status-pill">{a.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-4">
+              <AgendaSummary />
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function CreateAppointment({ go }) {
+      return (
+        <DashboardLayout current="criar-agendamento" go={go} title="Criar agendamento" subtitle="Monte uma nova consulta com poucos cliques.">
+          <div className="premium-card p-4 p-lg-5">
+            <form onSubmit={(e) => { e.preventDefault(); go("agenda"); }}>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold" htmlFor="appointment-patient">Paciente</label>
+                  <select id="appointment-patient" className="form-select">
+                    {patients.map(p => <option key={p.name}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold" htmlFor="appointment-date">Data</label>
+                  <input id="appointment-date" type="date" className="form-control" />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label fw-semibold" htmlFor="appointment-time">Horário</label>
+                  <input id="appointment-time" type="time" className="form-control" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold" htmlFor="appointment-type">Modalidade</label>
+                  <select id="appointment-type" className="form-select">
+                    <option>Online</option>
+                    <option>Presencial</option>
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold" htmlFor="appointment-status">Status</label>
+                  <select id="appointment-status" className="form-select">
+                    <option>Confirmado</option>
+                    <option>Aguardando confirmação</option>
+                    <option>Remarcado</option>
+                  </select>
+                </div>
+                <div className="col-12">
+                  <label className="form-label fw-semibold" htmlFor="appointment-notes">Observações</label>
+                  <textarea id="appointment-notes" className="form-control" rows="4" placeholder="Notas internas do atendimento"></textarea>
+                </div>
+              </div>
+
+              <div className="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" className="btn btn-pm-ghost rounded-pill px-4" onClick={() => go("agenda")}>Cancelar</button>
+                <button type="submit" className="btn btn-pm-primary rounded-pill px-4">Salvar agendamento</button>
+              </div>
+            </form>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function Patients({ go }) {
+      return (
+        <DashboardLayout current="pacientes" go={go} title="Pacientes" subtitle="Gerencie dados, status clínico e próximos atendimentos.">
+          <div className="premium-card p-4">
+            <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+              <div className="input-group" style={{ maxWidth: 420 }}>
+                <span className="input-group-text bg-white border-end-0 rounded-start-pill"><i className="bi bi-search"></i></span>
+                <input className="form-control border-start-0 rounded-end-pill" placeholder="Buscar paciente" aria-label="Buscar paciente" />
+              </div>
+              <button className="btn btn-pm-primary rounded-pill" onClick={() => go("criar-paciente")}>Criar paciente</button>
+            </div>
+
+            <div className="table-responsive">
+              <table className="table align-middle">
+                <thead>
+                  <tr className="text-secondary">
+                    <th>Paciente</th>
+                    <th>Idade</th>
+                    <th>Status</th>
+                    <th>Próxima consulta</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {patients.map(p => (
+                    <tr key={p.name}>
+                      <td>
+                        <div className="d-flex align-items-center gap-3">
+                          <div className="avatar">{p.name.split(" ").map(n => n[0]).join("").slice(0,2)}</div>
+                          <strong>{p.name}</strong>
+                        </div>
+                      </td>
+                      <td>{p.age}</td>
+                      <td><span className="status-pill">{p.status}</span></td>
+                      <td className="text-secondary">{p.next}</td>
+                      <td><button className="btn btn-pm-ghost rounded-pill btn-sm">Ver perfil</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function PatientForm({ submitText, onSubmit }) {
+      return (
+        <form onSubmit={(e) => { e.preventDefault(); onSubmit && onSubmit(); }}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold" htmlFor="patient-name">Nome completo</label>
+              <input id="patient-name" className="form-control" placeholder="Nome do paciente" />
+            </div>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold" htmlFor="patient-age">Idade</label>
+              <input id="patient-age" type="number" className="form-control" placeholder="32" />
+            </div>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold" htmlFor="patient-phone">Telefone</label>
+              <input id="patient-phone" className="form-control" placeholder="(00) 00000-0000" />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold" htmlFor="patient-email">E-mail</label>
+              <input id="patient-email" type="email" className="form-control" placeholder="paciente@email.com" />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold" htmlFor="patient-status">Status</label>
+              <select id="patient-status" className="form-select">
+                <option>Triagem</option>
+                <option>Em acompanhamento</option>
+                <option>Retorno</option>
+                <option>Alta planejada</option>
+              </select>
+            </div>
+            <div className="col-12">
+              <label className="form-label fw-semibold" htmlFor="patient-notes">Observações iniciais</label>
+              <textarea id="patient-notes" className="form-control" rows="4" placeholder="Informações gerais não sensíveis para organização interna"></textarea>
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-end gap-2 mt-4">
+            <button type="submit" className="btn btn-pm-primary rounded-pill px-4">{submitText}</button>
+          </div>
+        </form>
+      );
+    }
+
+    function CreatePatient({ go }) {
+      return (
+        <DashboardLayout current="criar-paciente" go={go} title="Criar paciente" subtitle="Cadastre um novo paciente na clínica.">
+          <div className="premium-card p-4 p-lg-5">
+            <PatientForm submitText="Salvar paciente" onSubmit={() => go("pacientes")} />
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function Finance({ go }) {
+      return (
+        <DashboardLayout current="financeiro" go={go} title="Financeiro" subtitle="Acompanhe receitas, pendências e performance financeira.">
+          <div className="row g-4 mb-4">
+            <div className="col-md-4"><MetricCard icon="bi-cash-stack" label="Receita recebida" value="R$ 32,8k" trend="+18%" /></div>
+            <div className="col-md-4"><MetricCard icon="bi-hourglass-split" label="A receber" value="R$ 6,2k" trend="12 itens" /></div>
+            <div className="col-md-4"><MetricCard icon="bi-receipt" label="Ticket médio" value="R$ 220" trend="+4%" /></div>
+          </div>
+
+          <div className="premium-card p-4">
+            <h2 className="h5 fw-bold mb-3">Movimentações recentes</h2>
+            <div className="table-responsive">
+              <table className="table align-middle">
+                <thead>
+                  <tr className="text-secondary">
+                    <th>Descrição</th>
+                    <th>Paciente</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Consulta individual", "Marina Alves", "R$ 220", "Pago"],
+                    ["Sessão online", "Caio Menezes", "R$ 180", "Pendente"],
+                    ["Retorno presencial", "Fernanda Lima", "R$ 220", "Pago"]
+                  ].map(row => (
+                    <tr key={row[1]}>
+                      <td>{row[0]}</td>
+                      <td>{row[1]}</td>
+                      <td><strong>{row[2]}</strong></td>
+                      <td><span className="status-pill">{row[3]}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function Reports({ go }) {
+      return (
+        <DashboardLayout current="relatorios" go={go} title="Relatórios" subtitle="Indicadores para decisões clínicas e administrativas.">
+          <div className="row g-4">
+            <div className="col-lg-8">
+              <div className="premium-card p-4 h-100">
+                <h2 className="h5 fw-bold mb-3">Atendimentos por mês</h2>
+                <div className="mini-chart" style={{ height: 240 }}>
+                  {[40, 52, 61, 72, 66, 86, 92, 78, 88].map((h, i) => (
+                    <div key={i} className="bar" style={{ height: `${h}%` }}></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-4">
+              <div className="premium-card p-4 h-100">
+                <h2 className="h5 fw-bold mb-3">Resumo executivo</h2>
+                {[
+                  ["Crescimento de pacientes", "+14%"],
+                  ["Consultas concluídas", "421"],
+                  ["Cancelamentos", "18"],
+                  ["Receita recorrente", "R$ 28,4k"]
+                ].map(item => (
+                  <div className="soft-card p-3 mb-3 d-flex justify-content-between" key={item[0]}>
+                    <span className="text-secondary">{item[0]}</span>
+                    <strong>{item[1]}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function Profile({ go }) {
+      return (
+        <DashboardLayout current="perfil" go={go} title="Perfil profissional" subtitle="Dados públicos e preferências do profissional.">
+          <div className="premium-card p-4 p-lg-5">
+            <div className="d-flex align-items-center gap-4 mb-4 flex-wrap">
+              <div className="avatar" style={{ width: 92, height: 92, borderRadius: 28, fontSize: 28 }}>AP</div>
+              <div>
+                <h2 className="h4 fw-bold mb-1">Dra. Ana Paula</h2>
+                <p className="text-secondary mb-0">Psicóloga clínica · CRP 00/00000</p>
+              </div>
+            </div>
+
+            <form onSubmit={(e) => e.preventDefault()}>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold" htmlFor="profile-name">Nome profissional</label>
+                  <input id="profile-name" className="form-control" defaultValue="Dra. Ana Paula" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold" htmlFor="profile-specialty">Especialidade</label>
+                  <input id="profile-specialty" className="form-control" defaultValue="Psicologia clínica" />
+                </div>
+                <div className="col-12">
+                  <label className="form-label fw-semibold" htmlFor="profile-bio">Bio profissional</label>
+                  <textarea id="profile-bio" className="form-control" rows="4" defaultValue="Atendimento psicológico para adultos com foco em acolhimento, clareza e acompanhamento contínuo."></textarea>
+                </div>
+              </div>
+
+              <button className="btn btn-pm-primary rounded-pill px-4 mt-4">Salvar perfil</button>
+            </form>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function Settings({ go }) {
+      return (
+        <DashboardLayout current="configuracoes" go={go} title="Configurações" subtitle="Personalize preferências operacionais do sistema.">
+          <div className="row g-4">
+            {[
+              ["bi-bell", "Notificações", "Lembretes de consulta, confirmações e alertas financeiros."],
+              ["bi-calendar-event", "Agenda", "Horários de atendimento, intervalos e regras de disponibilidade."],
+              ["bi-building", "Clínica", "Dados da clínica, unidades e informações administrativas."],
+              ["bi-shield-check", "Segurança", "Preferências de acesso e integrações futuras com autenticação segura."]
+            ].map(item => (
+              <div className="col-md-6" key={item[1]}>
+                <div className="premium-card p-4 h-100">
+                  <div className="metric-icon mb-3"><i className={`bi ${item[0]}`}></i></div>
+                  <h2 className="h5 fw-bold">{item[1]}</h2>
+                  <p className="text-secondary">{item[2]}</p>
+                  <button className="btn btn-pm-ghost rounded-pill">Configurar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function App() {
+      const [route, setRoute] = useState("landing");
+
+      const go = (next) => {
+        setRoute(next);
+      };
+
+      React.useEffect(() => {
+        applyConfig(window.elementSdk?.config || defaultConfig);
+      }, []);
+
+      const screen = useMemo(() => {
+        if (route === "landing") return <Landing go={go} />;
+        if (route === "login-admin") return <AccessPage type="admin" go={go} />;
+        if (route === "login-paciente") return <AccessPage type="paciente" go={go} />;
+        if (route === "cadastro-paciente") return <PublicPatientSignup go={go} />;
+        if (route === "dashboard") return <Dashboard go={go} />;
+        if (route === "agenda") return <Agenda go={go} />;
+        if (route === "criar-agendamento") return <CreateAppointment go={go} />;
+        if (route === "pacientes") return <Patients go={go} />;
+        if (route === "criar-paciente") return <CreatePatient go={go} />;
+        if (route === "financeiro") return <Finance go={go} />;
+        if (route === "relatorios") return <Reports go={go} />;
+        if (route === "perfil") return <Profile go={go} />;
+        if (route === "configuracoes") return <Settings go={go} />;
+        return <Landing go={go} />;
+      }, [route]);
+
+      return screen;
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ff71a3ba402139e',t:'MTc3OTQwMzQzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

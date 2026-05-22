@@ -18,21 +18,26 @@ export default function AppointmentForm({
   patients,
   spaces,
   onSubmit,
+  psychologists,
   editingAppointment,
   onCancelEdit
 }) {
   const [formData, setFormData] = useState({
     patientId: "",
     spaceId: "",
+    psychologistId: "",
     date: "",
     status: "scheduled"
   });
-
+ 
   useEffect(() => {
+   
+
     if (editingAppointment) {
       setFormData({
         patientId: editingAppointment.patientId || "",
         spaceId: editingAppointment.spaceId || "",
+        psychologistId: editingAppointment.psychologistId || "",
         date: formatDateTimeLocal(editingAppointment.date),
         status: editingAppointment.status || "scheduled"
       });
@@ -86,12 +91,14 @@ export default function AppointmentForm({
         {editingAppointment ? "Editar agendamento" : "Novo agendamento"}
       </h3>
 
+
+
       <select
+        className="form-select"
         name="patientId"
         value={formData.patientId}
         onChange={handleChange}
         required
-        style={inputStyle}
       >
         <option value="">Selecione um paciente</option>
         {patients.map((patient) => (
@@ -100,13 +107,30 @@ export default function AppointmentForm({
           </option>
         ))}
       </select>
+      <select
+        className="form-select"
+        name="psychologistId"
+        value={formData.psychologistId}
+        onChange={handleChange}
+        required
+        
+      >
+        <option value="">Selecione um psicólogo</option>
+
+        {psychologists.map((psychologist) => (
+          <option key={psychologist.id} value={psychologist.id}>
+            {psychologist.name}
+          </option>
+        ))}
+      </select>
 
       <select
+        className="form-select"
         name="spaceId"
         value={formData.spaceId}
         onChange={handleChange}
         required
-        style={inputStyle}
+        
       >
         <option value="">Selecione um espaço</option>
         {spaces.map((space) => (
@@ -117,19 +141,21 @@ export default function AppointmentForm({
       </select>
 
       <input
+        className="form-control"
         type="datetime-local"
         name="date"
         value={formData.date}
         onChange={handleChange}
         required
-        style={inputStyle}
+        
       />
 
       <select
+        className="form-select"
         name="status"
         value={formData.status}
         onChange={handleChange}
-        style={inputStyle}
+      
       >
         {STATUS_OPTIONS.map((status) => (
           <option key={status.value} value={status.value}>
@@ -139,7 +165,7 @@ export default function AppointmentForm({
       </select>
 
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button type="submit" style={primaryButton}>
+        <button type="submit" className="btn btn-primary">
           {editingAppointment ? "Salvar alterações" : "Criar agendamento"}
         </button>
 
@@ -147,7 +173,7 @@ export default function AppointmentForm({
           <button
             type="button"
             onClick={onCancelEdit}
-            style={secondaryButton}
+            className="btn btn-outline-secondary"
           >
             Cancelar edição
           </button>
@@ -157,32 +183,3 @@ export default function AppointmentForm({
   );
 }
 
-const inputStyle = {
-  padding: "12px",
-  borderRadius: "10px",
-  border: "1px solid #d0d7e2",
-  fontSize: "14px",
-  background: "#fff"
-};
-
-const primaryButton = {
-  border: "none",
-  background: "#02af11",
-  color: "#fff",
-  padding: "10px 14px",
-  borderRadius: "10px",
-  cursor: "pointer",
-  fontWeight: "600",
-  minWidth: "170px",
-  height: "42px"
-};
-
-const secondaryButton = {
-  border: "1px solid #d0d7e2",
-  background: "#fff",
-  color: "#333",
-  padding: "10px 14px",
-  borderRadius: "10px",
-  cursor: "pointer",
-  fontWeight: "600"
-};

@@ -249,7 +249,7 @@ export default function MedicalRecordPage() {
                 name="status"
                 value={recordForm.status}
                 onChange={handleRecordChange}
-                style={inputStyle}
+                className="form-select"
               >
                 <option value="OPEN">Aberto</option>
                 <option value="CLOSED">Fechado</option>
@@ -262,7 +262,7 @@ export default function MedicalRecordPage() {
                 value={recordForm.mainComplaint}
                 onChange={handleRecordChange}
                 rows={3}
-                style={textareaStyle}
+                className="form-control"
               />
 
               <textarea
@@ -271,7 +271,7 @@ export default function MedicalRecordPage() {
                 value={recordForm.diagnosisHypothesis}
                 onChange={handleRecordChange}
                 rows={3}
-                style={textareaStyle}
+                className="form-control"
               />
 
               <textarea
@@ -280,7 +280,7 @@ export default function MedicalRecordPage() {
                 value={recordForm.clinicalNotes}
                 onChange={handleRecordChange}
                 rows={5}
-                style={textareaStyle}
+                className="form-control"
               />
 
               <button type="submit" disabled={savingRecord} style={primaryButton}>
@@ -297,7 +297,7 @@ export default function MedicalRecordPage() {
                 value={noteForm.sessionDate}
                 onChange={handleNoteChange}
                 required
-                style={inputStyle}
+                className="form-control"
               />
 
               <textarea
@@ -308,7 +308,7 @@ export default function MedicalRecordPage() {
                 rows={4}
                 required
                 disabled={!medicalRecord}
-                style={textareaStyle}
+                className="form-control"
               />
 
               <textarea
@@ -318,7 +318,7 @@ export default function MedicalRecordPage() {
                 onChange={handleNoteChange}
                 rows={3}
                 disabled={!medicalRecord}
-                style={textareaStyle}
+                className="form-control"
               />
 
               <textarea
@@ -328,7 +328,7 @@ export default function MedicalRecordPage() {
                 onChange={handleNoteChange}
                 rows={3}
                 disabled={!medicalRecord}
-                style={textareaStyle}
+                className="form-control"
               />
 
               <button
@@ -411,19 +411,7 @@ const sectionCardStyle = {
   boxShadow: "0 8px 24px rgba(0,0,0,0.06)"
 };
 
-const inputStyle = {
-  padding: "12px",
-  borderRadius: "10px",
-  border: "1px solid #d0d7e2",
-  fontSize: "14px",
-  background: "#fff"
-};
 
-const textareaStyle = {
-  ...inputStyle,
-  resize: "vertical",
-  fontFamily: "inherit"
-};
 
 const primaryButton = {
   border: "none",

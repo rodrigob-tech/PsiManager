@@ -22,73 +22,65 @@ export default function PatientList({
 
   return (
     <div
-      style={{
-        display: "grid",
-        gap: "12px"
-      }}
+      
     >
       {patients.map((patient) => (
         <div
           key={patient.id}
-          style={{
-            border: "1px solid #e5e7eb",
-            borderRadius: "12px",
-            padding: "14px",
-            background: "#fff"
-          }}
+          className="table-responsive"
         >
-          <div style={{ display: "grid", gap: "6px" }}>
-            <div>
-              <strong>Nome:</strong> {patient.name}
-            </div>
+          <table className="table table-hover align-middle">
+            <thead>
+              <tr>
+              <th>Nome:</th> {patient.name}
+            </tr>
 
-            <div>
-              <strong>Status:</strong> {statusLabel[patient.status] || patient.status}
-            </div>
+            <tr>
+              <th>Status:</th> {statusLabel[patient.status] || patient.status}
+            </tr>
 
-            <div>
-              <strong>Email:</strong> {patient.email || "Não informado"}
-            </div>
+            <tr>
+              <th>Email:</th> {patient.email || "Não informado"}
+            </tr>
 
-            <div>
-              <strong>Telefone:</strong> {patient.phone || "Não informado"}
-            </div>
+            <tr>
+              <th>Telefone:</th> {patient.phone || "Não informado"}
+            </tr>
 
-            <div>
-              <strong>CPF:</strong> {patient.cpf || "Não informado"}
-            </div>
+            <tr>
+              <th>CPF:</th> {patient.cpf || "Não informado"}
+            </tr>
 
-            <div>
-              <strong>Nascimento:</strong> {formatDate(patient.birthDate)}
-            </div>
+            <tr>
+              <th>Nascimento:</th> {formatDate(patient.birthDate)}
+            </tr>
 
-            <div>
-              <strong>Gênero:</strong>{" "}
+            <tr>
+              <th>Gênero:</th>{" "}
               {genderLabel[patient.gender] || patient.gender || "Não informado"}
-            </div>
+            </tr>
 
-            <div>
-              <strong>Emergência:</strong>{" "}
+            <tr>
+              <th>Emergência:</th>{" "}
               {patient.emergencyName || "Não informado"}
               {patient.emergencyPhone ? ` - ${patient.emergencyPhone}` : ""}
-            </div>
+            </tr>
 
-            <div>
-              <strong>Responsável:</strong>{" "}
+            <tr>
+              <th>Responsável:</th>{" "}
               {patient.guardianName || "Não informado"}
               {patient.guardianPhone ? ` - ${patient.guardianPhone}` : ""}
-            </div>
+            </tr>
 
-            <div>
-              <strong>Endereço:</strong> {patient.address || "Não informado"}
-            </div>
+            <tr>
+              <th>Endereço:</th> {patient.address || "Não informado"}
+            </tr>
 
-            <div>
-              <strong>Observações:</strong> {patient.notes || "Não informado"}
-            </div>
-          </div>
+            <tr>
+              <th>Observações:</th> {patient.notes || "Não informado"}
+            </tr>
 
-          <div
+            <div
             style={{
               marginTop: "12px",
               display: "flex",
@@ -99,7 +91,7 @@ export default function PatientList({
             <button
               type="button"
               onClick={() => onEdit(patient)}
-              style={editButton}
+              className="btn btn-outline-primary"
             >
               Editar
             </button>
@@ -107,7 +99,7 @@ export default function PatientList({
             <button
               type="button"
               onClick={() => onDelete(patient.id)}
-              style={deleteButton}
+              className="btn btn-outline-danger"
             >
               Excluir
             </button>
@@ -116,12 +108,17 @@ export default function PatientList({
               <button
                 type="button"
                 onClick={() => onOpenMedicalRecord(patient)}
-                style={medicalRecordButton}
+                className="btn btn-primary"
               >
                 Prontuário
               </button>
             )}
           </div>
+            </thead>
+            
+          </table>
+
+          
         </div>
       ))}
     </div>
@@ -147,34 +144,4 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("pt-BR", {
     timeZone: "UTC"
   });
-};
-
-const editButton = {
-  border: "none",
-  background: "#fffb03",
-  color: "#000000",
-  padding: "8px 12px",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontWeight: "600"
-};
-
-const deleteButton = {
-  border: "none",
-  background: "#d32f2f",
-  color: "#fff",
-  padding: "8px 12px",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontWeight: "600"
-};
-
-const medicalRecordButton = {
-  border: "none",
-  background: "#1976d2",
-  color: "#fff",
-  padding: "8px 12px",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontWeight: "600"
 };

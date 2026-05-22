@@ -86,7 +86,7 @@ export default function PatientLoginPage() {
               value={formData.email}
               onChange={handleChange}
               required
-              style={inputStyle}
+              className="form-control"
             />
 
             <input
@@ -96,7 +96,7 @@ export default function PatientLoginPage() {
               value={formData.password}
               onChange={handleChange}
               required
-              style={inputStyle}
+              className="form-control"
             />
 
             <button type="submit" disabled={loading} style={buttonStyle}>
@@ -206,12 +206,6 @@ const formStyle = {
   gap: "12px"
 };
 
-const inputStyle = {
-  padding: "13px",
-  borderRadius: "10px",
-  border: "1px solid #d0d7e2",
-  fontSize: "15px"
-};
 
 const buttonStyle = {
   border: "none",

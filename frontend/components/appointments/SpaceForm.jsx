@@ -65,7 +65,7 @@ export default function SpaceForm({ onSubmit, editingSpace, onCancelEdit }) {
         value={formData.name}
         onChange={handleChange}
         required
-        style={inputStyle}
+        className="form-control"
       />
 
       <input
@@ -74,11 +74,11 @@ export default function SpaceForm({ onSubmit, editingSpace, onCancelEdit }) {
         placeholder="Descrição do espaço"
         value={formData.description}
         onChange={handleChange}
-        style={inputStyle}
-      />
+        className="form-control" 
+      />          
 
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button type="submit" style={primaryButton}>
+        <button type="submit" className="btn btn-primary">
           {editingSpace ? "Salvar alterações" : "Criar espaço"}
         </button>
 
@@ -86,7 +86,7 @@ export default function SpaceForm({ onSubmit, editingSpace, onCancelEdit }) {
           <button
             type="button"
             onClick={onCancelEdit}
-            style={secondaryButton}
+            className="btn btn-outline-secondary"
           >
             Cancelar edição
           </button>
@@ -95,31 +95,3 @@ export default function SpaceForm({ onSubmit, editingSpace, onCancelEdit }) {
     </form>
   );
 }
-
-const inputStyle = {
-  padding: "12px",
-  borderRadius: "10px",
-  border: "1px solid #d0d7e2",
-  fontSize: "14px",
-  background: "#fff"
-};
-
-const primaryButton = {
-  border: "none",
-  background: "#02af11",
-  color: "#fff",
-  padding: "10px 14px",
-  borderRadius: "10px",
-  cursor: "pointer",
-  fontWeight: "600"
-};
-
-const secondaryButton = {
-  border: "1px solid #d0d7e2",
-  background: "#fff",
-  color: "#333",
-  padding: "10px 14px",
-  borderRadius: "10px",
-  cursor: "pointer",
-  fontWeight: "600"
-};

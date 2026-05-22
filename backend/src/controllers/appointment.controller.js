@@ -12,7 +12,15 @@ export const getAppointments = async (req, res) => {
     const appointments = await prisma.appointment.findMany({
       include: {
         patient: true,
-        space: true
+        space: true,
+        psychologist: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
       },
       orderBy: {
         date: "asc"
@@ -33,7 +41,15 @@ export const getAppointmentById = async (req, res) => {
       where: { id },
       include: {
         patient: true,
-        space: true
+        space: true,
+        psychologist: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
       }
     });
 
@@ -48,7 +64,7 @@ export const getAppointmentById = async (req, res) => {
 };
 export const createAppointment = async (req, res) => {
   try {
-    const { date, status, patientId, spaceId } = req.body;
+    const { date, status, patientId, spaceId, psychologistId } = req.body;
     // Validação  de data, patientId, space ID
     if (!date || !patientId || !spaceId) {
       return res.status(400).json({
@@ -85,7 +101,21 @@ export const createAppointment = async (req, res) => {
         return res.status(404).json({ error: "Espaço não encontrado" });
       }
     }
+    if (psychologistId) {
+      const psychologistExists = await prisma.user.findFirst({
+        where: {
+          id: psychologistId,
+          role: "PSYCHOLOGIST",
+          isActive: true
+        }
+      });
 
+      if (!psychologistExists) {
+        return res.status(404).json({
+          error: "Psicólogo não encontrado ou inativo"
+        });
+      }
+    }
     await validatePublicBookingRules({ date, spaceId });
     // verificando se o horário é um dos bloqueados
     const blockedTime = await prisma.blockedTime.findFirst({
@@ -120,18 +150,41 @@ export const createAppointment = async (req, res) => {
       }
     }
 
+    if (psychologistId) {
+      const conflictingPsychologistAppointment = await prisma.appointment.findFirst({
+        where: {
+          date: appointmentDate,
+          psychologistId
+        }
+      });
+
+      if (conflictingPsychologistAppointment) {
+        return res.status(400).json({
+          error: "Este psicólogo já possui um agendamento neste horário"
+        });
+      }
+    }
+
     // criando o agendamento no db
     const appointment = await prisma.appointment.create({
       data: {
         date: appointmentDate,
         status: status || "scheduled",
         patientId,
-        // tava spaceId: spaceId
-        spaceId
+        spaceId,
+        psychologistId: psychologistId || null
       },
       include: {
         patient: true,
-        space: true
+        space: true,
+        psychologist: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
       }
     });
     try {
@@ -183,7 +236,15 @@ export const createAppointment = async (req, res) => {
       where: { id: appointment.id },
       include: {
         patient: true,
-        space: true
+        space: true,
+        psychologist: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
       }
     });
 
@@ -195,13 +256,21 @@ export const createAppointment = async (req, res) => {
 export const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { date, status, patientId, spaceId } = req.body;
+    const { date, status, patientId, spaceId, psychologistId } = req.body;
 
     const appointmentExists = await prisma.appointment.findUnique({
       where: { id },
       include: {
         patient: true,
-        space: true
+        space: true,
+        psychologist: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
       }
     });
 
@@ -255,7 +324,7 @@ export const updateAppointment = async (req, res) => {
         error: "Este horário está bloqueado"
       });
     }
-
+    // validando conflitos
     const conflictingAppointment = await prisma.appointment.findFirst({
       where: {
         id: {
@@ -271,6 +340,26 @@ export const updateAppointment = async (req, res) => {
         error: "Já existe um agendamento neste horário para este espaço"
       });
     }
+    const finalPsychologistId =
+      psychologistId !== undefined
+        ? psychologistId || null
+        : appointmentExists.psychologistId;
+
+    if (finalPsychologistId) {
+      const conflictingPsychologistAppointment = await prisma.appointment.findFirst({
+        where: {
+          id: { not: id },
+          date: finalDate,
+          psychologistId: finalPsychologistId
+        }
+      });
+
+      if (conflictingPsychologistAppointment) {
+        return res.status(400).json({
+          error: "Este psicólogo já possui um agendamento neste horário"
+        });
+      }
+    }
 
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
@@ -278,11 +367,21 @@ export const updateAppointment = async (req, res) => {
         ...(date && { date: new Date(date) }),
         ...(status && { status }),
         ...(patientId && { patientId }),
-        ...(spaceId !== undefined && { spaceId: spaceId || null })
+        ...(spaceId !== undefined && { spaceId: spaceId || null }),
+        ...(psychologistIdId !== undefined && { psychologistIdId: psychologistIdId || null })
+        
       },
       include: {
         patient: true,
-        space: true
+        space: true,
+        psychologist: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
       }
     });
 
@@ -320,7 +419,15 @@ export const updateAppointment = async (req, res) => {
       where: { id: updatedAppointment.id },
       include: {
         patient: true,
-        space: true
+        space: true,
+        psychologist: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
       }
     });
 
@@ -338,7 +445,15 @@ export const deleteAppointment = async (req, res) => {
       where: { id },
       include: {
         patient: true,
-        space: true
+        space: true,
+        psychologist: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
       }
     });
 

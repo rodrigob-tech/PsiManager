@@ -12,6 +12,31 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/psychologists", async (req, res) => {
+  try {
+    const psychologists = await prisma.user.findMany({
+      where: {
+        role: "PSYCHOLOGIST",
+        isActive: true
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true
+      },
+      orderBy: {
+        name: "asc"
+      }
+    });
+
+    res.json(psychologists);
+  } catch (error) {
+    console.error("Erro ao buscar psicólogos:", error);
+    res.status(500).json({ error: "Erro ao buscar psicólogos" });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     const { name, email, password } = req.body;

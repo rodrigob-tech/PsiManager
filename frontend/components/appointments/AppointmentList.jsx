@@ -47,11 +47,8 @@ export default function AppointmentList({
   }
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gap: "12px"
-      }}
+    <div 
+      
     >
       {appointments.map((appointment) => {
         const statusStyle =
@@ -60,87 +57,65 @@ export default function AppointmentList({
         return (
           <div
             key={appointment.id}
-            style={{
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-              padding: "16px",
-              background: "#fff"
-            }}
+            className="table-responsive"
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: "16px",
-                flexWrap: "wrap"
-              }}
-            >
-              <div style={{ display: "grid", gap: "6px" }}>
-                <div>
-                  <strong>Paciente:</strong>{" "}
+            <table className="table ">
+              <thead >
+                <tr>
+                  <th>Paciente:</th>{" "}
                   {appointment.patient?.name || "Sem nome"}
-                </div>
+                </tr>
 
-                <div>
-                  <strong>Espaço:</strong>{" "}
+                <tr>
+                  <th>Espaço:</th>{" "}
                   {appointment.space?.name || "Sem espaço"}
-                </div>
+                </tr>
 
-                <div>
-                  <strong>Data:</strong>{" "}
+                <tr>
+                  <th>Data:</th>{" "}
                   {new Date(appointment.date).toLocaleDateString("pt-BR")}
-                </div>
+                </tr>
 
-                <div>
-                  <strong>Horário:</strong>{" "}
+                <tr>
+                  <th>Horário:</th>{" "}
                   {new Date(appointment.date).toLocaleTimeString("pt-BR", {
                     hour: "2-digit",
                     minute: "2-digit",
                     hour12: false
                   })}
-                </div>
-              </div>
+                </tr>
+                <tr>
+                  <th>Status:</th>{" "}
+                  {statusStyle.label}
+                </tr>
+                
+              </thead>
 
-              <div
-                style={{
-                  background: statusStyle.background,
-                  color: statusStyle.color,
-                  padding: "8px 12px",
-                  borderRadius: "999px",
-                  fontWeight: "700",
-                  fontSize: "14px",
-                  whiteSpace: "nowrap"
-                }}
-              >
-                {statusStyle.label}
-              </div>
-            </div>
+            </table>
 
-            <div
-              style={{
-                marginTop: "14px",
-                display: "flex",
-                gap: "10px",
-                flexWrap: "wrap"
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => onEdit(appointment)}
-                style={editButton}
-              >
-                Editar
-              </button>
+            <thead>
+              <tr>
+                <th><button
+                  type="button"
+                  onClick={() => onEdit(appointment)}
+                  className="btn btn-outline-primary"
+                >
+                  Editar
+                </button></th>
+                <th>  <button
+                  type="button"
+                  onClick={() => onDelete(appointment.id)}
+                  className="btn btn-outline-danger"
+                >
+                  Excluir
+                </button></th>
 
-              <button
-                type="button"
-                onClick={() => onDelete(appointment.id)}
-                style={deleteButton}
-              >
-                Excluir
-              </button>
-            </div>
+              </tr>
+
+
+            </thead>
+
+
           </div>
         );
       })}

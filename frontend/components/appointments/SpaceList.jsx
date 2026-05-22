@@ -28,47 +28,45 @@ export default function SpaceList({
       {spaces.map((space) => (
         <div
           key={space.id}
-          style={{
-            border: "1px solid #e5e7eb",
-            borderRadius: "14px",
-            padding: "16px",
-            background: "#fff"
-          }}
+          className="table-responsive"
         >
-          <div style={{ display: "grid", gap: "6px" }}>
-            <div>
-              <strong>Nome:</strong> {space.name}
-            </div>
+          <table className="table">
+            <thead>
+              
 
-            <div>
-              <strong>Descrição:</strong>{" "}
-              {space.description || "Sem descrição"}
-            </div>
-          </div>
+              
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Nome:</th>
+                <td>
+                  {space.name}
+                </td>
+              </tr>
+              <tr><th scope="row">Descrição:</th>
+                <td>{space.description || "Sem descrição"}</td>
+              </tr>
+            </tbody>
+            <button
+                type="button"
+                onClick={() => onEdit(space)}
+                className="btn btn-outline-primary"
+              >
+                Editar
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onDelete(space.id)}
+                className="btn btn-outline-danger"
+              >
+                Excluir
+              </button>
+          </table>
 
           <div
-            style={{
-              marginTop: "14px",
-              display: "flex",
-              gap: "10px",
-              flexWrap: "wrap"
-            }}
           >
-            <button
-              type="button"
-              onClick={() => onEdit(space)}
-              style={editButton}
-            >
-              Editar
-            </button>
 
-            <button
-              type="button"
-              onClick={() => onDelete(space.id)}
-              style={deleteButton}
-            >
-              Excluir
-            </button>
           </div>
         </div>
       ))}
