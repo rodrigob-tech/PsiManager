@@ -20,7 +20,12 @@ import {
   clearPatientAuth
 } from "./services/patientAuthStorage";
 import "../src/styles/navbar.css"
-
+import AdminDashboardPage from "../pages/AdminDashboardPage.jsx";
+import AdminAgendaPage from "../pages/AdminAgendaPage.jsx";
+import AdminPatientsPage from "../pages/AdminPatientsPage.jsx";
+import AdminAppointmentsPage from "../pages/AdminAppointmentsPage.jsx";
+import AdminSpacesPage from "../pages/AdminSpacesPage.jsx";
+import AdminBlockedTimesPage from "../pages/AdminBlockedTimesPage.jsx";
 
 
 
@@ -50,73 +55,7 @@ function AppLayout() {
 
   return (
     <div className="app-shell">
-      <header className="app-header">
-        <div className="app-header-inner">
-          <div>
-            <div className="app-brand-title">PsiManager</div>
-            <div className="app-brand-subtitle">
-              Gestão de atendimentos e autoagendamento
-            </div>
-          </div>
-
-          <nav className="app-nav">
-            {!adminLogged && !patientLogged && (
-              <>
-                <div className="nav-group">
-                  <span className="nav-group-label">Admin</span>
-                  <NavItem to="/login-admin">Login admin</NavItem>
-                </div>
-
-                <div className="nav-group">
-                  <span className="nav-group-label">Paciente</span>
-                  <NavItem to="/cadastro-paciente">Cadastro</NavItem>
-                  <NavItem to="/login-paciente">Login</NavItem>
-                </div>
-              </>
-            )}
-
-            {adminLogged && (
-              <div className="nav-group">
-                <span className="nav-group-label">
-                  Admin{admin?.name ? `: ${admin.name}` : ""}
-                </span>
-                <NavItem to="/">Painel</NavItem>
-                <button
-                  type="button"
-                  className="nav-action-button"
-                  onClick={() => {
-                    clearUserAuth();
-                    navigate("/login-admin", { replace: true });
-
-                  }}
-                >
-                  Sair
-                </button>
-              </div>
-            )}
-
-            {patientLogged && (
-              <div className="nav-group">
-                <span className="nav-group-label">
-                  Paciente{patient?.name ? `: ${patient.name}` : ""}
-                </span>
-                <NavItem to="/agendar">Agendar</NavItem>
-                <NavItem to="/meus-agendamentos">Meus agendamentos</NavItem>
-                <button
-                  type="button"
-                  className="nav-action-button"
-                  onClick={() => {
-                    clearPatientAuth();
-                    navigate("/login-paciente", { replace: true });
-                  }}
-                >
-                  Sair
-                </button>
-              </div>
-            )}
-          </nav>
-        </div>
-      </header>
+      
 
       <main>
         <Routes>
@@ -130,6 +69,59 @@ function AppLayout() {
               </AdminProtectedRoute>
             }
           />
+          
+          <Route
+  path="/admin/agenda"
+  element={
+    <AdminProtectedRoute>
+      <AdminAgendaPage />
+    </AdminProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin/pacientes"
+  element={
+    <AdminProtectedRoute>
+      <AdminPatientsPage />
+    </AdminProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin/agendamentos"
+  element={
+    <AdminProtectedRoute>
+      <AdminAppointmentsPage />
+    </AdminProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin/espacos"
+  element={
+    <AdminProtectedRoute>
+      <AdminSpacesPage />
+    </AdminProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin/bloqueios"
+  element={
+    <AdminProtectedRoute>
+      <AdminBlockedTimesPage />
+    </AdminProtectedRoute>
+  }
+/>
+<Route
+  path="/admin/dashboard"
+  element={
+    <AdminProtectedRoute>
+      <AdminDashboardPage />
+    </AdminProtectedRoute>
+  }
+/>
 
           <Route
             path="/patients/:patientId/prontuario"

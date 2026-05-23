@@ -35,7 +35,7 @@ import {
 } from "../services/spaceService";
 import { getUserToken, getUserData, clearUserAuth } from "../src/services/userAuthStorage";
 import { getPsychologists } from "../services/userService";
-
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 
 
@@ -62,7 +62,6 @@ export default function CalendarPage() {
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [activeSection, setActiveSection] = useState("appointments");
   const [psychologists, setPsychologists] = useState([]);
-
   const admin = getUserData();
   const canAccessMedicalRecord = admin?.role !== "RECEPTIONIST";
 
@@ -324,6 +323,7 @@ export default function CalendarPage() {
 
     return matchesStatus && matchesSpace;
   });
+  
   const getTabButtonStyle = (section) => ({
     border: "none",
     background: activeSection === section ? "#1976d2" : "#e9eef8",
@@ -339,7 +339,15 @@ export default function CalendarPage() {
   }, []);
 
   return (
-    <div
+    
+  
+
+   <DashboardLayout
+    title="Agenda"
+    subtitle="Gerencie pacientes, espaços, agendamentos e bloqueios."
+    current="agenda"
+  >
+    {<div
       style={{
         minHeight: "100vh",
         background: "#f5f7fb",
@@ -606,6 +614,7 @@ export default function CalendarPage() {
           )}
         </div>
       </div>
-    </div>
-  );
+    </div>}
+  </DashboardLayout>
+);
 }
