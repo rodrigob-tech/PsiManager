@@ -1,4 +1,4 @@
-  function MetricCard({ icon, label, value, trend }) {
+  export default function MetricCard({ icon, label, value, trend }) {
       return (
         <div className="premium-card p-4 h-100">
           <div className="d-flex justify-content-between align-items-start">

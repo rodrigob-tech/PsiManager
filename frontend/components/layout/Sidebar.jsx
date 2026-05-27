@@ -3,12 +3,14 @@ import Brand from "./Brand";
 
 
 const navItems = [
+   { to: "/landing-page", label: "Pagina Inicial", icon: "bi-calendar-x" },
   { to: "/admin/dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
   { to: "/admin/agenda", label: "Agenda", icon: "bi-calendar2-week" },
   { to: "/admin/pacientes", label: "Pacientes", icon: "bi-people" },
   { to: "/admin/agendamentos", label: "Agendamentos", icon: "bi-calendar-plus" },
   { to: "/admin/espacos", label: "Espaços", icon: "bi-building" },
   { to: "/admin/bloqueios", label: "Bloqueios", icon: "bi-calendar-x" },
+  { to: "/finance", label: "Financeiro", icon: "bi-calendar-x" },
 ];
 
 

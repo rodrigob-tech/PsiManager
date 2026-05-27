@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 enum UserRole {
   ADMIN
   PSYCHOLOGIST
@@ -140,10 +141,40 @@ model Appointment {
   syncedAt         DateTime?
 
   sessionNotes SessionNote[]
+  payment Payment?
 }
 
 model BlockedTime {
   id    String   @id @default(uuid())
   start DateTime
   end   DateTime
+}
+
+enum PaymentMethod {
+  PIX
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  OTHER
+}
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELED
+  REFUNDED
+}
+model Payment {
+  id            String        @id @default(uuid())
+  appointmentId String       @unique
+  appointment   Appointment  @relation(fields: [appointmentId], references: [id])
+
+  amount        Decimal
+  status        PaymentStatus @default(PENDING)
+  method        PaymentMethod?
+  paidAt        DateTime?
+  notes         String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

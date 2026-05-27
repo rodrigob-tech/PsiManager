@@ -26,6 +26,8 @@ import AdminPatientsPage from "../pages/AdminPatientsPage.jsx";
 import AdminAppointmentsPage from "../pages/AdminAppointmentsPage.jsx";
 import AdminSpacesPage from "../pages/AdminSpacesPage.jsx";
 import AdminBlockedTimesPage from "../pages/AdminBlockedTimesPage.jsx";
+import LandingPage from "../pages/LandingPage.jsx";
+import FinancePage from "../pages/FinancePage.jsx";
 
 
 
@@ -131,6 +133,14 @@ function AppLayout() {
               </AdminProtectedRoute>
             }
           />
+          <Route
+            path="/finance"
+            element={
+              
+                <FinancePage />
+              
+            }
+          />
 
           <Route
             path="/agendar"
@@ -152,6 +162,10 @@ function AppLayout() {
 
           <Route path="/cadastro-paciente" element={<PatientRegisterPage />} />
           <Route path="/login-paciente" element={<PatientLoginPage />} />
+
+          <Route
+            path="/landing-page"
+            element={<LandingPage/>}/>
         </Routes>
       </main>
     </div>
