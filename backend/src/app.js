@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import patientRoutes from "./routes/patient.routes.js";
-
+import paymentRoutes from "./routes/payment.routes.js";
 import appointmentRoutes from "./routes/appointment.routes.js";
 import blockedTimeRoutes from "./routes/blockedTime.routes.js";
 import spaceRoutes from "./routes/space.routes.js";
@@ -14,6 +14,7 @@ import userAuthRoutes from "./routes/userAuth.routes.js";
 import medicalRecordRoutes from "./routes/medicalRecordRoutes.js";
 import sessionNoteRoutes from "./routes/sessionNoteRoutes.js";
 import { requireUserAuth } from "./middlewares/userAuth.middleware.js";
+
 const app = express();
 
 app.use(cors());
@@ -35,5 +36,6 @@ app.use("/public-booking", publicBookingRoutes);
 app.use("/patient-auth", patientAuthRoutes);
 app.use("/patient-bookings", patientBookingRoutes);
 app.use("/user-auth", userAuthRoutes);
+app.use("/payments", paymentRoutes);
 export default app;
 // GET /public-booking/available-slots?date=2026-05-05&spaceId=ID_DO_ESPACO
