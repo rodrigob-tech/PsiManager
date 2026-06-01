@@ -9,7 +9,12 @@ import { validatePublicBookingRules } from "../services/availability.service.js"
 
 export const getAppointments = async (req, res) => {
   try {
+
+
     const appointments = await prisma.appointment.findMany({
+      where: {
+        clinicId: req.user.clinicId
+      },
       include: {
         patient: true,
         space: true,
@@ -18,13 +23,14 @@ export const getAppointments = async (req, res) => {
             id: true,
             name: true,
             email: true,
-            role: true
-          }
-        }
+            role: true,
+          },
+        },
+        payment: true,
       },
       orderBy: {
-        date: "asc"
-      }
+        date: "asc",
+      },
     });
 
     res.json(appointments);
@@ -38,7 +44,7 @@ export const getAppointmentById = async (req, res) => {
     const { id } = req.params;
 
     const appointment = await prisma.appointment.findUnique({
-      where: { id },
+      where: { id, clinicId: req.user.clinicId },
       include: {
         patient: true,
         space: true,
@@ -164,9 +170,32 @@ export const createAppointment = async (req, res) => {
         });
       }
     }
+    const patient = await prisma.patient.findFirst({
+  where: {
+    id: patientId,
+    clinicId: req.user.clinicId,
+  },
+});
+const space = await prisma.space.findFirst({
+  where: {
+    id: spaceId,
+    clinicId: req.user.clinicId,
+  },
+});
+const psychologist = await prisma.user.findFirst({
+  where: {
+    id: psychologistId,
+    clinicId: req.user.clinicId,
+    role: "PSYCHOLOGIST",
+    isActive: true,
+  },
+});
 
     // criando o agendamento no db
     const appointment = await prisma.appointment.create({
+      where: {
+        clinicId: req.user.clinicId,
+      },
       data: {
         date: appointmentDate,
         status: status || "scheduled",
@@ -369,7 +398,7 @@ export const updateAppointment = async (req, res) => {
         ...(patientId && { patientId }),
         ...(spaceId !== undefined && { spaceId: spaceId || null }),
         ...(psychologistIdId !== undefined && { psychologistIdId: psychologistIdId || null })
-        
+
       },
       include: {
         patient: true,

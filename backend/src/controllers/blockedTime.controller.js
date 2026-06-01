@@ -3,6 +3,9 @@ import prisma from "../prisma/client.js";
 export const getBlockedTimes = async (req, res) => {
   try {
     const blockedTimes = await prisma.blockedTime.findMany({
+      where: {
+  clinicId: req.user.clinicId,
+},
       orderBy: {
         start: "asc"
       }
@@ -19,7 +22,9 @@ export const getBlockedTimeById = async (req, res) => {
     const { id } = req.params;
 
     const blockedTime = await prisma.blockedTime.findUnique({
-      where: { id }
+      where: { id, where: {
+  clinicId: req.user.clinicId,
+}}
     });
 
     if (!blockedTime) {
@@ -52,6 +57,9 @@ export const createBlockedTime = async (req, res) => {
     }
 
     const blockedTime = await prisma.blockedTime.create({
+      where: {
+  clinicId: req.user.clinicId,
+},
       data: {
         start: startDate,
         end: endDate
@@ -70,7 +78,7 @@ export const updateBlockedTime = async (req, res) => {
     const { start, end } = req.body;
 
     const blockedTimeExists = await prisma.blockedTime.findUnique({
-      where: { id }
+      where: { id , clinicId: req.user.clinicId}
     });
 
     if (!blockedTimeExists) {
@@ -108,7 +116,7 @@ export const deleteBlockedTime = async (req, res) => {
     const { id } = req.params;
 
     const blockedTimeExists = await prisma.blockedTime.findUnique({
-      where: { id }
+      where: { id,  clinicId: req.user.clinicId }
     });
 
     if (!blockedTimeExists) {

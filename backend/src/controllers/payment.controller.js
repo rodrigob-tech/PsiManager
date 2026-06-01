@@ -59,6 +59,11 @@ function validatePaymentPayload({ appointmentId, amount, status, method }, isUpd
 export const getPayments = async (req, res) => {
   try {
     const payments = await prisma.payment.findMany({
+      where: {
+        appointment: {
+          clinicId: req.user.clinicId,
+        },
+      },
       include: paymentInclude,
       orderBy: {
         createdAt: "desc",
@@ -128,7 +133,7 @@ export const createPayment = async (req, res) => {
     }
 
     const appointment = await prisma.appointment.findUnique({
-      where: { id: appointmentId },
+      where: { id: appointmentId }, clinicId: req.user.clinicId,
     });
 
     if (!appointment) {

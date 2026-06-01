@@ -3,6 +3,9 @@ import prisma from "../prisma/client.js";
 export const getSpaces = async (req, res) => {
   try {
     const spaces = await prisma.space.findMany({
+      where: {
+        clinicId,
+      },
       orderBy: {
         name: "asc"
       }
@@ -19,7 +22,7 @@ export const getSpaceById = async (req, res) => {
     const { id } = req.params;
 
     const space = await prisma.space.findUnique({
-      where: { id }
+      where: { id, clinicId: req.user.clinicId }
     });
 
     if (!space) {
@@ -43,6 +46,9 @@ export const createSpace = async (req, res) => {
     }
 
     const space = await prisma.space.create({
+      where: {
+        clinicId: req.user.clinicId,
+      },
       data: {
         name,
         description
@@ -69,7 +75,7 @@ export const updateSpace = async (req, res) => {
     }
 
     const updatedSpace = await prisma.space.update({
-      where: { id },
+      where: { id , clinicId: req.user.clinicId},
       data: {
         name,
         description
@@ -87,7 +93,7 @@ export const deleteSpace = async (req, res) => {
     const { id } = req.params;
 
     const spaceExists = await prisma.space.findUnique({
-      where: { id }
+      where: { id, clinicId: req.user.clinicId   }
     });
 
     if (!spaceExists) {

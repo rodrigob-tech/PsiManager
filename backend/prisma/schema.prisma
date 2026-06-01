@@ -11,7 +11,7 @@ datasource db {
 enum UserRole {
   ADMIN
   PSYCHOLOGIST
-  RECEPTIONIST
+  
 }
 
 enum Status {
@@ -27,9 +27,10 @@ model User {
   name     String
   email    String   @unique
   password String
-  role     UserRole @default(PSYCHOLOGIST)
+  role     UserRole @default(ADMIN)
   isActive Boolean  @default(true)
-
+  clinicId  String?
+  clinic    Clinic?  @relation(fields: [clinicId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -72,6 +73,8 @@ model Patient {
   guardianPhone  String?
   address        String?
   notes          String?
+  clinicId  String?
+  clinic    Clinic?  @relation(fields: [clinicId], references: [id])
   status         PatientStatus @default(ACTIVE)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -116,6 +119,8 @@ model Space {
   name         String
   description  String?
   appointments Appointment[]
+  clinicId  String?
+  clinic    Clinic?  @relation(fields: [clinicId], references: [id])
 }
 
 model Appointment {
@@ -129,7 +134,8 @@ model Appointment {
 
   psychologistId String?
   psychologist   User?    @relation(fields: [psychologistId], references: [id])
-
+  clinicId  String?
+  clinic    Clinic?  @relation(fields: [clinicId], references: [id])
 
   spaceId String
   space   Space  @relation(fields: [spaceId], references: [id])
@@ -148,6 +154,8 @@ model BlockedTime {
   id    String   @id @default(uuid())
   start DateTime
   end   DateTime
+  clinicId  String?
+  clinic    Clinic?  @relation(fields: [clinicId], references: [id])
 }
 
 enum PaymentMethod {
@@ -175,6 +183,21 @@ model Payment {
   paidAt        DateTime?
   notes         String?
 
+ 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Clinic {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+
+  users       User[]
+  patients    Patient[]
+  spaces      Space[]
+  appointments Appointment[]
+  blockedTimes BlockedTime[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

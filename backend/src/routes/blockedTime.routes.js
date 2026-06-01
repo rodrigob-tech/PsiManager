@@ -6,9 +6,11 @@ import {
   updateBlockedTime,
   deleteBlockedTime
 } from "../controllers/blockedTime.controller.js";
-
+import authInternal from "../middlewares/authInternal.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 const router = Router();
-
+router.use(authInternal);
+router.use(authorizeRoles("ADMIN", "PSYCHOLOGIST"));
 router.get("/", getBlockedTimes);
 router.get("/:id", getBlockedTimeById);
 router.post("/", createBlockedTime);

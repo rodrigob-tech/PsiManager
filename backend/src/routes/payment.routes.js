@@ -7,9 +7,11 @@ import {
   updatePayment,
   deletePayment,
 } from "../controllers/payment.controller.js";
-
+import authInternal from "../middlewares/authInternal.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 const router = express.Router();
-
+router.use(authInternal);
+router.use(authorizeRoles("ADMIN", "PSYCHOLOGIST"));
 router.get("/", getPayments);
 router.get("/appointment/:appointmentId", getPaymentByAppointmentId);
 router.get("/:id", getPaymentById);
