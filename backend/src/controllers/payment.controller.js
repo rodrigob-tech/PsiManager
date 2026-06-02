@@ -81,7 +81,7 @@ export const getPayments = async (req, res) => {
 export const getPaymentById = async (req, res) => {
   try {
     const { id } = req.params;
-
+    const clinicId = req.user?.clinicId;
     const payment = await prisma.payment.findUnique({
       where: { id },
       include: paymentInclude,
@@ -121,7 +121,7 @@ export const getPaymentByAppointmentId = async (req, res) => {
 export const createPayment = async (req, res) => {
   try {
     const { appointmentId, amount, status, method, paidAt, notes } = req.body;
-
+    const clinicId = req.user?.clinicId;
     const validationError = validatePaymentPayload({
       appointmentId,
       amount,
@@ -173,7 +173,7 @@ export const updatePayment = async (req, res) => {
   try {
     const { id } = req.params;
     const { amount, status, method, paidAt, notes } = req.body;
-
+    const clinicId = req.user?.clinicId;
     const validationError = validatePaymentPayload(
       {
         amount,
@@ -220,7 +220,7 @@ export const updatePayment = async (req, res) => {
 export const deletePayment = async (req, res) => {
   try {
     const { id } = req.params;
-
+    const clinicId = req.user?.clinicId;
     const paymentExists = await prisma.payment.findFirst({
       where: {
         id,

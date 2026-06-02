@@ -12,6 +12,7 @@ const navItems = [
   { to: "/admin/bloqueios", label: "Bloqueios", icon: "bi-calendar-x" },
   { to: "/admin/finance", label: "Financeiro", icon: "bi-wallet2" },
   { to: "/admin/clinica", label: "Clínica", icon: "bi-building-gear" },
+  { to: "/admin/relatorios", label: "Relatórios", icon: "bi-bar-chart" }
 ];
 
 

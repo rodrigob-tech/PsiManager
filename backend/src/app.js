@@ -15,6 +15,7 @@ import medicalRecordRoutes from "./routes/medicalRecordRoutes.js";
 import sessionNoteRoutes from "./routes/sessionNotes.routes.js";
 import { requireUserAuth } from "./middlewares/userAuth.middleware.js";
 import clinicRoutes from "./routes/clinic.routes.js";
+import reportRoutes from "./routes/report.routes.js";
 const app = express();
 
 app.use(cors());
@@ -24,6 +25,8 @@ app.get("/", (req, res) => {
   res.json({ message: "API rodando com sucesso" });
 });
 
+
+app.use("/reports", reportRoutes);
 app.use("/patients", requireUserAuth, patientRoutes);
 app.use("/medical-records", requireUserAuth, medicalRecordRoutes);
 app.use("/session-notes", requireUserAuth, sessionNoteRoutes);

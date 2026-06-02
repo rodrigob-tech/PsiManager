@@ -29,6 +29,7 @@ import AdminBlockedTimesPage from "../pages/AdminBlockedTimesPage.jsx";
 import LandingPage from "../pages/LandingPage.jsx";
 import FinancePage from "../pages/FinancePage.jsx";
 import AdminClinicPage from "../pages/AdminClinicPage";
+import ReportsPage from "../pages/ReportsPage";
 
 
 function App() {
@@ -148,11 +149,18 @@ function AppLayout() {
               <AdminProtectedRoute>
                 <FinancePage />
               </AdminProtectedRoute>
-              
+
 
             }
           />
-
+          <Route
+            path="/admin/relatorios"
+            element={
+              <AdminProtectedRoute>
+                <ReportsPage />
+              </AdminProtectedRoute>
+            }
+          />
           <Route
             path="/agendar"
             element={
