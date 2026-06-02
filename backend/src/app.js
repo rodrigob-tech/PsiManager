@@ -12,7 +12,7 @@ import patientAuthRoutes from "./routes/patientAuth.routes.js"
 import patientBookingRoutes from "./routes/patientBooking.routes.js";
 import userAuthRoutes from "./routes/userAuth.routes.js";
 import medicalRecordRoutes from "./routes/medicalRecordRoutes.js";
-import sessionNoteRoutes from "./routes/sessionNoteRoutes.js";
+import sessionNoteRoutes from "./routes/sessionNotes.routes.js";
 import { requireUserAuth } from "./middlewares/userAuth.middleware.js";
 import clinicRoutes from "./routes/clinic.routes.js";
 const app = express();

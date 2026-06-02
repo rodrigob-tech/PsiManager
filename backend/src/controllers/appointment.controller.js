@@ -3,31 +3,101 @@ import { sendEmail } from "../services/email.service.js";
 import {
   createGoogleCalendarEvent,
   updateGoogleCalendarEvent,
-  deleteGoogleCalendarEvent
+  deleteGoogleCalendarEvent,
 } from "../services/googleCalendar.service.js";
 import { validatePublicBookingRules } from "../services/availability.service.js";
 
+const validStatuses = ["scheduled", "confirmed", "pending", "canceled", "done"];
+
+const appointmentInclude = {
+  patient: true,
+  space: true,
+  payment: true,
+  psychologist: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      clinicId: true,
+    },
+  },
+};
+
+function getClinicId(req) {
+  return req.user?.clinicId || null;
+}
+
+function validateStatus(status) {
+  if (status && !validStatuses.includes(status)) {
+    return "Status inválido";
+  }
+
+  return null;
+}
+
+function parseAppointmentDate(date) {
+  if (!date) return null;
+
+  const appointmentDate = new Date(date);
+
+  if (Number.isNaN(appointmentDate.getTime())) {
+    return null;
+  }
+
+  return appointmentDate;
+}
+
+async function validatePatientBelongsToClinic(patientId, clinicId) {
+  if (!patientId) return null;
+
+  return prisma.patient.findFirst({
+    where: {
+      id: patientId,
+      clinicId,
+    },
+  });
+}
+
+async function validateSpaceBelongsToClinic(spaceId, clinicId) {
+  if (!spaceId) return null;
+
+  return prisma.space.findFirst({
+    where: {
+      id: spaceId,
+      clinicId,
+    },
+  });
+}
+
+async function validatePsychologistBelongsToClinic(psychologistId, clinicId) {
+  if (!psychologistId) return null;
+
+  return prisma.user.findFirst({
+    where: {
+      id: psychologistId,
+      clinicId,
+      role: "PSYCHOLOGIST",
+      isActive: true,
+    },
+  });
+}
+
 export const getAppointments = async (req, res) => {
   try {
+    const clinicId = getClinicId(req);
 
+    if (!clinicId) {
+      return res.status(400).json({
+        error: "Usuário não está vinculado a uma clínica",
+      });
+    }
 
     const appointments = await prisma.appointment.findMany({
       where: {
-        clinicId: req.user.clinicId
+        clinicId,
       },
-      include: {
-        patient: true,
-        space: true,
-        psychologist: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
-        payment: true,
-      },
+      include: appointmentInclude,
       orderBy: {
         date: "asc",
       },
@@ -35,480 +105,470 @@ export const getAppointments = async (req, res) => {
 
     res.json(appointments);
   } catch (error) {
+    console.error("Erro ao buscar agendamentos:", error);
     res.status(500).json({ error: "Erro ao buscar agendamentos" });
   }
 };
 
 export const getAppointmentById = async (req, res) => {
   try {
+    const clinicId = getClinicId(req);
     const { id } = req.params;
 
-    const appointment = await prisma.appointment.findUnique({
-      where: { id, clinicId: req.user.clinicId },
-      include: {
-        patient: true,
-        space: true,
-        psychologist: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true
-          }
-        }
-      }
+    if (!clinicId) {
+      return res.status(400).json({
+        error: "Usuário não está vinculado a uma clínica",
+      });
+    }
+
+    const appointment = await prisma.appointment.findFirst({
+      where: {
+        id,
+        clinicId,
+      },
+      include: appointmentInclude,
     });
 
     if (!appointment) {
-      return res.status(404).json({ error: "Agendamento não encontrado" });
+      return res.status(404).json({
+        error: "Agendamento não encontrado nesta clínica",
+      });
     }
 
     res.json(appointment);
   } catch (error) {
+    console.error("Erro ao buscar agendamento:", error);
     res.status(500).json({ error: "Erro ao buscar agendamento" });
   }
 };
+
 export const createAppointment = async (req, res) => {
   try {
+    const clinicId = getClinicId(req);
     const { date, status, patientId, spaceId, psychologistId } = req.body;
-    // Validação  de data, patientId, space ID
+
+    if (!clinicId) {
+      return res.status(400).json({
+        error: "Usuário não está vinculado a uma clínica",
+      });
+    }
+
     if (!date || !patientId || !spaceId) {
       return res.status(400).json({
-        error: "date, patientId e spaceId são obrigatórios"
+        error: "date, patientId e spaceId são obrigatórios",
       });
     }
-    // Validação  dos status
-    const validStatuses = ["scheduled", "confirmed", "pending", "canceled", "done"];
-    if (status && !validStatuses.includes(status)) {
-      return res.status(400).json({ error: "Status inválido" });
-    }
-    // Validação  data do appointment
-    const appointmentDate = new Date(date);
 
-    if (isNaN(appointmentDate.getTime())) {
+    const statusError = validateStatus(status);
+    if (statusError) {
+      return res.status(400).json({ error: statusError });
+    }
+
+    const appointmentDate = parseAppointmentDate(date);
+    if (!appointmentDate) {
       return res.status(400).json({ error: "Data inválida" });
     }
-    // Validando se o Paciente existe no DB
-    const patientExists = await prisma.patient.findUnique({
-      where: { id: patientId }
-    });
 
-    if (!patientExists) {
-      return res.status(404).json({ error: "Paciente não encontrado" });
-    }
-
-    // Validando  se o spaceID existe no DB
-    if (spaceId) {
-      const spaceExists = await prisma.space.findUnique({
-        where: { id: spaceId }
+    const patient = await validatePatientBelongsToClinic(patientId, clinicId);
+    if (!patient) {
+      return res.status(404).json({
+        error: "Paciente não encontrado nesta clínica",
       });
-
-      if (!spaceExists) {
-        return res.status(404).json({ error: "Espaço não encontrado" });
-      }
     }
+
+    const space = await validateSpaceBelongsToClinic(spaceId, clinicId);
+    if (!space) {
+      return res.status(404).json({
+        error: "Espaço não encontrado nesta clínica",
+      });
+    }
+
     if (psychologistId) {
-      const psychologistExists = await prisma.user.findFirst({
-        where: {
-          id: psychologistId,
-          role: "PSYCHOLOGIST",
-          isActive: true
-        }
-      });
+      const psychologist = await validatePsychologistBelongsToClinic(
+        psychologistId,
+        clinicId
+      );
 
-      if (!psychologistExists) {
+      if (!psychologist) {
         return res.status(404).json({
-          error: "Psicólogo não encontrado ou inativo"
+          error: "Psicólogo não encontrado ou inativo nesta clínica",
         });
       }
     }
-    await validatePublicBookingRules({ date, spaceId });
-    // verificando se o horário é um dos bloqueados
+
+    await validatePublicBookingRules({
+      date,
+      spaceId,
+    });
+
     const blockedTime = await prisma.blockedTime.findFirst({
       where: {
+        clinicId,
         start: {
-          lte: appointmentDate
+          lte: appointmentDate,
         },
         end: {
-          gte: appointmentDate
-        }
-      }
+          gte: appointmentDate,
+        },
+      },
     });
 
     if (blockedTime) {
       return res.status(400).json({
-        error: "Este horário está bloqueado"
+        error: "Este horário está bloqueado",
       });
     }
-    // verificando se ja existe um agendamento naquela sala no mesmo horário
-    if (spaceId) {
-      const conflictingAppointment = await prisma.appointment.findFirst({
-        where: {
-          date: appointmentDate,
-          spaceId: spaceId
-        }
-      });
 
-      if (conflictingAppointment) {
-        return res.status(400).json({
-          error: "Já existe um agendamento neste horário para este espaço"
-        });
-      }
+    const conflictingSpaceAppointment = await prisma.appointment.findFirst({
+      where: {
+        clinicId,
+        date: appointmentDate,
+        spaceId,
+      },
+    });
+
+    if (conflictingSpaceAppointment) {
+      return res.status(400).json({
+        error: "Já existe um agendamento neste horário para este espaço",
+      });
     }
 
     if (psychologistId) {
-      const conflictingPsychologistAppointment = await prisma.appointment.findFirst({
-        where: {
-          date: appointmentDate,
-          psychologistId
-        }
-      });
+      const conflictingPsychologistAppointment =
+        await prisma.appointment.findFirst({
+          where: {
+            clinicId,
+            date: appointmentDate,
+            psychologistId,
+          },
+        });
 
       if (conflictingPsychologistAppointment) {
         return res.status(400).json({
-          error: "Este psicólogo já possui um agendamento neste horário"
+          error: "Este psicólogo já possui um agendamento neste horário",
         });
       }
     }
-    const patient = await prisma.patient.findFirst({
-  where: {
-    id: patientId,
-    clinicId: req.user.clinicId,
-  },
-});
-const space = await prisma.space.findFirst({
-  where: {
-    id: spaceId,
-    clinicId: req.user.clinicId,
-  },
-});
-const psychologist = await prisma.user.findFirst({
-  where: {
-    id: psychologistId,
-    clinicId: req.user.clinicId,
-    role: "PSYCHOLOGIST",
-    isActive: true,
-  },
-});
 
-    // criando o agendamento no db
     const appointment = await prisma.appointment.create({
-      where: {
-        clinicId: req.user.clinicId,
-      },
       data: {
+        clinicId,
         date: appointmentDate,
         status: status || "scheduled",
         patientId,
         spaceId,
-        psychologistId: psychologistId || null
+        psychologistId: psychologistId || null,
       },
-      include: {
-        patient: true,
-        space: true,
-        psychologist: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true
-          }
-        }
-      }
+      include: appointmentInclude,
     });
+
     try {
-      // usando um job do Bree para enviar o email
       if (appointment.patient?.email) {
         await sendEmail({
           to: appointment.patient.email,
           subject: "Agendamento confirmado",
-          text: `Olá, ${appointment.patient.name}. Seu agendamento foi criado para ${new Date(
+          text: `Olá, ${appointment.patient.name}.
+Seu agendamento foi criado para ${new Date(
             appointment.date
-          ).toLocaleString("pt-BR")}. Espaço: ${appointment.space?.name || "Não informado"
-            }. Status: ${appointment.status}.`
+          ).toLocaleString("pt-BR")}.
+Espaço: ${appointment.space?.name || "Não informado"}.
+Status: ${appointment.status}.`,
         });
       }
     } catch (emailError) {
       console.error("Erro ao enviar email de criação:", emailError);
     }
-    try {
 
-      // Criando um evento no google calendar
+    try {
       const googleEvent = await createGoogleCalendarEvent(
         req.user.userId,
         appointment
       );
 
       await prisma.appointment.update({
-        where: { id: appointment.id },
+        where: {
+          id: appointment.id,
+        },
         data: {
           googleEventId: googleEvent.id || null,
           googleCalendarId: "primary",
           googleSyncStatus: "synced",
           googleSyncError: null,
-          syncedAt: new Date()
-        }
+          syncedAt: new Date(),
+        },
       });
     } catch (googleError) {
       console.error("Erro ao sincronizar com Google Calendar:", googleError);
 
       await prisma.appointment.update({
-        where: { id: appointment.id },
+        where: {
+          id: appointment.id,
+        },
         data: {
           googleSyncStatus: "failed",
-          googleSyncError: googleError.message
-        }
+          googleSyncError: googleError.message,
+        },
       });
     }
-    // atualizando o appointment com as info do googleEvent
-    const updatedAppointment = await prisma.appointment.findUnique({
-      where: { id: appointment.id },
-      include: {
-        patient: true,
-        space: true,
-        psychologist: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true
-          }
-        }
-      }
+
+    const updatedAppointment = await prisma.appointment.findFirst({
+      where: {
+        id: appointment.id,
+        clinicId,
+      },
+      include: appointmentInclude,
     });
 
     res.status(201).json(updatedAppointment);
   } catch (error) {
+    console.error("Erro ao criar agendamento:", error);
     res.status(500).json({ error: "Erro ao criar agendamento" });
   }
 };
+
 export const updateAppointment = async (req, res) => {
   try {
+    const clinicId = getClinicId(req);
     const { id } = req.params;
     const { date, status, patientId, spaceId, psychologistId } = req.body;
 
-    const appointmentExists = await prisma.appointment.findUnique({
-      where: { id },
-      include: {
-        patient: true,
-        space: true,
-        psychologist: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true
-          }
-        }
-      }
+    if (!clinicId) {
+      return res.status(400).json({
+        error: "Usuário não está vinculado a uma clínica",
+      });
+    }
+
+    const appointmentExists = await prisma.appointment.findFirst({
+      where: {
+        id,
+        clinicId,
+      },
+      include: appointmentInclude,
     });
 
     if (!appointmentExists) {
-      return res.status(404).json({ error: "Agendamento não encontrado" });
-    }
-
-    if (patientId) {
-      const patientExists = await prisma.patient.findUnique({
-        where: { id: patientId }
+      return res.status(404).json({
+        error: "Agendamento não encontrado nesta clínica",
       });
-
-      if (!patientExists) {
-        return res.status(404).json({ error: "Paciente não encontrado" });
-      }
     }
 
-    if (spaceId) {
-      const spaceExists = await prisma.space.findUnique({
-        where: { id: spaceId }
-      });
-
-      if (!spaceExists) {
-        return res.status(404).json({ error: "Espaço não encontrado" });
-      }
+    const statusError = validateStatus(status);
+    if (statusError) {
+      return res.status(400).json({ error: statusError });
     }
 
-    const finalDate = date ? new Date(date) : appointmentExists.date;
+    const finalDate = date ? parseAppointmentDate(date) : appointmentExists.date;
+
+    if (!finalDate) {
+      return res.status(400).json({ error: "Data inválida" });
+    }
+
+    const finalPatientId =
+      patientId !== undefined ? patientId : appointmentExists.patientId;
+
     const finalSpaceId =
-      spaceId !== undefined ? (spaceId || null) : appointmentExists.spaceId;
+      spaceId !== undefined ? spaceId : appointmentExists.spaceId;
 
-    if (!finalSpaceId) {
-      return res.status(400).json({
-        error: "spaceId é obrigatório"
-      });
-    }
-
-    const blockedTime = await prisma.blockedTime.findFirst({
-      where: {
-        start: {
-          lte: finalDate
-        },
-        end: {
-          gte: finalDate
-        }
-      }
-    });
-
-    if (blockedTime) {
-      return res.status(400).json({
-        error: "Este horário está bloqueado"
-      });
-    }
-    // validando conflitos
-    const conflictingAppointment = await prisma.appointment.findFirst({
-      where: {
-        id: {
-          not: id
-        },
-        date: finalDate,
-        spaceId: finalSpaceId
-      }
-    });
-
-    if (conflictingAppointment) {
-      return res.status(400).json({
-        error: "Já existe um agendamento neste horário para este espaço"
-      });
-    }
     const finalPsychologistId =
       psychologistId !== undefined
         ? psychologistId || null
         : appointmentExists.psychologistId;
 
-    if (finalPsychologistId) {
-      const conflictingPsychologistAppointment = await prisma.appointment.findFirst({
-        where: {
-          id: { not: id },
-          date: finalDate,
-          psychologistId: finalPsychologistId
-        }
+    if (!finalPatientId || !finalSpaceId) {
+      return res.status(400).json({
+        error: "patientId e spaceId são obrigatórios",
       });
+    }
+
+    const patient = await validatePatientBelongsToClinic(
+      finalPatientId,
+      clinicId
+    );
+
+    if (!patient) {
+      return res.status(404).json({
+        error: "Paciente não encontrado nesta clínica",
+      });
+    }
+
+    const space = await validateSpaceBelongsToClinic(finalSpaceId, clinicId);
+
+    if (!space) {
+      return res.status(404).json({
+        error: "Espaço não encontrado nesta clínica",
+      });
+    }
+
+    if (finalPsychologistId) {
+      const psychologist = await validatePsychologistBelongsToClinic(
+        finalPsychologistId,
+        clinicId
+      );
+
+      if (!psychologist) {
+        return res.status(404).json({
+          error: "Psicólogo não encontrado ou inativo nesta clínica",
+        });
+      }
+    }
+
+    const blockedTime = await prisma.blockedTime.findFirst({
+      where: {
+        clinicId,
+        start: {
+          lte: finalDate,
+        },
+        end: {
+          gte: finalDate,
+        },
+      },
+    });
+
+    if (blockedTime) {
+      return res.status(400).json({
+        error: "Este horário está bloqueado",
+      });
+    }
+
+    const conflictingSpaceAppointment = await prisma.appointment.findFirst({
+      where: {
+        id: {
+          not: id,
+        },
+        clinicId,
+        date: finalDate,
+        spaceId: finalSpaceId,
+      },
+    });
+
+    if (conflictingSpaceAppointment) {
+      return res.status(400).json({
+        error: "Já existe um agendamento neste horário para este espaço",
+      });
+    }
+
+    if (finalPsychologistId) {
+      const conflictingPsychologistAppointment =
+        await prisma.appointment.findFirst({
+          where: {
+            id: {
+              not: id,
+            },
+            clinicId,
+            date: finalDate,
+            psychologistId: finalPsychologistId,
+          },
+        });
 
       if (conflictingPsychologistAppointment) {
         return res.status(400).json({
-          error: "Este psicólogo já possui um agendamento neste horário"
+          error: "Este psicólogo já possui um agendamento neste horário",
         });
       }
     }
 
     const updatedAppointment = await prisma.appointment.update({
-      where: { id },
-      data: {
-        ...(date && { date: new Date(date) }),
-        ...(status && { status }),
-        ...(patientId && { patientId }),
-        ...(spaceId !== undefined && { spaceId: spaceId || null }),
-        ...(psychologistIdId !== undefined && { psychologistIdId: psychologistIdId || null })
-
+      where: {
+        id,
       },
-      include: {
-        patient: true,
-        space: true,
-        psychologist: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true
-          }
-        }
-      }
+      data: {
+        ...(date !== undefined && { date: finalDate }),
+        ...(status !== undefined && { status }),
+        ...(patientId !== undefined && { patientId: finalPatientId }),
+        ...(spaceId !== undefined && { spaceId: finalSpaceId }),
+        ...(psychologistId !== undefined && {
+          psychologistId: finalPsychologistId,
+        }),
+      },
+      include: appointmentInclude,
     });
 
     try {
-
-
       if (updatedAppointment.googleEventId) {
-        await updateGoogleCalendarEvent(
-          req.user.userId,
-          updatedAppointment
-        );
+        await updateGoogleCalendarEvent(req.user.userId, updatedAppointment);
 
         await prisma.appointment.update({
-          where: { id: updatedAppointment.id },
+          where: {
+            id: updatedAppointment.id,
+          },
           data: {
             googleSyncStatus: "synced",
             googleSyncError: null,
-            syncedAt: new Date()
-          }
+            syncedAt: new Date(),
+          },
         });
       }
     } catch (googleError) {
       console.error("Erro ao atualizar evento no Google Calendar:", googleError);
 
       await prisma.appointment.update({
-        where: { id: updatedAppointment.id },
+        where: {
+          id: updatedAppointment.id,
+        },
         data: {
           googleSyncStatus: "failed",
-          googleSyncError: googleError.message
-        }
+          googleSyncError: googleError.message,
+        },
       });
     }
 
-    const finalAppointment = await prisma.appointment.findUnique({
-      where: { id: updatedAppointment.id },
-      include: {
-        patient: true,
-        space: true,
-        psychologist: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true
-          }
-        }
-      }
+    const finalAppointment = await prisma.appointment.findFirst({
+      where: {
+        id: updatedAppointment.id,
+        clinicId,
+      },
+      include: appointmentInclude,
     });
 
     res.json(finalAppointment);
   } catch (error) {
+    console.error("Erro ao atualizar agendamento:", error);
     res.status(500).json({ error: "Erro ao atualizar agendamento" });
   }
 };
 
 export const deleteAppointment = async (req, res) => {
   try {
+    const clinicId = getClinicId(req);
     const { id } = req.params;
 
-    const appointmentExists = await prisma.appointment.findUnique({
-      where: { id },
-      include: {
-        patient: true,
-        space: true,
-        psychologist: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true
-          }
-        }
-      }
+    if (!clinicId) {
+      return res.status(400).json({
+        error: "Usuário não está vinculado a uma clínica",
+      });
+    }
+
+    const appointmentExists = await prisma.appointment.findFirst({
+      where: {
+        id,
+        clinicId,
+      },
+      include: appointmentInclude,
     });
 
     if (!appointmentExists) {
-      return res.status(404).json({ error: "Agendamento não encontrado" });
+      return res.status(404).json({
+        error: "Agendamento não encontrado nesta clínica",
+      });
     }
 
     try {
-      const GOOGLE_OWNER_USER_ID = "2ec5f4e3-6517-4f68-b968-2e496a3eb972";
-
       if (appointmentExists.googleEventId) {
-        await deleteGoogleCalendarEvent(
-          req.user.userId,
-          appointmentExists
-        );
+        await deleteGoogleCalendarEvent(req.user.userId, appointmentExists);
       }
     } catch (googleError) {
       console.error("Erro ao excluir evento no Google Calendar:", googleError);
     }
 
     await prisma.appointment.delete({
-      where: { id }
+      where: {
+        id,
+      },
     });
 
     res.json({ message: "Agendamento removido com sucesso" });
   } catch (error) {
+    console.error("Erro ao remover agendamento:", error);
     res.status(500).json({ error: "Erro ao remover agendamento" });
   }
 };

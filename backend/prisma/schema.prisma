@@ -119,6 +119,7 @@ model Space {
   name         String
   description  String?
   appointments Appointment[]
+  blockedTimes BlockedTime[]
   clinicId  String?
   clinic    Clinic?  @relation(fields: [clinicId], references: [id])
 }
@@ -154,8 +155,11 @@ model BlockedTime {
   id    String   @id @default(uuid())
   start DateTime
   end   DateTime
+  reason String?
   clinicId  String?
   clinic    Clinic?  @relation(fields: [clinicId], references: [id])
+  spaceId   String?
+  space     Space?   @relation(fields: [spaceId], references: [id])
 }
 
 enum PaymentMethod {

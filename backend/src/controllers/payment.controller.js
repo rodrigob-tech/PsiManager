@@ -58,10 +58,11 @@ function validatePaymentPayload({ appointmentId, amount, status, method }, isUpd
 
 export const getPayments = async (req, res) => {
   try {
+    const clinicId = req.user?.clinicId;
     const payments = await prisma.payment.findMany({
       where: {
         appointment: {
-          clinicId: req.user.clinicId,
+          clinicId,
         },
       },
       include: paymentInclude,
@@ -132,14 +133,13 @@ export const createPayment = async (req, res) => {
       return res.status(400).json({ error: validationError });
     }
 
-    const appointment = await prisma.appointment.findUnique({
-      where: { id: appointmentId }, clinicId: req.user.clinicId,
+
+    const appointment = await prisma.appointment.findFirst({
+      where: {
+        id: appointmentId,
+        clinicId,
+      },
     });
-
-    if (!appointment) {
-      return res.status(404).json({ error: "Agendamento não encontrado" });
-    }
-
     const existingPayment = await prisma.payment.findUnique({
       where: { appointmentId },
     });
@@ -187,13 +187,14 @@ export const updatePayment = async (req, res) => {
       return res.status(400).json({ error: validationError });
     }
 
-    const paymentExists = await prisma.payment.findUnique({
-      where: { id },
+    const paymentExists = await prisma.payment.findFirst({
+      where: {
+        id,
+        appointment: {
+          clinicId,
+        },
+      },
     });
-
-    if (!paymentExists) {
-      return res.status(404).json({ error: "Pagamento não encontrado" });
-    }
 
     const updatedPayment = await prisma.payment.update({
       where: { id },
@@ -220,14 +221,14 @@ export const deletePayment = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const paymentExists = await prisma.payment.findUnique({
-      where: { id },
+    const paymentExists = await prisma.payment.findFirst({
+      where: {
+        id,
+        appointment: {
+          clinicId,
+        },
+      },
     });
-
-    if (!paymentExists) {
-      return res.status(404).json({ error: "Pagamento não encontrado" });
-    }
-
     await prisma.payment.delete({
       where: { id },
     });
