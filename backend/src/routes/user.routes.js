@@ -1,6 +1,7 @@
 import { Router } from "express";
 import prisma from "../prisma/client.js";
-
+import authInternal from "../middlewares/authInternal.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 const router = Router();
 
 router.get("/", async (req, res) => {
@@ -12,31 +13,42 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/psychologists", async (req, res) => {
+router.get("/psychologists", authInternal, authorizeRoles("ADMIN", "PSYCHOLOGIST"), async (req, res) => {
   try {
+    const clinicId = req.user?.clinicId;
+
+    if (!clinicId) {
+      return res.status(400).json({
+        error: "Usuário não está vinculado a uma clínica",
+      });
+    }
+
     const psychologists = await prisma.user.findMany({
       where: {
+        clinicId,
         role: "PSYCHOLOGIST",
-        isActive: true
+        isActive: true,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true
+        role: true,
+        clinicId: true,
       },
       orderBy: {
-        name: "asc"
-      }
+        name: "asc",
+      },
     });
 
     res.json(psychologists);
   } catch (error) {
     console.error("Erro ao buscar psicólogos:", error);
-    res.status(500).json({ error: "Erro ao buscar psicólogos" });
+    res.status(500).json({
+      error: "Erro ao buscar psicólogos",
+    });
   }
 });
-
 router.post("/", async (req, res) => {
   try {
     const { name, email, password } = req.body;

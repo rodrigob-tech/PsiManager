@@ -10,7 +10,8 @@ const navItems = [
   { to: "/admin/agendamentos", label: "Agendamentos", icon: "bi-calendar-plus" },
   { to: "/admin/espacos", label: "Espaços", icon: "bi-building" },
   { to: "/admin/bloqueios", label: "Bloqueios", icon: "bi-calendar-x" },
-  { to: "/finance", label: "Financeiro", icon: "bi-calendar-x" },
+  { to: "/admin/finance", label: "Financeiro", icon: "bi-wallet2" },
+  { to: "/admin/clinica", label: "Clínica", icon: "bi-building-gear" },
 ];
 
 

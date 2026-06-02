@@ -28,7 +28,7 @@ import AdminSpacesPage from "../pages/AdminSpacesPage.jsx";
 import AdminBlockedTimesPage from "../pages/AdminBlockedTimesPage.jsx";
 import LandingPage from "../pages/LandingPage.jsx";
 import FinancePage from "../pages/FinancePage.jsx";
-
+import AdminClinicPage from "../pages/AdminClinicPage";
 
 
 function App() {
@@ -57,7 +57,7 @@ function AppLayout() {
 
   return (
     <div className="app-shell">
-      
+
 
       <main>
         <Routes>
@@ -71,59 +71,59 @@ function AppLayout() {
               </AdminProtectedRoute>
             }
           />
-          
+
           <Route
-  path="/admin/agenda"
-  element={
-    <AdminProtectedRoute>
-      <AdminAgendaPage />
-    </AdminProtectedRoute>
-  }
-/>
+            path="/admin/agenda"
+            element={
+              <AdminProtectedRoute>
+                <AdminAgendaPage />
+              </AdminProtectedRoute>
+            }
+          />
 
-<Route
-  path="/admin/pacientes"
-  element={
-    <AdminProtectedRoute>
-      <AdminPatientsPage />
-    </AdminProtectedRoute>
-  }
-/>
+          <Route
+            path="/admin/pacientes"
+            element={
+              <AdminProtectedRoute>
+                <AdminPatientsPage />
+              </AdminProtectedRoute>
+            }
+          />
 
-<Route
-  path="/admin/agendamentos"
-  element={
-    <AdminProtectedRoute>
-      <AdminAppointmentsPage />
-    </AdminProtectedRoute>
-  }
-/>
+          <Route
+            path="/admin/agendamentos"
+            element={
+              <AdminProtectedRoute>
+                <AdminAppointmentsPage />
+              </AdminProtectedRoute>
+            }
+          />
 
-<Route
-  path="/admin/espacos"
-  element={
-    <AdminProtectedRoute>
-      <AdminSpacesPage />
-    </AdminProtectedRoute>
-  }
-/>
+          <Route
+            path="/admin/espacos"
+            element={
+              <AdminProtectedRoute>
+                <AdminSpacesPage />
+              </AdminProtectedRoute>
+            }
+          />
 
-<Route
-  path="/admin/bloqueios"
-  element={
-    <AdminProtectedRoute>
-      <AdminBlockedTimesPage />
-    </AdminProtectedRoute>
-  }
-/>
-<Route
-  path="/admin/dashboard"
-  element={
-    <AdminProtectedRoute>
-      <AdminDashboardPage />
-    </AdminProtectedRoute>
-  }
-/>
+          <Route
+            path="/admin/bloqueios"
+            element={
+              <AdminProtectedRoute>
+                <AdminBlockedTimesPage />
+              </AdminProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminProtectedRoute>
+                <AdminDashboardPage />
+              </AdminProtectedRoute>
+            }
+          />
 
           <Route
             path="/patients/:patientId/prontuario"
@@ -133,12 +133,23 @@ function AppLayout() {
               </AdminProtectedRoute>
             }
           />
+
           <Route
-            path="/finance"
+            path="/admin/clinica"
             element={
-              
+              <AdminProtectedRoute>
+                <AdminClinicPage />
+              </AdminProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/finance"
+            element={
+              <AdminProtectedRoute>
                 <FinancePage />
+              </AdminProtectedRoute>
               
+
             }
           />
 
@@ -165,7 +176,7 @@ function AppLayout() {
 
           <Route
             path="/landing-page"
-            element={<LandingPage/>}/>
+            element={<LandingPage />} />
         </Routes>
       </main>
     </div>
