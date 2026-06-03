@@ -25,7 +25,7 @@ import { getPsychologists } from "../services/userService";
 import { getUserToken } from "../storages/userAuthStorage";
 
 
-
+ 
 
 export default function AdminAppointmentsPage() {
 
