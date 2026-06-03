@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { savePatientAuth } from "../src/services/patientAuthStorage";
-import { clearUserAuth } from "../src/services/userAuthStorage";
+import { savePatientAuth } from "../storages/patientAuthStorage";
+import { clearUserAuth } from "../storages/userAuthStorage";
 
 export default function PatientLoginPage() {
   const navigate = useNavigate();

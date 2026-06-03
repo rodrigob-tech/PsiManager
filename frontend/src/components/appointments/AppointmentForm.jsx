@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { STATUS_OPTIONS } from "../../constants/appointmentStatus";
+import { STATUS_OPTIONS } from "../../../constants/appointmentStatus";
 
 function formatDateTimeLocal(dateString) {
   if (!dateString) return "";

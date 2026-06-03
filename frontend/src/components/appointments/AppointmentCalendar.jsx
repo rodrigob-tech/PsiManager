@@ -3,7 +3,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
-import "../../src/styles/calendar.css"
+import "/src/styles/calendar.css"
 
 export default function AppointmentCalendar({ events, onEventClick }) {
   return (

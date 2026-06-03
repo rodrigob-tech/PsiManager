@@ -1,35 +1,39 @@
 import { BrowserRouter, Routes, Route, Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import CalendarPage from "../pages/CalendarPage";
-import MyAppointmentsPage from "../pages/MyAppointmentsPage";
-import AdminProtectedRoute from "../components/admin/AdminProtectedRoute";
-import PublicBookingPage from "../pages/PublicBookingPage";
-import PatientRegisterPage from "../pages/PatientRegisterPage";
-import PatientLoginPage from "../pages/PatientLoginPage";
-import PatientProtectedRoute from "../components/publicBooking/PatientProtectedRoute";
-import UserLoginPage from "../pages/UserLoginPage";
-import MedicalRecordPage from "../pages/MedicalRecordPage";
+
+import CalendarPage from "../src/pages/CalendarPage.jsx";
+import MyAppointmentsPage from "../src/pages/MyAppointmentsPage.jsx";
+
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute.jsx";
+
+import PublicBookingPage from "../src/pages/PublicBookingPage.jsx";
+import PatientRegisterPage from "../src/pages/PatientRegisterPage.jsx";
+import PatientLoginPage from "../src/pages/PatientLoginPage.jsx";
+import PatientProtectedRoute from "./components/publicBooking/PatientProtectedRoute.jsx";
+import UserLoginPage from "./pages/UserLoginPage.jsx";
+import MedicalRecordPage from "./pages/MedicalRecordPage.jsx";
 import {
   isUserAuthenticated,
   getUserData,
   clearUserAuth
-} from "./services/userAuthStorage";
+} from "../src/storages/userAuthStorage.js";
 import {
   isPatientAuthenticated,
   getPatientData,
   clearPatientAuth
-} from "./services/patientAuthStorage";
-import "../src/styles/navbar.css"
-import AdminDashboardPage from "../pages/AdminDashboardPage.jsx";
-import AdminAgendaPage from "../pages/AdminAgendaPage.jsx";
-import AdminPatientsPage from "../pages/AdminPatientsPage.jsx";
-import AdminAppointmentsPage from "../pages/AdminAppointmentsPage.jsx";
-import AdminSpacesPage from "../pages/AdminSpacesPage.jsx";
-import AdminBlockedTimesPage from "../pages/AdminBlockedTimesPage.jsx";
-import LandingPage from "../pages/LandingPage.jsx";
-import FinancePage from "../pages/FinancePage.jsx";
-import AdminClinicPage from "../pages/AdminClinicPage";
-import ReportsPage from "../pages/ReportsPage";
+} from "../src/storages/patientAuthStorage.js";
+
+import "./styles/navbar.css"
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminAgendaPage from "./pages/AdminAgendaPage";
+import AdminPatientsPage from "./pages/AdminPatientsPage";
+import AdminAppointmentsPage from "./pages/AdminAppointmentsPage";
+import AdminSpacesPage from "./pages/AdminSpacesPage";
+import AdminBlockedTimesPage from "./pages/AdminBlockedTimesPage";
+import LandingPage from "./pages/LandingPage";
+import FinancePage from "./pages/FinancePage";
+import AdminClinicPage from "./pages/AdminClinicPage";
+import ReportsPage from "./pages/ReportsPage.jsx";
 
 
 function App() {

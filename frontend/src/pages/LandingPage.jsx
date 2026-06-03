@@ -13,9 +13,9 @@ export default function LandingPage(){
               </button>
 
               <div className="d-flex flex-wrap gap-2 align-items-center justify-content-end">
-                <button className="btn btn-pm-ghost rounded-pill px-4" onClick={() => navigate("/admin")}>Acesso admin</button>
+                <button className="btn btn-pm-ghost rounded-pill px-4" onClick={() => navigate("/login-admin")}>Acesso admin</button>
                 
-                <button className="btn btn-pm-primary rounded-pill px-4" onClick={() => navigate("/admin")}>
+                <button className="btn btn-pm-primary rounded-pill px-4" onClick={() => navigate("/login-admin")}>
                   Abrir demo
                 </button>
               </div>
@@ -35,10 +35,10 @@ export default function LandingPage(){
                   PsiManager
                 </p>
                 <div className="d-flex flex-wrap gap-3">
-                  <button className="btn btn-pm-primary btn-lg rounded-pill px-5" onClick={() => navigate("/admin")}>
+                  <button className="btn btn-pm-primary btn-lg rounded-pill px-5" onClick={() => navigate("/login-admin")}>
                     Conhecer plataforma
                   </button>
-                  <button className="btn btn-pm-ghost btn-lg rounded-pill px-5" onClick={() => navigate("/admin")}>
+                  <button className="btn btn-pm-ghost btn-lg rounded-pill px-5" onClick={() => navigate("/login-admin")}>
                     Cadastrar paciente
                   </button>
                 </div>

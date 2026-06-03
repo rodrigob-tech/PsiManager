@@ -1,4 +1,4 @@
-import { STATUS_COLORS } from "../constants/appointmentStatus";
+import { STATUS_COLORS } from "../../constants/appointmentStatus";
 
 
 export function mapAppointmentsToEvents(appointments) {

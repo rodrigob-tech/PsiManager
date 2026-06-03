@@ -8,7 +8,10 @@ import {
     updateSpace,
     deleteSpace
 } from "../services/spaceService";
-import { getUserToken } from "../src/services/userAuthStorage";
+
+import { getUserToken } from "../storages/userAuthStorage";
+
+
 export default function AdminSpacesPage() {
     const [spaces, setSpaces] = useState([]);
     const [editingSpace, setEditingSpace] = useState(null);

@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { savePatientAuth } from "../src/services/patientAuthStorage";
-import { clearUserAuth } from "../src/services/userAuthStorage";
+import { saveUserAuth } from "../storages/userAuthStorage";
+import { clearPatientAuth } from "../storages/patientAuthStorage";
 
-export default function PatientRegisterPage() {
+export default function UserLoginPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
-    phone: "",
     password: ""
   });
 
@@ -33,18 +31,18 @@ export default function PatientRegisterPage() {
       setError("");
       setLoading(true);
 
-      const response = await api.post("/patient-auth/register", formData);
+      const response = await api.post("/user-auth/login", formData);
 
-      clearUserAuth();
+      clearPatientAuth();
 
-      savePatientAuth({
+      saveUserAuth({
         token: response.data.token,
-        patient: response.data.patient
+        user: response.data.user
       });
 
-      navigate("/agendar", { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
-      setError(error.response?.data?.error || "Erro ao criar conta");
+      setError(error.response?.data?.error || "Erro ao fazer login admin");
     } finally {
       setLoading(false);
     }
@@ -52,40 +50,20 @@ export default function PatientRegisterPage() {
 
   return (
     <div style={pageStyle}>
-      <div style={cardStyle}> 
-        <h1 style={titleStyle}>Criar conta</h1>
+      <div style={cardStyle}>
+        <h1 style={titleStyle}>Login do admin</h1>
         <p style={subtitleStyle}>
-          Cadastre-se para agendar e acompanhar seus atendimentos.
+          Acesse o painel administrativo para gerenciar Pacientes, espaços e agendamentos.
         </p>
 
         {error && <div style={errorStyle}>{error}</div>}
 
         <form onSubmit={handleSubmit} style={formStyle}>
           <input
-            type="text"
-            name="name"
-            placeholder="Nome completo"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="form-control"
-          />
-
-          <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="Email do admin"
             value={formData.email}
-            onChange={handleChange}
-            required
-            className="form-control"
-          />
-
-          <input
-            type="text"
-            name="phone"
-            placeholder="Telefone"
-            value={formData.phone}
             onChange={handleChange}
             required
             className="form-control"
@@ -102,16 +80,9 @@ export default function PatientRegisterPage() {
           />
 
           <button type="submit" disabled={loading} style={buttonStyle}>
-            {loading ? "Criando conta..." : "Cadastrar"}
+            {loading ? "Entrando..." : "Entrar no painel"}
           </button>
         </form>
-
-        <p style={footerTextStyle}>
-          Já tem conta?{" "}
-          <Link to="/login-paciente" style={linkStyle}>
-            Entrar
-          </Link>
-        </p>
       </div>
     </div>
   );
@@ -128,7 +99,7 @@ const pageStyle = {
 
 const cardStyle = {
   width: "100%",
-  maxWidth: "460px",
+  maxWidth: "430px",
   background: "#ffffff",
   borderRadius: "18px",
   padding: "30px",
@@ -169,17 +140,6 @@ const buttonStyle = {
   cursor: "pointer",
   fontWeight: "700",
   fontSize: "15px"
-};
-
-const footerTextStyle = {
-  marginTop: "18px",
-  color: "#64748b"
-};
-
-const linkStyle = {
-  color: "#1976d2",
-  fontWeight: "700",
-  textDecoration: "none"
 };
 
 const errorStyle = {

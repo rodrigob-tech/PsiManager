@@ -10,7 +10,7 @@ import {
   updatePatient,
   deletePatient,
 } from "../services/patientService";
-import { getUserToken, getUserData } from "../src/services/userAuthStorage";
+import { getUserToken, getUserData } from "../storages/userAuthStorage";
 
 export default function AdminPatientsPage() {
   const navigate = useNavigate();

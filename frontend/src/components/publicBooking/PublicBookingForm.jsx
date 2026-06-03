@@ -1,4 +1,4 @@
-import { getPatientData } from "../../src/services/patientAuthStorage";  
+import { getPatientData } from "../../storages/patientAuthStorage";  
 
 
 export default function PublicBookingForm({

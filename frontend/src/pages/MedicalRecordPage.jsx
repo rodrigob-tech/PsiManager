@@ -10,7 +10,7 @@ import {
   createSessionNote,
   getSessionNotesByMedicalRecordId
 } from "../services/sessionNoteService";
-import { getUserData, getUserToken } from "../src/services/userAuthStorage";
+import { getUserData, getUserToken } from "../storages/userAuthStorage";
 
 const recordInitialState = {
   mainComplaint: "",

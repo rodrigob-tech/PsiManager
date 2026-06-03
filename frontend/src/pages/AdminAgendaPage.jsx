@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-
 import AppointmentCalendar from "../components/appointments/AppointmentCalendar";
+
+
 import {
   getAppointments,
   createAppointment,
@@ -11,7 +12,8 @@ import {
 import {
   mapAppointmentsToEvents,
   mapBlockedTimesToEvents
-} from "../utils/appointmentMapper";
+} from "/src/utils/appointmentMapper";
+
 import {
   getBlockedTimes,
   createBlockedTime,
@@ -25,7 +27,7 @@ import {
   updateSpace,
   deleteSpace
 } from "../services/spaceService";
-import { getUserToken} from "../src/services/userAuthStorage";
+import { getUserToken} from "../storages/userAuthStorage";
 import { getPsychologists } from "../services/userService";
 import DashboardLayout from "../components/layout/DashboardLayout";
 

@@ -8,7 +8,7 @@ import {
   getPatientToken,
   getPatientData,
   clearPatientAuth
-} from "../src/services/patientAuthStorage";   
+} from "../storages/patientAuthStorage";   
  
 
 export default function PublicBookingPage() {

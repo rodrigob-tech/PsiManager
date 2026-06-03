@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getUserToken } from "../src/services/userAuthStorage";
+import { getUserToken } from "../storages/userAuthStorage";
 import BlockedTimeForm from "../components/appointments/BlockedTimeForm";
 import BlockedTimeList from "../components/appointments/BlockedTimeList";
 import {

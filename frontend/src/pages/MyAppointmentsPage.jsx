@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
-import { getPatientToken, getPatientData } from "../src/services/patientAuthStorage";
+import { getPatientToken, getPatientData } from "../storages/patientAuthStorage";
 
 
 

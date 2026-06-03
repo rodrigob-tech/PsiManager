@@ -22,7 +22,7 @@ import {
 import { getPatients, createPatient, updatePatient, deletePatient } from "../services/patientService";
 import { getPsychologists } from "../services/userService";
 
-import { getUserToken } from "../src/services/userAuthStorage";
+import { getUserToken } from "../storages/userAuthStorage";
 
 
 

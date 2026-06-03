@@ -12,7 +12,7 @@ import {
 } from "../services/spaceService";
 
 import { getBlockedTimes } from "../services/blockedTime.service";
-import { getUserToken, getUserData } from "../src/services/userAuthStorage";
+import { getUserToken, getUserData } from "../storages/userAuthStorage";
 
 function MetricCard({ icon, label, value, helper }) {
   return (

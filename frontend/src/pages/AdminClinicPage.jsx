@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import DashboardLayout from "../components/layout/DashboardLayout";
-import { getUserToken, getUserData } from "../src/services/userAuthStorage";
+import { getUserToken, getUserData } from "../storages/userAuthStorage";
 
 import {
   getMyClinic,

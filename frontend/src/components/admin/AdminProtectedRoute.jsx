@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 
-import { isUserAuthenticated } from "../../src/services/userAuthStorage";
+import { isUserAuthenticated } from "../../storages/userAuthStorage";
 
 export default function AdminProtectedRoute({ children }) {
   if (!isUserAuthenticated()) {

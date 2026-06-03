@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 
 
-import { isPatientAuthenticated } from "../../src/services/patientAuthStorage";
+import { isPatientAuthenticated } from "../../storages/patientAuthStorage";
 
 export default function PatientProtectedRoute({ children }) {
   if (!isPatientAuthenticated()) {

@@ -33,7 +33,7 @@ import {
   updateSpace,
   deleteSpace
 } from "../services/spaceService";
-import { getUserToken, getUserData, clearUserAuth } from "../src/services/userAuthStorage";
+import { getUserToken, getUserData, clearUserAuth } from "../storages/userAuthStorage";
 import { getPsychologists } from "../services/userService";
 import DashboardLayout from "../components/layout/DashboardLayout";
 
