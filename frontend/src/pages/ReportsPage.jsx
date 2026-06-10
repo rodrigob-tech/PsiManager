@@ -4,7 +4,7 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import MetricCard from "../components/metrics/MetricCard";
 import { getUserToken } from "../storages/userAuthStorage";
 import { getReports } from "../services/reportService";
-
+import { getFinancialReportPdf } from "../services/documentService";
 function formatCurrency(value) {
   return Number(value || 0).toLocaleString("pt-BR", {
     style: "currency",
@@ -112,7 +112,43 @@ export default function ReportsPage() {
     setFilters(cleanFilters);
     loadReports(cleanFilters);
   }
+  async function handleOpenFinancialReportPdf() {
+    try {
+      const token = getUserToken();
 
+      const authHeaders = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      const params = {};
+
+      if (filters.startDate) {
+        params.startDate = filters.startDate;
+      }
+
+      if (filters.endDate) {
+        params.endDate = filters.endDate;
+      }
+
+      const response = await getFinancialReportPdf(params, authHeaders);
+
+      const file = new Blob([response.data], {
+        type: "application/pdf",
+      });
+
+      const fileURL = URL.createObjectURL(file);
+
+      window.open(fileURL, "_blank");
+    } catch (error) {
+      console.error("Erro ao gerar relatório financeiro em PDF:", error);
+
+      const message =
+        error.response?.data?.error ||
+        "Erro ao gerar relatório financeiro em PDF";
+
+      alert(message);
+    }
+  }
   useEffect(() => {
     loadReports();
   }, []);
@@ -129,7 +165,7 @@ export default function ReportsPage() {
     return Math.round(
       (Number(totals.completedAppointments || 0) /
         Number(totals.appointments || 1)) *
-        100
+      100
     );
   }, [totals]);
 
@@ -180,6 +216,13 @@ export default function ReportsPage() {
               onClick={handleClearFilters}
             >
               Limpar
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-primary rounded-pill px-4"
+              onClick={handleOpenFinancialReportPdf}
+            >
+              Exportar PDF
             </button>
           </div>
         </form>

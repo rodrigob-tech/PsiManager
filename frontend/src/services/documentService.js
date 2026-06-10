@@ -10,3 +10,9 @@ export const getPaymentReceipt = (paymentId, headers = {}) =>
     headers,
     responseType: "blob",
   });
+  export const getFinancialReportPdf = (params = {}, headers = {}) =>
+  api.get("/documents/reports/financial", {
+    params,
+    headers,
+    responseType: "blob",
+  });

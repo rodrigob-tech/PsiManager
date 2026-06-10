@@ -448,3 +448,306 @@ export const generatePatientFile = async (req, res) => {
     });
   }
 };
+
+export const generateFinancialReport = async (req, res) => {
+  try {
+    const clinicId = getClinicId(req);
+
+    if (!clinicId) {
+      return res.status(400).json({
+        error: "Usuário não está vinculado a uma clínica",
+      });
+    }
+
+    const { startDate, endDate } = req.query;
+
+    const parsedStartDate = startDate ? new Date(startDate) : null;
+    const parsedEndDate = endDate ? new Date(endDate) : null;
+
+    if (parsedStartDate && Number.isNaN(parsedStartDate.getTime())) {
+      return res.status(400).json({
+        error: "Data inicial inválida",
+      });
+    }
+
+    if (parsedEndDate && Number.isNaN(parsedEndDate.getTime())) {
+      return res.status(400).json({
+        error: "Data final inválida",
+      });
+    }
+
+    const appointmentDateFilter = {};
+
+    if (parsedStartDate) {
+      appointmentDateFilter.gte = parsedStartDate;
+    }
+
+    if (parsedEndDate) {
+      appointmentDateFilter.lte = parsedEndDate;
+    }
+
+    const hasDateFilter = Object.keys(appointmentDateFilter).length > 0;
+
+    const clinic = await prisma.clinic.findUnique({
+      where: {
+        id: clinicId,
+      },
+    });
+
+    const payments = await prisma.payment.findMany({
+      where: {
+        appointment: {
+          clinicId,
+          ...(hasDateFilter && {
+            date: appointmentDateFilter,
+          }),
+        },
+      },
+      include: {
+        appointment: {
+          include: {
+            patient: true,
+            psychologist: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            space: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    const psychologists = await prisma.user.findMany({
+      where: {
+        clinicId,
+        role: "PSYCHOLOGIST",
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
+
+    const paidPayments = payments.filter((payment) => payment.status === "PAID");
+    const pendingPayments = payments.filter(
+      (payment) => payment.status === "PENDING"
+    );
+    const canceledPayments = payments.filter(
+      (payment) => payment.status === "CANCELED"
+    );
+    const refundedPayments = payments.filter(
+      (payment) => payment.status === "REFUNDED"
+    );
+
+    const totalReceived = paidPayments.reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0
+    );
+
+    const totalPending = pendingPayments.reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0
+    );
+
+    const totalCanceled = canceledPayments.reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0
+    );
+
+    const totalRefunded = refundedPayments.reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0
+    );
+
+    const revenueByPsychologist = psychologists.map((psychologist) => {
+      const psychologistPayments = paidPayments.filter(
+        (payment) => payment.appointment?.psychologist?.id === psychologist.id
+      );
+
+      const revenue = psychologistPayments.reduce(
+        (sum, payment) => sum + Number(payment.amount || 0),
+        0
+      );
+
+      return {
+        psychologistId: psychologist.id,
+        psychologistName: psychologist.name,
+        paymentsCount: psychologistPayments.length,
+        revenue,
+      };
+    });
+
+    const fileName = `relatorio-financeiro-${clinicId}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename="${fileName}"`);
+
+    const doc = new PDFDocument({
+      size: "A4",
+      margin: 50,
+    });
+
+    doc.pipe(res);
+
+    doc.fontSize(22).text("Relatório Financeiro", {
+      align: "center",
+    });
+
+    doc.moveDown(0.5);
+
+    doc.fontSize(12).text("PsiManager", {
+      align: "center",
+    });
+
+    doc.moveDown(2);
+
+    doc.fontSize(14).text("Dados da Clínica", {
+      underline: true,
+    });
+
+    doc.moveDown(0.5);
+
+    doc.fontSize(11);
+    doc.text(`Clínica: ${clinic?.name || "Não informado"}`);
+    doc.text(`Descrição: ${clinic?.description || "Não informado"}`);
+
+    doc.moveDown(1.5);
+
+    doc.fontSize(14).text("Período do Relatório", {
+      underline: true,
+    });
+
+    doc.moveDown(0.5);
+
+    doc.fontSize(11);
+    doc.text(
+      `Data inicial: ${
+        parsedStartDate ? formatDate(parsedStartDate) : "Não informado"
+      }`
+    );
+    doc.text(
+      `Data final: ${
+        parsedEndDate ? formatDate(parsedEndDate) : "Não informado"
+      }`
+    );
+
+    doc.moveDown(1.5);
+
+    doc.fontSize(14).text("Resumo Financeiro", {
+      underline: true,
+    });
+
+    doc.moveDown(0.5);
+
+    doc.fontSize(11);
+    doc.text(`Total de pagamentos: ${payments.length}`);
+    doc.text(`Pagamentos pagos: ${paidPayments.length}`);
+    doc.text(`Pagamentos pendentes: ${pendingPayments.length}`);
+    doc.text(`Pagamentos cancelados: ${canceledPayments.length}`);
+    doc.text(`Pagamentos reembolsados: ${refundedPayments.length}`);
+    doc.text(`Total recebido: ${formatCurrency(totalReceived)}`);
+    doc.text(`Total pendente: ${formatCurrency(totalPending)}`);
+    doc.text(`Total cancelado: ${formatCurrency(totalCanceled)}`);
+    doc.text(`Total reembolsado: ${formatCurrency(totalRefunded)}`);
+
+    doc.moveDown(1.5);
+
+    doc.fontSize(14).text("Receita por Psicólogo", {
+      underline: true,
+    });
+
+    doc.moveDown(0.5);
+
+    if (!revenueByPsychologist.length) {
+      doc.fontSize(11).text("Nenhum psicólogo encontrado.");
+    } else {
+      revenueByPsychologist.forEach((item, index) => {
+        doc.fontSize(11).text(
+          `${index + 1}. ${item.psychologistName} - ${
+            item.paymentsCount
+          } pagamento(s) - ${formatCurrency(item.revenue)}`
+        );
+      });
+    }
+
+    doc.moveDown(1.5);
+
+    doc.fontSize(14).text("Pagamentos Recentes", {
+      underline: true,
+    });
+
+    doc.moveDown(0.5);
+
+    if (!payments.length) {
+      doc.fontSize(11).text("Nenhum pagamento encontrado no período.");
+    } else {
+      payments.slice(0, 20).forEach((payment, index) => {
+        const patientName =
+          payment.appointment?.patient?.name || "Paciente não informado";
+
+        const psychologistName =
+          payment.appointment?.psychologist?.name ||
+          "Psicólogo não informado";
+
+        const appointmentDate = payment.appointment?.date
+          ? formatDateTime(payment.appointment.date)
+          : "Data não informada";
+
+        doc.fontSize(10).text(
+          `${index + 1}. ${patientName} | ${psychologistName} | ${appointmentDate} | ${formatCurrency(
+            payment.amount
+          )} | ${translatePaymentMethod(payment.method)} | ${translatePaymentStatus(
+            payment.status
+          )}`
+        );
+      });
+    }
+
+    doc.moveDown(2);
+
+    doc.fontSize(11).text(
+      "Este relatório apresenta informações financeiras registradas no sistema PsiManager conforme os filtros selecionados.",
+      {
+        align: "justify",
+      }
+    );
+
+    doc.moveDown(3);
+
+    doc.text("________________________________________", {
+      align: "center",
+    });
+
+    doc.text(clinic?.name || "Clínica", {
+      align: "center",
+    });
+
+    doc.moveDown(2);
+
+    doc
+      .fontSize(9)
+      .fillColor("gray")
+      .text(`Documento gerado em ${formatDateTime(new Date())}`, {
+        align: "center",
+      });
+
+    doc.end();
+  } catch (error) {
+    console.error("Erro ao gerar relatório financeiro:", error);
+
+    return res.status(500).json({
+      error: "Erro ao gerar relatório financeiro",
+    });
+  }
+};
