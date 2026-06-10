@@ -16,6 +16,7 @@ import sessionNoteRoutes from "./routes/sessionNotes.routes.js";
 import { requireUserAuth } from "./middlewares/userAuth.middleware.js";
 import clinicRoutes from "./routes/clinic.routes.js";
 import reportRoutes from "./routes/report.routes.js";
+import documentRoutes from "./routes/document.routes.js";
 const app = express();
 
 app.use(cors());
@@ -41,5 +42,6 @@ app.use("/patient-bookings", patientBookingRoutes);
 app.use("/user-auth", userAuthRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/clinics", clinicRoutes);
+app.use("/documents", documentRoutes);
 export default app;
 // GET /public-booking/available-slots?date=2026-05-05&spaceId=ID_DO_ESPACO

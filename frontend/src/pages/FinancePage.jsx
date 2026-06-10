@@ -14,7 +14,7 @@ import {
 } from "../services/paymentService";
 
 import { getUserToken } from "../storages/userAuthStorage";
-
+import { getPaymentReceipt } from "../services/documentService";
 function formatCurrency(value) {
   const numberValue = Number(value || 0);
 
@@ -138,7 +138,32 @@ export default function FinancePage() {
       alert(message);
     }
   }
+  async function handleOpenReceipt(paymentId) {
+    try {
+      const token = getUserToken();
 
+      const authHeaders = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      const response = await getPaymentReceipt(paymentId, authHeaders);
+
+      const file = new Blob([response.data], {
+        type: "application/pdf",
+      });
+
+      const fileURL = URL.createObjectURL(file);
+
+      window.open(fileURL, "_blank");
+    } catch (error) {
+      console.error("Erro ao gerar recibo:", error);
+
+      const message =
+        error.response?.data?.error || "Erro ao gerar recibo de pagamento";
+
+      alert(message);
+    }
+  }
   useEffect(() => {
     loadData();
   }, []);
@@ -339,6 +364,13 @@ export default function FinancePage() {
                                   onClick={() => handleDeletePayment(payment.id)}
                                 >
                                   Excluir
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-outline-primary"
+                                  onClick={() => handleOpenReceipt(payment.id)}
+                                >
+                                  Recibo
                                 </button>
                               </div>
                             </td>

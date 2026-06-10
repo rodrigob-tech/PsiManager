@@ -14,18 +14,18 @@ import {
 
 
 import {
-  getSpaces,
-  createSpace,
-  updateSpace,
-  deleteSpace
+    getSpaces,
+    createSpace,
+    updateSpace,
+    deleteSpace
 } from "../services/spaceService";
 import { getPatients, createPatient, updatePatient, deletePatient } from "../services/patientService";
 import { getPsychologists } from "../services/userService";
 
-import { getUserToken } from "../storages/userAuthStorage";
+import { getUserToken, getUserData } from "../storages/userAuthStorage";
 
 
- 
+
 
 export default function AdminAppointmentsPage() {
 
@@ -53,6 +53,8 @@ export default function AdminAppointmentsPage() {
                 getPsychologists(authHeaders),
             ]);
 
+           
+
             setAppointments(appointmentsResponse.data);
             setPatients(patientsResponse.data);
             setSpaces(spacesResponse.data);
@@ -68,12 +70,17 @@ export default function AdminAppointmentsPage() {
             const authHeaders = {
                 Authorization: `Bearer ${token}`
             };
+            
+
+            
 
             if (editingAppointment) {
                 await updateAppointment(editingAppointment.id, formData, authHeaders);
                 alert("Agendamento atualizado com sucesso");
                 setEditingAppointment(null);
             } else {
+                
+                
                 await createAppointment(formData, authHeaders);
                 alert("Agendamento criado com sucesso");
             }
