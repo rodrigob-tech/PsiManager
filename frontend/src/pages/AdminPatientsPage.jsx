@@ -11,6 +11,7 @@ import {
   deletePatient,
 } from "../services/patientService";
 import { getUserToken, getUserData } from "../storages/userAuthStorage";
+import { getPatientFile } from "../services/documentService";
 
 export default function AdminPatientsPage() {
   const navigate = useNavigate();
@@ -74,7 +75,32 @@ export default function AdminPatientsPage() {
       alert(message);
     }
   }
+  async function handleOpenPatientFile(patientId) {
+  try {
+    const token = getUserToken();
 
+    const authHeaders = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const response = await getPatientFile(patientId, authHeaders);
+
+    const file = new Blob([response.data], {
+      type: "application/pdf",
+    });
+
+    const fileURL = URL.createObjectURL(file);
+
+    window.open(fileURL, "_blank");
+  } catch (error) {
+    console.error("Erro ao gerar ficha do paciente:", error);
+
+    const message =
+      error.response?.data?.error || "Erro ao gerar ficha do paciente";
+
+    alert(message);
+  }
+}
   useEffect(() => {
     loadPatients();
   }, []);
@@ -112,6 +138,7 @@ export default function AdminPatientsPage() {
               onOpenMedicalRecord={(patient) =>
                 navigate(`/patients/${patient.id}/prontuario`)
               }
+              onOpenPatientFile={handleOpenPatientFile}
             />
           </div>
         </div>

@@ -5,3 +5,8 @@ export const getPaymentReceipt = (paymentId, headers = {}) =>
     headers,
     responseType: "blob",
   });
+  export const getPatientFile = (patientId, headers = {}) =>
+  api.get(`/documents/patients/${patientId}/file`, {
+    headers,
+    responseType: "blob",
+  });
