@@ -23,7 +23,12 @@ export default function AdminPatientsPage() {
 
   const admin = getUserData();
   const canAccessMedicalRecord = admin?.role !== "RECEPTIONIST";
-
+const [selectedReminderPatient, setSelectedReminderPatient] = useState(null);
+const [reminderSubject, setReminderSubject] = useState("Lembrete de atendimento");
+const [reminderMessage, setReminderMessage] = useState(
+  "Olá, passando para lembrar do seu atendimento. Em caso de dúvidas, entre em contato com a clínica."
+);
+const [sendingReminder, setSendingReminder] = useState(false);
   async function loadPatients() {
     try {
       const token = getUserToken();
@@ -104,26 +109,47 @@ export default function AdminPatientsPage() {
   }
 }
 
-async function handleSendReminder(patient) {
+
+function handleOpenReminderModal(patient) {
+  if (!patient.email) {
+    alert("Este paciente não possui e-mail cadastrado.");
+    return;
+  }
+
+  setSelectedReminderPatient(patient);
+  setReminderSubject("Lembrete de atendimento");
+  setReminderMessage(
+    "Olá, passando para lembrar do seu atendimento. Em caso de dúvidas, entre em contato com a clínica."
+  );
+}
+
+function handleCloseReminderModal() {
+  if (sendingReminder) return;
+
+  setSelectedReminderPatient(null);
+  setReminderSubject("Lembrete de atendimento");
+  setReminderMessage(
+    "Olá, passando para lembrar do seu atendimento. Em caso de dúvidas, entre em contato com a clínica."
+  );
+}
+
+async function handleSendReminderEmail() {
   try {
-    if (!patient.email) {
-      alert("Este paciente não possui e-mail cadastrado.");
+    if (!selectedReminderPatient) {
       return;
     }
 
-    const subject = window.prompt(
-      "Assunto do lembrete:",
-      "Lembrete de atendimento"
-    );
+    if (!reminderSubject.trim()) {
+      alert("Informe o assunto do lembrete.");
+      return;
+    }
 
-    if (!subject) return;
+    if (!reminderMessage.trim()) {
+      alert("Informe a mensagem do lembrete.");
+      return;
+    }
 
-    const message = window.prompt(
-      "Mensagem do lembrete:",
-      "Olá, passando para lembrar do seu atendimento. Em caso de dúvidas, entre em contato com a clínica."
-    );
-
-    if (!message) return;
+    setSendingReminder(true);
 
     const token = getUserToken();
 
@@ -132,24 +158,29 @@ async function handleSendReminder(patient) {
     };
 
     await sendPatientReminderEmail(
-      patient.id,
+      selectedReminderPatient.id,
       {
-        subject,
-        message,
+        subject: reminderSubject.trim(),
+        message: reminderMessage.trim(),
       },
       authHeaders
     );
 
     alert("Lembrete enviado com sucesso.");
+
+    handleCloseReminderModal();
   } catch (error) {
     console.error("Erro ao enviar lembrete:", error);
 
     const message =
-      error.response?.data?.error || "Erro ao enviar lembrete por e-mail";
+      error.response?.data?.error || "Erro ao enviar lembrete por e-mail.";
 
     alert(message);
+  } finally {
+    setSendingReminder(false);
   }
 }
+
   useEffect(() => {
     loadPatients();
   }, []);
@@ -188,11 +219,93 @@ async function handleSendReminder(patient) {
                 navigate(`/patients/${patient.id}/prontuario`)
               }
               onOpenPatientFile={handleOpenPatientFile}
-              onSendReminder={handleSendReminder}
+              onSendReminder={handleOpenReminderModal}
             />
           </div>
         </div>
+        {selectedReminderPatient && (
+  <div
+    className="modal fade show d-block"
+    tabIndex="-1"
+    style={{ backgroundColor: "rgba(15, 23, 42, 0.45)" }}
+  >
+    <div className="modal-dialog modal-dialog-centered">
+      <div className="modal-content border-0 shadow">
+        <div className="modal-header">
+          <div>
+            <h5 className="modal-title mb-0">Enviar lembrete</h5>
+            <small className="text-secondary">
+              Paciente: {selectedReminderPatient.name}
+            </small>
+          </div>
+
+          <button
+            type="button"
+            className="btn-close"
+            onClick={handleCloseReminderModal}
+            disabled={sendingReminder}
+          ></button>
+        </div>
+
+        <div className="modal-body">
+          <div className="mb-3">
+            <label className="form-label">E-mail do paciente</label>
+            <input
+              type="text"
+              className="form-control"
+              value={selectedReminderPatient.email || ""}
+              disabled
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Assunto</label>
+            <input
+              type="text"
+              className="form-control"
+              value={reminderSubject}
+              onChange={(event) => setReminderSubject(event.target.value)}
+              disabled={sendingReminder}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Mensagem</label>
+            <textarea
+              className="form-control"
+              rows="5"
+              value={reminderMessage}
+              onChange={(event) => setReminderMessage(event.target.value)}
+              disabled={sendingReminder}
+            ></textarea>
+          </div>
+        </div>
+
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={handleCloseReminderModal}
+            disabled={sendingReminder}
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSendReminderEmail}
+            disabled={sendingReminder}
+          >
+            {sendingReminder ? "Enviando..." : "Enviar lembrete"}
+          </button>
+        </div>
       </div>
+    </div>
+  </div>
+)}
+      </div>
+      
     </DashboardLayout>
   );
 }

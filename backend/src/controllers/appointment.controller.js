@@ -168,6 +168,24 @@ export const createAppointment = async (req, res) => {
       });
     }
 
+    const businessValidationError = validateBusinessDayAndHours(appointmentDate);
+
+    if (businessValidationError) {
+      return res.status(400).json({
+        error: businessValidationError,
+      });
+    }
+    try {
+      await validatePublicBookingRules({
+        date: appointmentDate,
+        spaceId,
+      });
+    } catch (validationError) {
+      return res.status(400).json({
+        error: validationError.message,
+      });
+    }
+
     let finalPsychologistId = psychologistId || null;
 
     if (req.user.role === "PSYCHOLOGIST") {
@@ -302,11 +320,50 @@ export const createAppointment = async (req, res) => {
       },
       include: appointmentInclude,
     });
+
+    let appointmentWithGoogle = appointment;
+
+    if (appointment.psychologistId) {
+      try {
+        const googleEvent = await createGoogleCalendarEvent(
+          appointment.psychologistId,
+          appointment
+        );
+
+        appointmentWithGoogle = await prisma.appointment.update({
+          where: {
+            id: appointment.id,
+          },
+          data: {
+            googleEventId: googleEvent.id,
+            googleCalendarId: googleEvent.organizer?.email || "primary",
+            googleSyncStatus: "synced",
+            googleSyncError: null,
+            syncedAt: new Date(),
+          },
+          include: appointmentInclude,
+        });
+      } catch (googleError) {
+        console.error("Erro ao criar evento no Google Calendar:", googleError);
+
+        appointmentWithGoogle = await prisma.appointment.update({
+          where: {
+            id: appointment.id,
+          },
+          data: {
+            googleSyncStatus: "failed",
+            googleSyncError: googleError.message,
+          },
+          include: appointmentInclude,
+        });
+      }
+    }
+
     await createAuditLog({
       req,
       action: "APPOINTMENT_CREATED",
       entity: "Appointment",
-      entityId: appointment.id,
+      entityId: appointmentWithGoogle.id,
       description: "Agendamento criado",
       metadata: {
         patientId: appointment.patientId,
@@ -316,7 +373,7 @@ export const createAppointment = async (req, res) => {
         status: appointment.status,
       },
     });
-    return res.status(201).json(appointment);
+    return res.status(201).json(appointmentWithGoogle);
   } catch (error) {
     console.error("Erro ao criar agendamento:", error);
 
@@ -363,12 +420,20 @@ export const updateAppointment = async (req, res) => {
         });
       }
     }
+    const businessValidationError = validateBusinessDayAndHours(finalDate);
 
+    if (businessValidationError) {
+      return res.status(400).json({
+        error: businessValidationError,
+      });
+    }
     const finalPatientId =
       patientId !== undefined ? patientId : appointmentExists.patientId;
 
     const finalSpaceId =
       spaceId !== undefined ? spaceId : appointmentExists.spaceId;
+
+
 
     let finalPsychologistId =
       psychologistId !== undefined
@@ -379,6 +444,11 @@ export const updateAppointment = async (req, res) => {
       finalPsychologistId = req.user.id;
     }
 
+    const scheduleChanged =
+      date !== undefined ||
+      patientId !== undefined ||
+      spaceId !== undefined ||
+      psychologistId !== undefined;
     const patient = await prisma.patient.findFirst({
       where: {
         id: finalPatientId,
@@ -421,118 +491,182 @@ export const updateAppointment = async (req, res) => {
         });
       }
     }
-
-    const conflictingPatientAppointment = await prisma.appointment.findFirst({
-      where: {
-        id: {
-          not: id,
-        },
-        clinicId,
-        patientId: finalPatientId,
-        date: finalDate,
-
-      },
-    });
-
-    if (conflictingPatientAppointment) {
-      return res.status(400).json({
-        error: "Este paciente já possui um agendamento neste horário",
-      });
-    }
-
-    const conflictingSpaceAppointment = await prisma.appointment.findFirst({
-      where: {
-        id: {
-          not: id,
-        },
-        clinicId,
-        spaceId: finalSpaceId,
-        date: finalDate,
-
-      },
-    });
-
-    if (conflictingSpaceAppointment) {
-      return res.status(400).json({
-        error: "Este espaço já possui um agendamento neste horário",
-      });
-    }
-
-    if (finalPsychologistId) {
-      const conflictingPsychologistAppointment =
-        await prisma.appointment.findFirst({
-          where: {
-            id: {
-              not: id,
-            },
-            clinicId,
-            psychologistId: finalPsychologistId,
-            date: finalDate,
-
+    if (scheduleChanged) {
+      const conflictingPatientAppointment = await prisma.appointment.findFirst({
+        where: {
+          id: {
+            not: id,
           },
-        });
+          clinicId,
+          patientId: finalPatientId,
+          date: finalDate,
 
-      if (conflictingPsychologistAppointment) {
+        },
+      });
+
+      if (conflictingPatientAppointment) {
         return res.status(400).json({
-          error: "Este psicólogo já possui um agendamento neste horário",
+          error: "Este paciente já possui um agendamento neste horário",
         });
       }
+
+      const conflictingSpaceAppointment = await prisma.appointment.findFirst({
+        where: {
+          id: {
+            not: id,
+          },
+          clinicId,
+          spaceId: finalSpaceId,
+          date: finalDate,
+
+        },
+      });
+
+      if (conflictingSpaceAppointment) {
+        return res.status(400).json({
+          error: "Este espaço já possui um agendamento neste horário",
+        });
+      }
+
+      if (finalPsychologistId) {
+        const conflictingPsychologistAppointment =
+          await prisma.appointment.findFirst({
+            where: {
+              id: {
+                not: id,
+              },
+              clinicId,
+              psychologistId: finalPsychologistId,
+              date: finalDate,
+
+            },
+          });
+
+        if (conflictingPsychologistAppointment) {
+          return res.status(400).json({
+            error: "Este psicólogo já possui um agendamento neste horário",
+          });
+        }
+      }
+
+      const blockedTimeConflict = await prisma.blockedTime.findFirst({
+        where: {
+          clinicId,
+          OR: [
+            {
+              spaceId: finalSpaceId,
+            },
+            {
+              spaceId: null,
+            },
+          ],
+          start: {
+            lte: finalDate,
+          },
+          end: {
+            gt: finalDate,
+          },
+        },
+      });
+
+      if (blockedTimeConflict) {
+        return res.status(400).json({
+          error: "Este horário está bloqueado",
+        });
+      }
+
     }
+let updatedAppointment = await prisma.appointment.update({
+  where: {
+    id,
+  },
+  data: {
+    date: finalDate,
+    status: status !== undefined ? status : appointmentExists.status,
+    patientId: finalPatientId,
+    spaceId: finalSpaceId,
+    psychologistId: finalPsychologistId,
+  },
+  include: appointmentInclude,
+});
 
-    const blockedTimeConflict = await prisma.blockedTime.findFirst({
-      where: {
-        clinicId,
-        OR: [
-          {
-            spaceId: finalSpaceId,
-          },
-          {
-            spaceId: null,
-          },
-        ],
-        start: {
-          lte: finalDate,
-        },
-        end: {
-          gt: finalDate,
-        },
-      },
-    });
+if (updatedAppointment.psychologistId) {
+  try {
+    if (updatedAppointment.googleEventId) {
+      await updateGoogleCalendarEvent(
+        updatedAppointment.psychologistId,
+        {
+          ...updatedAppointment,
+          googleCalendarId: updatedAppointment.googleCalendarId || "primary",
+        }
+      );
 
-    if (blockedTimeConflict) {
-      return res.status(400).json({
-        error: "Este horário está bloqueado",
+      updatedAppointment = await prisma.appointment.update({
+        where: {
+          id: updatedAppointment.id,
+        },
+        data: {
+          googleCalendarId: updatedAppointment.googleCalendarId || "primary",
+          googleSyncStatus: "synced",
+          googleSyncError: null,
+          syncedAt: new Date(),
+        },
+        include: appointmentInclude,
+      });
+    } else {
+      const googleEvent = await createGoogleCalendarEvent(
+        updatedAppointment.psychologistId,
+        updatedAppointment
+      );
+
+      updatedAppointment = await prisma.appointment.update({
+        where: {
+          id: updatedAppointment.id,
+        },
+        data: {
+          googleEventId: googleEvent.id,
+          googleCalendarId: "primary",
+          googleSyncStatus: "synced",
+          googleSyncError: null,
+          syncedAt: new Date(),
+        },
+        include: appointmentInclude,
       });
     }
+  } catch (googleError) {
+    console.error("Erro ao sincronizar agendamento com Google Calendar:", googleError);
 
-    const updatedAppointment = await prisma.appointment.update({
+    updatedAppointment = await prisma.appointment.update({
       where: {
-        id,
+        id: updatedAppointment.id,
       },
       data: {
-        date: finalDate,
-        status: status !== undefined ? status : appointmentExists.status,
-        patientId: finalPatientId,
-        spaceId: finalSpaceId,
-        psychologistId: finalPsychologistId,
+        googleSyncStatus: "failed",
+        googleSyncError: googleError.message,
       },
       include: appointmentInclude,
     });
-    await createAuditLog({
-      req,
-      action: "APPOINTMENT_UPDATED",
-      entity: "Appointment",
-      entityId: updatedAppointment.id,
-      description: "Agendamento atualizado",
-      metadata: {
-        patientId: updatedAppointment.patientId,
-        psychologistId: updatedAppointment.psychologistId,
-        spaceId: updatedAppointment.spaceId,
-        date: updatedAppointment.date,
-        status: updatedAppointment.status,
-      },
-    });
-    return res.json(updatedAppointment);
+  }
+}
+
+await createAuditLog({
+  req,
+  action: "APPOINTMENT_UPDATED",
+  entity: "Appointment",
+  entityId: updatedAppointment.id,
+  description: "Agendamento atualizado",
+  metadata: {
+    patientId: updatedAppointment.patientId,
+    psychologistId: updatedAppointment.psychologistId,
+    spaceId: updatedAppointment.spaceId,
+    date: updatedAppointment.date,
+    status: updatedAppointment.status,
+    googleSyncStatus: updatedAppointment.googleSyncStatus,
+  },
+});
+
+return res.json(updatedAppointment);
+
   } catch (error) {
     console.error("Erro ao atualizar agendamento:", error);
 
@@ -596,3 +730,41 @@ export const deleteAppointment = async (req, res) => {
     res.status(500).json({ error: "Erro ao remover agendamento" });
   }
 };
+
+function getBrasiliaParts(date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  const map = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return {
+    weekday: map.weekday,
+    hour: Number(map.hour),
+    minute: Number(map.minute),
+  };
+}
+
+function validateBusinessDayAndHours(date) {
+  const { weekday, hour, minute } = getBrasiliaParts(date);
+
+  const weekend = weekday === "Sat" || weekday === "Sun";
+
+  if (weekend) {
+    return "Agendamentos só podem ser marcados de segunda a sexta-feira";
+  }
+
+  const minutes = hour * 60 + minute;
+  const start = 8 * 60;
+  const end = 18 * 60;
+
+  if (minutes < start || minutes >= end) {
+    return "Agendamentos só podem ser marcados entre 08:00 e 18:00";
+  }
+
+  return null;
+}
