@@ -1,7 +1,12 @@
 import { NavLink } from "react-router-dom";
 import Brand from "./Brand";
+import { getUserData } from "../../storages/userAuthStorage";
+ 
 
 
+export default function Sidebar() {
+  const user = getUserData();
+const isAdmin = user?.role === "ADMIN";
 const navItems = [
    { to: "/landing-page", label: "Pagina Inicial", icon: "bi-calendar-x" },
   { to: "/admin/dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
@@ -11,12 +16,14 @@ const navItems = [
   { to: "/admin/espacos", label: "Espaços", icon: "bi-building" },
   { to: "/admin/bloqueios", label: "Bloqueios", icon: "bi-calendar-x" },
   { to: "/admin/finance", label: "Financeiro", icon: "bi-wallet2" },
-  { to: "/admin/clinica", label: "Clínica", icon: "bi-building-gear" },
-  { to: "/admin/relatorios", label: "Relatórios", icon: "bi-bar-chart" }
+  ...(isAdmin
+    ? [{ to: "/admin/clinica", label: "Clínica", icon: "bi-building-gear" }]
+    : []),
+  { to: "/admin/relatorios", label: "Relatórios", icon: "bi-bar-chart" },
+   ...(isAdmin
+    ? [{ to: "/admin/auditoria", label: "Auditoria", icon: "bi-shield-check" }]
+    : [])
 ];
-
-
-export default function Sidebar() {
   return (
     <aside className="sidebar p-4">
       <div className="mb-4">

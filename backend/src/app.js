@@ -19,10 +19,10 @@ import reportRoutes from "./routes/report.routes.js";
 import documentRoutes from "./routes/document.routes.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-
+import auditLogRoutes from "./routes/auditLog.routes.js";
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
   message: {
     error: "Muitas requisições realizadas. Tente novamente mais tarde.",
   },
@@ -62,5 +62,6 @@ app.use("/user-auth", userAuthRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/clinics", clinicRoutes);
 app.use("/documents", documentRoutes);
+app.use("/audit-logs", auditLogRoutes);
 export default app;
 // GET /public-booking/available-slots?date=2026-05-05&spaceId=ID_DO_ESPACO

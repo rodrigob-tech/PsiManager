@@ -34,7 +34,7 @@ import LandingPage from "./pages/LandingPage";
 import FinancePage from "./pages/FinancePage";
 import AdminClinicPage from "./pages/AdminClinicPage";
 import ReportsPage from "./pages/ReportsPage.jsx";
-
+import AdminAuditLogsPage from "./pages/AdminAuditLogsPage.jsx";
 
 function App() {
   return (
@@ -162,6 +162,15 @@ function AppLayout() {
             element={
               <AdminProtectedRoute>
                 <ReportsPage />
+              </AdminProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/auditoria"
+            element={
+              <AdminProtectedRoute>
+                <AdminAuditLogsPage />
               </AdminProtectedRoute>
             }
           />

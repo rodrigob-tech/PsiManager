@@ -1,6 +1,6 @@
 import PDFDocument from "pdfkit";
 import prisma from "../prisma/client.js";
-
+import { createAuditLog } from "../services/auditLog.service.js";
 function getClinicId(req) {
   return req.user?.clinicId || null;
 }
@@ -92,7 +92,18 @@ export const generatePaymentReceipt = async (req, res) => {
         error: "Pagamento não encontrado nesta clínica",
       });
     }
-
+    await createAuditLog({
+      req,
+      action: "PAYMENT_RECEIPT_GENERATED",
+      entity: "Payment",
+      entityId: payment.id,
+      description: "Recibo de pagamento gerado em PDF",
+      metadata: {
+        paymentId: payment.id,
+        amount: payment.amount,
+        status: payment.status,
+      },
+    });
     const appointment = payment.appointment;
     const clinic = appointment.clinic;
     const patient = appointment.patient;
@@ -282,7 +293,16 @@ export const generatePatientFile = async (req, res) => {
         error: "Paciente não encontrado nesta clínica",
       });
     }
-
+    await createAuditLog({
+      req,
+      action: "PATIENT_FILE_GENERATED",
+      entity: "Patient",
+      entityId: patient.id,
+      description: "Ficha do paciente gerada em PDF",
+      metadata: {
+        patientName: patient.name,
+      },
+    });
     const fileName = `ficha-paciente-${patient.id}.pdf`;
 
     res.setHeader("Content-Type", "application/pdf");
@@ -375,14 +395,12 @@ export const generatePatientFile = async (req, res) => {
       doc.text(`Status do prontuário: ${patient.medicalRecord.status || "Não informado"}`);
       doc.text(`Queixa principal: ${patient.medicalRecord.mainComplaint || "Não informado"}`);
       doc.text(
-        `Hipótese diagnóstica: ${
-          patient.medicalRecord.diagnosisHypothesis || "Não informado"
+        `Hipótese diagnóstica: ${patient.medicalRecord.diagnosisHypothesis || "Não informado"
         }`
       );
       doc.text(`Notas clínicas: ${patient.medicalRecord.clinicalNotes || "Não informado"}`);
       doc.text(
-        `Psicólogo responsável: ${
-          patient.medicalRecord.psychologist?.name || "Não informado"
+        `Psicólogo responsável: ${patient.medicalRecord.psychologist?.name || "Não informado"
         }`
       );
     } else {
@@ -402,10 +420,8 @@ export const generatePatientFile = async (req, res) => {
     } else {
       patient.appointments.forEach((appointment, index) => {
         doc.fontSize(11).text(
-          `${index + 1}. ${formatDateTime(appointment.date)} - ${
-            appointment.psychologist?.name || "Psicólogo não informado"
-          } - ${appointment.space?.name || "Espaço não informado"} - ${
-            appointment.status || "Sem status"
+          `${index + 1}. ${formatDateTime(appointment.date)} - ${appointment.psychologist?.name || "Psicólogo não informado"
+          } - ${appointment.space?.name || "Espaço não informado"} - ${appointment.status || "Sem status"
           }`
         );
       });
@@ -587,7 +603,16 @@ export const generateFinancialReport = async (req, res) => {
         revenue,
       };
     });
-
+    await createAuditLog({
+      req,
+      action: "FINANCIAL_REPORT_GENERATED",
+      entity: "Report",
+      description: "Relatório financeiro gerado em PDF",
+      metadata: {
+        startDate,
+        endDate,
+      },
+    });
     const fileName = `relatorio-financeiro-${clinicId}.pdf`;
 
     res.setHeader("Content-Type", "application/pdf");
@@ -632,13 +657,11 @@ export const generateFinancialReport = async (req, res) => {
 
     doc.fontSize(11);
     doc.text(
-      `Data inicial: ${
-        parsedStartDate ? formatDate(parsedStartDate) : "Não informado"
+      `Data inicial: ${parsedStartDate ? formatDate(parsedStartDate) : "Não informado"
       }`
     );
     doc.text(
-      `Data final: ${
-        parsedEndDate ? formatDate(parsedEndDate) : "Não informado"
+      `Data final: ${parsedEndDate ? formatDate(parsedEndDate) : "Não informado"
       }`
     );
 
@@ -674,8 +697,7 @@ export const generateFinancialReport = async (req, res) => {
     } else {
       revenueByPsychologist.forEach((item, index) => {
         doc.fontSize(11).text(
-          `${index + 1}. ${item.psychologistName} - ${
-            item.paymentsCount
+          `${index + 1}. ${item.psychologistName} - ${item.paymentsCount
           } pagamento(s) - ${formatCurrency(item.revenue)}`
         );
       });

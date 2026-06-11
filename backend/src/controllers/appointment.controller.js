@@ -6,7 +6,7 @@ import {
   deleteGoogleCalendarEvent,
 } from "../services/googleCalendar.service.js";
 import { validatePublicBookingRules } from "../services/availability.service.js";
-
+import { createAuditLog } from "../services/auditLog.service.js";
 const validStatuses = ["scheduled", "confirmed", "pending", "canceled", "done"];
 
 const appointmentInclude = {
@@ -222,7 +222,7 @@ export const createAppointment = async (req, res) => {
         clinicId,
         patientId,
         date: appointmentDate,
-        
+
       },
     });
 
@@ -237,7 +237,7 @@ export const createAppointment = async (req, res) => {
         clinicId,
         spaceId,
         date: appointmentDate,
-        
+
       },
     });
 
@@ -254,7 +254,7 @@ export const createAppointment = async (req, res) => {
             clinicId,
             psychologistId: finalPsychologistId,
             date: appointmentDate,
-            
+
           },
         });
 
@@ -302,7 +302,20 @@ export const createAppointment = async (req, res) => {
       },
       include: appointmentInclude,
     });
-
+    await createAuditLog({
+      req,
+      action: "APPOINTMENT_CREATED",
+      entity: "Appointment",
+      entityId: appointment.id,
+      description: "Agendamento criado",
+      metadata: {
+        patientId: appointment.patientId,
+        psychologistId: appointment.psychologistId,
+        spaceId: appointment.spaceId,
+        date: appointment.date,
+        status: appointment.status,
+      },
+    });
     return res.status(201).json(appointment);
   } catch (error) {
     console.error("Erro ao criar agendamento:", error);
@@ -417,7 +430,7 @@ export const updateAppointment = async (req, res) => {
         clinicId,
         patientId: finalPatientId,
         date: finalDate,
-        
+
       },
     });
 
@@ -435,7 +448,7 @@ export const updateAppointment = async (req, res) => {
         clinicId,
         spaceId: finalSpaceId,
         date: finalDate,
-        
+
       },
     });
 
@@ -455,7 +468,7 @@ export const updateAppointment = async (req, res) => {
             clinicId,
             psychologistId: finalPsychologistId,
             date: finalDate,
-            
+
           },
         });
 
@@ -505,7 +518,20 @@ export const updateAppointment = async (req, res) => {
       },
       include: appointmentInclude,
     });
-
+    await createAuditLog({
+      req,
+      action: "APPOINTMENT_UPDATED",
+      entity: "Appointment",
+      entityId: updatedAppointment.id,
+      description: "Agendamento atualizado",
+      metadata: {
+        patientId: updatedAppointment.patientId,
+        psychologistId: updatedAppointment.psychologistId,
+        spaceId: updatedAppointment.spaceId,
+        date: updatedAppointment.date,
+        status: updatedAppointment.status,
+      },
+    });
     return res.json(updatedAppointment);
   } catch (error) {
     console.error("Erro ao atualizar agendamento:", error);
@@ -554,7 +580,16 @@ export const deleteAppointment = async (req, res) => {
         id,
       },
     });
-
+    await createAuditLog({
+      req,
+      action: "APPOINTMENT_DELETED",
+      entity: "Appointment",
+      entityId: id,
+      description: "Agendamento excluído",
+      metadata: {
+        appointmentId: id,
+      },
+    });
     res.json({ message: "Agendamento removido com sucesso" });
   } catch (error) {
     console.error("Erro ao remover agendamento:", error);

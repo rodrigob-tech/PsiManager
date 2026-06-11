@@ -43,6 +43,7 @@ model User {
   medicalRecords MedicalRecord[]
   sessionNotes   SessionNote[]
   appointments Appointment[]
+  auditLogs AuditLog[]
 }
 
 enum PatientStatus {
@@ -197,11 +198,35 @@ model Clinic {
   name        String   @unique
   description String?
 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   users       User[]
   patients    Patient[]
   spaces      Space[]
   appointments Appointment[]
   blockedTimes BlockedTime[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  auditLogs AuditLog[]
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+
+  action     String
+  entity     String?
+  entityId   String?
+
+  description String?
+
+  userId     String?
+  clinicId   String?
+
+  metadata   Json?
+
+  ipAddress  String?
+  userAgent  String?
+
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id])
+  clinic     Clinic?  @relation(fields: [clinicId], references: [id])
 }

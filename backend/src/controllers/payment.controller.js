@@ -1,5 +1,5 @@
 import prisma from "../prisma/client.js";
-
+import { createAuditLog } from "../services/auditLog.service.js";
 const paymentInclude = {
   appointment: {
     include: {
@@ -161,7 +161,19 @@ export const createPayment = async (req, res) => {
       },
       include: paymentInclude,
     });
-
+    await createAuditLog({
+      req,
+      action: "PAYMENT_CREATED",
+      entity: "Payment",
+      entityId: payment.id,
+      description: "Pagamento registrado",
+      metadata: {
+        amount: payment.amount,
+        method: payment.method,
+        status: payment.status,
+        appointmentId: payment.appointmentId,
+      },
+    });
     res.status(201).json(payment);
   } catch (error) {
     console.error("Erro ao criar pagamento:", error);
@@ -209,7 +221,19 @@ export const updatePayment = async (req, res) => {
       },
       include: paymentInclude,
     });
-
+    await createAuditLog({
+      req,
+      action: "PAYMENT_UPDATED",
+      entity: "Payment",
+      entityId: updatedPayment.id,
+      description: "Pagamento atualizado",
+      metadata: {
+        amount: updatedPayment.amount,
+        method: updatedPayment.method,
+        status: updatedPayment.status,
+        appointmentId: updatedPayment.appointmentId,
+      },
+    });
     res.json(updatedPayment);
   } catch (error) {
     console.error("Erro ao atualizar pagamento:", error);

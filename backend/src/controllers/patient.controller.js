@@ -1,5 +1,5 @@
 import prisma from "../prisma/client.js";
-
+import { createAuditLog } from "../services/auditLog.service.js";
 const PATIENT_STATUSES = ["ACTIVE", "INACTIVE", "ARCHIVED"];
 
 const optionalStringFields = [
@@ -191,6 +191,17 @@ export const createPatient = async (req, res) => {
         clinicId,
       },
     });
+    await createAuditLog({
+      req,
+      action: "PATIENT_CREATED",
+      entity: "Patient",
+      entityId: patient.id,
+      description: `Paciente criado: ${patient.name}`,
+      metadata: {
+        patientName: patient.name,
+        patientEmail: patient.email,
+      },
+    });
 
     res.status(201).json(patient);
   } catch (error) {
@@ -282,7 +293,17 @@ export const updatePatient = async (req, res) => {
       },
       data,
     });
-
+    await createAuditLog({
+      req,
+      action: "PATIENT_UPDATED",
+      entity: "Patient",
+      entityId: updatedPatient.id,
+      description: `Paciente atualizado: ${updatedPatient.name}`,
+      metadata: {
+        patientName: updatedPatient.name,
+        patientEmail: updatedPatient.email,
+      },
+    });
     res.json(updatedPatient);
   } catch (error) {
     console.error("Erro ao atualizar paciente:", error);
@@ -348,7 +369,16 @@ export const deletePatient = async (req, res) => {
         id,
       },
     });
-
+    await createAuditLog({
+  req,
+  action: "PATIENT_DELETED",
+  entity: "Patient",
+  entityId: id,
+  description: "Paciente excluído ou arquivado",
+  metadata: {
+    patientId: id,
+  },
+});
     res.json({ message: "Paciente removido com sucesso" });
   } catch (error) {
     console.error("Erro ao remover paciente:", error);

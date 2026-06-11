@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import prisma from "../prisma/client.js";
 import { generateUserToken } from "../services/userToken.service.js";
-
+import { createAuditLog } from "../services/auditLog.service.js";
 const isValidEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
@@ -101,7 +101,17 @@ export const loginUser = async (req, res) => {
     }
 
     const token = generateUserToken(user);
-
+    await createAuditLog({
+  req,
+  action: "LOGIN_SUCCESS",
+  entity: "User",
+  entityId: user.id,
+  description: `Login realizado por ${user.email}`,
+  metadata: {
+    email: user.email,
+    role: user.role,
+  },
+});
     res.json({
       message: "Login admin realizado com sucesso",
       token,
@@ -112,6 +122,7 @@ export const loginUser = async (req, res) => {
         role: user.role
       }
     });
+
   } catch (error) {
     console.error("Erro ao autenticar admin:", error);
     res.status(500).json({
