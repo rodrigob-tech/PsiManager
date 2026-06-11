@@ -4,7 +4,8 @@ export default function PatientList({
   onDelete,
   canAccessMedicalRecord = false,
   onOpenMedicalRecord,
-  onOpenPatientFile
+  onOpenPatientFile,
+  onSendReminder
 }) {
   if (!patients?.length) {
     return (
@@ -120,6 +121,14 @@ export default function PatientList({
                   onClick={() => onOpenPatientFile(patient.id)}
                 >
                   Ficha PDF
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-success"
+                  onClick={() => onSendReminder(patient)}
+                >
+                  Enviar lembrete
                 </button>
               </div>
             </thead>

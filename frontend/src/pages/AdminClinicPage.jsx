@@ -183,6 +183,32 @@ export default function AdminClinicPage() {
     }
   }
 
+async function handleConnectGoogleCalendar() {
+  try {
+    const token = getUserToken();
+
+    const authHeaders = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const response = await getGoogleCalendarAuthUrl(authHeaders);
+
+    if (!response.data?.authUrl) {
+      alert("Não foi possível iniciar a conexão com Google Agenda.");
+      return;
+    }
+
+    window.open(response.data.authUrl, "_blank");
+  } catch (error) {
+    console.error("Erro ao conectar Google Agenda:", error);
+
+    const message =
+      error.response?.data?.error || "Erro ao conectar Google Agenda";
+
+    alert(message);
+  }
+}
+
   useEffect(() => {
     loadData();
   }, []);

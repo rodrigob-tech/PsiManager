@@ -13,6 +13,8 @@ import {
 import { getUserToken, getUserData } from "../storages/userAuthStorage";
 import { getPatientFile } from "../services/documentService";
 
+import { sendPatientReminderEmail } from "../services/reminder.service";
+
 export default function AdminPatientsPage() {
   const navigate = useNavigate();
 
@@ -101,6 +103,53 @@ export default function AdminPatientsPage() {
     alert(message);
   }
 }
+
+async function handleSendReminder(patient) {
+  try {
+    if (!patient.email) {
+      alert("Este paciente não possui e-mail cadastrado.");
+      return;
+    }
+
+    const subject = window.prompt(
+      "Assunto do lembrete:",
+      "Lembrete de atendimento"
+    );
+
+    if (!subject) return;
+
+    const message = window.prompt(
+      "Mensagem do lembrete:",
+      "Olá, passando para lembrar do seu atendimento. Em caso de dúvidas, entre em contato com a clínica."
+    );
+
+    if (!message) return;
+
+    const token = getUserToken();
+
+    const authHeaders = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    await sendPatientReminderEmail(
+      patient.id,
+      {
+        subject,
+        message,
+      },
+      authHeaders
+    );
+
+    alert("Lembrete enviado com sucesso.");
+  } catch (error) {
+    console.error("Erro ao enviar lembrete:", error);
+
+    const message =
+      error.response?.data?.error || "Erro ao enviar lembrete por e-mail";
+
+    alert(message);
+  }
+}
   useEffect(() => {
     loadPatients();
   }, []);
@@ -139,6 +188,7 @@ export default function AdminPatientsPage() {
                 navigate(`/patients/${patient.id}/prontuario`)
               }
               onOpenPatientFile={handleOpenPatientFile}
+              onSendReminder={handleSendReminder}
             />
           </div>
         </div>

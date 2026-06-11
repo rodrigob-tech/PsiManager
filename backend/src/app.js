@@ -20,6 +20,7 @@ import documentRoutes from "./routes/document.routes.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import auditLogRoutes from "./routes/auditLog.routes.js";
+import reminderRoutes from "./routes/reminder.routes.js";
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
@@ -63,5 +64,6 @@ app.use("/payments", paymentRoutes);
 app.use("/clinics", clinicRoutes);
 app.use("/documents", documentRoutes);
 app.use("/audit-logs", auditLogRoutes);
+app.use("/reminders", reminderRoutes);
 export default app;
 // GET /public-booking/available-slots?date=2026-05-05&spaceId=ID_DO_ESPACO
