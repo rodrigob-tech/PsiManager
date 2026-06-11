@@ -75,111 +75,130 @@ export default function AppointmentForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        display: "grid",
-        gap: "12px",
-        marginBottom: "20px",
-        padding: "16px",
-        background: "#f8faff",
-        border: "1px solid #e1e8f5",
-        borderRadius: "14px"
-      }}
-    >
-      <h3 style={{ margin: 0 }}>
-        {editingAppointment ? "Editar agendamento" : "Novo agendamento"}
-      </h3>
+  <form onSubmit={handleSubmit} className="d-grid gap-3">
+    <div className="row g-3">
+      <div className="col-md-6">
+        <label className="form-label fw-semibold" htmlFor="appointment-patient">
+          Paciente
+        </label>
 
-
-
-      <select
-        className="form-select"
-        name="patientId"
-        value={formData.patientId}
-        onChange={handleChange}
-        required
-      >
-        <option value="">Selecione um paciente</option>
-        {patients.map((patient) => (
-          <option key={patient.id} value={patient.id}>
-            {patient.name}
-          </option>
-        ))}
-      </select>
-      <select
-        className="form-select"
-        name="psychologistId"
-        value={formData.psychologistId}
-        onChange={handleChange}
-        required
-        
-      >
-        <option value="">Selecione um psicólogo</option>
-
-        {psychologists.map((psychologist) => (
-          <option key={psychologist.id} value={psychologist.id}>
-            {psychologist.name}
-          </option>
-        ))}
-      </select>
-
-      <select
-        className="form-select"
-        name="spaceId"
-        value={formData.spaceId}
-        onChange={handleChange}
-        required
-        
-      >
-        <option value="">Selecione um espaço</option>
-        {spaces.map((space) => (
-          <option key={space.id} value={space.id}>
-            {space.name}
-          </option>
-        ))}
-      </select>
-
-      <input
-        className="form-control"
-        type="datetime-local"
-        name="date"
-        value={formData.date}
-        onChange={handleChange}
-        required
-        
-      />
-
-      <select
-        className="form-select"
-        name="status"
-        value={formData.status}
-        onChange={handleChange}
-      
-      >
-        {STATUS_OPTIONS.map((status) => (
-          <option key={status.value} value={status.value}>
-            {status.label}
-          </option>
-        ))}
-      </select>
-
-      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button type="submit" className="btn btn-primary">
-          {editingAppointment ? "Salvar alterações" : "Criar agendamento"}
-        </button>
-
-        {editingAppointment && (
-          <button
-            type="button"
-            onClick={onCancelEdit}
-            className="btn btn-outline-secondary"
-          >
-            Cancelar edição
-          </button>
-        )}
+        <select
+          id="appointment-patient"
+          className="form-select"
+          name="patientId"
+          value={formData.patientId}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Selecione um paciente</option>
+          {patients.map((patient) => (
+            <option key={patient.id} value={patient.id}>
+              {patient.name}
+            </option>
+          ))}
+        </select>
       </div>
-    </form>
-  );
+
+      <div className="col-md-6">
+        <label
+          className="form-label fw-semibold"
+          htmlFor="appointment-psychologist"
+        >
+          Psicólogo
+        </label>
+
+        <select
+          id="appointment-psychologist"
+          className="form-select"
+          name="psychologistId"
+          value={formData.psychologistId}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Selecione um psicólogo</option>
+          {psychologists.map((psychologist) => (
+            <option key={psychologist.id} value={psychologist.id}>
+              {psychologist.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label fw-semibold" htmlFor="appointment-space">
+          Espaço
+        </label>
+
+        <select
+          id="appointment-space"
+          className="form-select"
+          name="spaceId"
+          value={formData.spaceId}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Selecione um espaço</option>
+          {spaces.map((space) => (
+            <option key={space.id} value={space.id}>
+              {space.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label fw-semibold" htmlFor="appointment-date">
+          Data e horário
+        </label>
+
+        <input
+          id="appointment-date"
+          className="form-control"
+          type="datetime-local"
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label fw-semibold" htmlFor="appointment-status">
+          Status
+        </label>
+
+        <select
+          id="appointment-status"
+          className="form-select"
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+        >
+          {STATUS_OPTIONS.map((status) => (
+            <option key={status.value} value={status.value}>
+              {status.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <div className="d-flex justify-content-end gap-2 mt-2 flex-wrap">
+      {editingAppointment && (
+        <button
+          type="button"
+          onClick={onCancelEdit}
+          className="btn btn-pm-ghost rounded-pill px-4"
+        >
+          Cancelar
+        </button>
+      )}
+
+      <button type="submit" class="btn btn-success rounded-pill">
+        {editingAppointment ? "Salvar alterações" : "Salvar agendamento"}
+      </button>
+    </div>
+  </form>
+);
 }
 

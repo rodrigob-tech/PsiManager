@@ -72,19 +72,9 @@ export default function PatientForm({
   return (
     <form
       onSubmit={handleSubmit}
-      style={{
-        display: "grid",
-        gap: "14px",
-        padding: "16px",
-        marginBottom: "20px",
-        background: "#f8faff",
-        border: "1px solid #e1e8f5",
-        borderRadius: "14px"
-      }}
+      className="d-grid gap-3"
     >
-      <h3 style={{ margin: 0 }}>
-        {editingPatient ? "Editar paciente" : "Novo paciente"}
-      </h3>
+      
 
       <div style={gridStyle}>
         <input

@@ -28,6 +28,8 @@ const [reminderSubject, setReminderSubject] = useState("Lembrete de atendimento"
 const [reminderMessage, setReminderMessage] = useState(
   "Olá, passando para lembrar do seu atendimento. Em caso de dúvidas, entre em contato com a clínica."
 );
+const [searchTerm, setSearchTerm] = useState("");
+const [showPatientForm, setShowPatientForm] = useState(false);
 const [sendingReminder, setSendingReminder] = useState(false);
   async function loadPatients() {
     try {
@@ -51,9 +53,11 @@ const [sendingReminder, setSendingReminder] = useState(false);
         await updatePatient(editingPatient.id, formData, authHeaders);
         alert("Paciente atualizado com sucesso");
         setEditingPatient(null);
+        setShowPatientForm(false);
       } else {
         await createPatient(formData, authHeaders);
         alert("Paciente criado com sucesso");
+        setShowPatientForm(false);
       }
 
       await loadPatients();
@@ -184,128 +188,203 @@ async function handleSendReminderEmail() {
   useEffect(() => {
     loadPatients();
   }, []);
+const filteredPatients = patients.filter((patient) => {
+  const term = searchTerm.toLowerCase().trim();
+
+  if (!term) return true;
 
   return (
-    <DashboardLayout
-      title="Pacientes"
-      subtitle="Cadastre, edite e acompanhe os pacientes da clínica."
-      current="pacientes"
-    >
-      <div className="row g-4">
-        <div className="col-lg-4">
-          <div className="premium-card p-4">
-            <h2 className="h5 fw-bold mb-3">
-              {editingPatient ? "Editar paciente" : "Novo paciente"}
-            </h2>
-
-            <PatientForm
-              onSubmit={handleSubmitPatient}
-              editingPatient={editingPatient}
-              onCancelEdit={() => setEditingPatient(null)}
-            />
-          </div>
-        </div>
-
-        <div className="col-lg-8">
-          <div className="premium-card p-4">
-            <h2 className="h5 fw-bold mb-3">Lista de pacientes</h2>
-
-            <PatientList
-              patients={patients}
-              onEdit={setEditingPatient}
-              onDelete={handleDeletePatient}
-              canAccessMedicalRecord={canAccessMedicalRecord}
-              onOpenMedicalRecord={(patient) =>
-                navigate(`/patients/${patient.id}/prontuario`)
-              }
-              onOpenPatientFile={handleOpenPatientFile}
-              onSendReminder={handleOpenReminderModal}
-            />
-          </div>
-        </div>
-        {selectedReminderPatient && (
-  <div
-    className="modal fade show d-block"
-    tabIndex="-1"
-    style={{ backgroundColor: "rgba(15, 23, 42, 0.45)" }}
-  >
-    <div className="modal-dialog modal-dialog-centered">
-      <div className="modal-content border-0 shadow">
-        <div className="modal-header">
-          <div>
-            <h5 className="modal-title mb-0">Enviar lembrete</h5>
-            <small className="text-secondary">
-              Paciente: {selectedReminderPatient.name}
-            </small>
-          </div>
-
-          <button
-            type="button"
-            className="btn-close"
-            onClick={handleCloseReminderModal}
-            disabled={sendingReminder}
-          ></button>
-        </div>
-
-        <div className="modal-body">
-          <div className="mb-3">
-            <label className="form-label">E-mail do paciente</label>
-            <input
-              type="text"
-              className="form-control"
-              value={selectedReminderPatient.email || ""}
-              disabled
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Assunto</label>
-            <input
-              type="text"
-              className="form-control"
-              value={reminderSubject}
-              onChange={(event) => setReminderSubject(event.target.value)}
-              disabled={sendingReminder}
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Mensagem</label>
-            <textarea
-              className="form-control"
-              rows="5"
-              value={reminderMessage}
-              onChange={(event) => setReminderMessage(event.target.value)}
-              disabled={sendingReminder}
-            ></textarea>
-          </div>
-        </div>
-
-        <div className="modal-footer">
-          <button
-            type="button"
-            className="btn btn-outline-secondary"
-            onClick={handleCloseReminderModal}
-            disabled={sendingReminder}
-          >
-            Cancelar
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleSendReminderEmail}
-            disabled={sendingReminder}
-          >
-            {sendingReminder ? "Enviando..." : "Enviar lembrete"}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-      </div>
-      
-    </DashboardLayout>
+    patient.name?.toLowerCase().includes(term) ||
+    patient.email?.toLowerCase().includes(term) ||
+    patient.phone?.toLowerCase().includes(term) ||
+    patient.cpf?.toLowerCase().includes(term)
   );
+});
+  return (
+  <DashboardLayout
+    title="Pacientes"
+    subtitle="Gerencie dados, status clínico e informações dos pacientes."
+    current="pacientes"
+  >
+    <div className="premium-card p-4">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div className="input-group" style={{ maxWidth: 420 }}>
+          <span className="input-group-text bg-white border-end-0 rounded-start-pill">
+            <i className="bi bi-search"></i>
+          </span>
+
+          <input
+            className="form-control border-start-0 rounded-end-pill"
+            placeholder="Buscar paciente"
+            aria-label="Buscar paciente"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </div>
+
+        <button
+          type="button"
+          className="btn btn-pm-primary rounded-pill"
+          onClick={() => {
+            setEditingPatient(null);
+            setShowPatientForm((prev) => !prev);
+          }}
+        >
+          {showPatientForm ? "Fechar cadastro" : "Criar paciente"}
+        </button>
+      </div>
+
+      {(showPatientForm || editingPatient) && (
+        <div className="soft-card p-4 mb-4">
+          <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+              <h2 className="h5 fw-bold mb-1">
+                {editingPatient ? "Editar paciente" : "Novo paciente"}
+              </h2>
+              <p className="text-secondary mb-0">
+                Preencha os dados cadastrais e clínicos do paciente.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="btn btn-pm-ghost rounded-pill btn-sm"
+              onClick={() => {
+                setEditingPatient(null);
+                setShowPatientForm(false);
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+
+          <PatientForm
+            onSubmit={handleSubmitPatient}
+            editingPatient={editingPatient}
+            onCancelEdit={() => {
+              setEditingPatient(null);
+              setShowPatientForm(false);
+            }}
+          />
+        </div>
+      )}
+
+      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+          <h2 className="h5 fw-bold mb-1">Lista de pacientes</h2>
+          <p className="text-secondary mb-0">
+            {filteredPatients.length} paciente(s) encontrado(s).
+          </p>
+        </div>
+      </div>
+
+      <PatientList
+        patients={filteredPatients}
+        onEdit={(patient) => {
+          setEditingPatient(patient);
+          setShowPatientForm(true);
+        }}
+        onDelete={handleDeletePatient}
+        canAccessMedicalRecord={canAccessMedicalRecord}
+        onOpenMedicalRecord={(patient) =>
+          navigate(`/patients/${patient.id}/prontuario`)
+        }
+        onOpenPatientFile={handleOpenPatientFile}
+        onSendReminder={handleOpenReminderModal}
+      />
+    </div>
+
+    {selectedReminderPatient && (
+      <div
+        className="modal fade show d-block"
+        tabIndex="-1"
+        style={{
+    position: "fixed",
+    inset: 0,
+    zIndex: 1055,
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "16px",
+  }}
+      >
+        <div className="modal-dialog modal-dialog-centered" 
+        > 
+          <div className="modal-content border-0 shadow">
+            <div className="modal-header">
+              <div>
+                <h5 className="modal-title mb-0">Enviar lembrete</h5>
+                <small className="text-secondary">
+                  Paciente: {selectedReminderPatient.name}
+                </small>
+              </div>
+
+              <button
+                type="button"
+                className="btn-close"
+                onClick={handleCloseReminderModal}
+                disabled={sendingReminder}
+              ></button>
+            </div>
+
+            <div className="modal-body">
+              <div className="mb-3">
+                <label className="form-label">E-mail do paciente</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={selectedReminderPatient.email || ""}
+                  disabled
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Assunto</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={reminderSubject}
+                  onChange={(event) => setReminderSubject(event.target.value)}
+                  disabled={sendingReminder}
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Mensagem</label>
+                <textarea
+                  className="form-control"
+                  rows="5"
+                  value={reminderMessage}
+                  onChange={(event) => setReminderMessage(event.target.value)}
+                  disabled={sendingReminder}
+                ></textarea>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={handleCloseReminderModal}
+                disabled={sendingReminder}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-pm-primary"
+                onClick={handleSendReminderEmail}
+                disabled={sendingReminder}
+              >
+                {sendingReminder ? "Enviando..." : "Enviar lembrete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </DashboardLayout>
+);
 }

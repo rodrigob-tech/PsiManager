@@ -5,139 +5,122 @@ export default function PatientList({
   canAccessMedicalRecord = false,
   onOpenMedicalRecord,
   onOpenPatientFile,
-  onSendReminder
+  onSendReminder,
 }) {
   if (!patients?.length) {
     return (
-      <div
-        style={{
-          background: "#f8f9fc",
-          borderRadius: "12px",
-          padding: "14px",
-          color: "#666"
-        }}
-      >
-        Nenhum paciente cadastrado.
+      <div className="soft-card p-4 text-center text-secondary">
+        <i className="bi bi-people fs-2 d-block mb-2"></i>
+        Nenhum paciente encontrado.
       </div>
     );
   }
 
   return (
-    <div
+    <div className="table-responsive">
+      <table className="table align-middle">
+        <thead>
+          <tr className="text-secondary">
+            <th>Paciente</th>
+            <th>Status</th>
+            <th>Contato</th>
+            <th>Nascimento</th>
+            <th>Emergência</th>
+            <th className="text-end">Ações</th>
+          </tr>
+        </thead>
 
-    >
-      {patients.map((patient) => (
-        <div
-          key={patient.id}
-          className="table-responsive"
-        >
-          <table className="table table-hover align-middle">
-            <thead>
-              <tr>
-                <th>Nome:</th> {patient.name}
-              </tr>
+        <tbody>
+          {patients.map((patient) => (
+            <tr key={patient.id}>
+              <td>
+                <div className="d-flex align-items-center gap-3">
+                  <div className="avatar">{getInitials(patient.name)}</div>
 
-              <tr>
-                <th>Status:</th> {statusLabel[patient.status] || patient.status}
-              </tr>
+                  <div>
+                    <strong>{patient.name}</strong>
+                    <div className="text-secondary small">
+                      CPF: {patient.cpf || "Não informado"}
+                    </div>
+                  </div>
+                </div>
+              </td>
 
-              <tr>
-                <th>Email:</th> {patient.email || "Não informado"}
-              </tr>
+              <td>
+                <span className={getStatusClass(patient.status)}>
+                  {statusLabel[patient.status] || patient.status || "Não informado"}
+                </span>
+              </td>
 
-              <tr>
-                <th>Telefone:</th> {patient.phone || "Não informado"}
-              </tr>
+              <td>
+                <div>{patient.email || "E-mail não informado"}</div>
+                <div className="text-secondary small">
+                  {patient.phone || "Telefone não informado"}
+                </div>
+              </td>
 
-              <tr>
-                <th>CPF:</th> {patient.cpf || "Não informado"}
-              </tr>
+              <td className="text-secondary">{formatDate(patient.birthDate)}</td>
 
-              <tr>
-                <th>Nascimento:</th> {formatDate(patient.birthDate)}
-              </tr>
-
-              <tr>
-                <th>Gênero:</th>{" "}
-                {genderLabel[patient.gender] || patient.gender || "Não informado"}
-              </tr>
-
-              <tr>
-                <th>Emergência:</th>{" "}
+              <td className="text-secondary">
                 {patient.emergencyName || "Não informado"}
                 {patient.emergencyPhone ? ` - ${patient.emergencyPhone}` : ""}
-              </tr>
+              </td>
 
-              <tr>
-                <th>Responsável:</th>{" "}
-                {patient.guardianName || "Não informado"}
-                {patient.guardianPhone ? ` - ${patient.guardianPhone}` : ""}
-              </tr>
-
-              <tr>
-                <th>Endereço:</th> {patient.address || "Não informado"}
-              </tr>
-
-              <tr>
-                <th>Observações:</th> {patient.notes || "Não informado"}
-              </tr>
-
-              <div
-                style={{
-                  marginTop: "12px",
-                  display: "flex",
-                  gap: "10px",
-                  flexWrap: "wrap"
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => onEdit(patient)}
-                  className="btn btn-outline-primary"
-                >
-                  Editar
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => onDelete(patient.id)}
-                  className="btn btn-outline-danger"
-                >
-                  Excluir
-                </button>
-
-                {canAccessMedicalRecord && (
+              <td>
+                <div className="d-flex justify-content-end gap-2 flex-wrap">
                   <button
                     type="button"
-                    onClick={() => onOpenMedicalRecord(patient)}
-                    className="btn btn-primary"
+                    className="btn btn-pm-ghost rounded-pill btn-sm"
+                    onClick={() => onEdit(patient)}
                   >
-                    Prontuário
+                    Editar
                   </button>
-                )}
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-primary"
-                  onClick={() => onOpenPatientFile(patient.id)}
-                >
-                  Ficha PDF
-                </button>
 
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-success"
-                  onClick={() => onSendReminder(patient)}
-                >
-                  Enviar lembrete
-                </button>
-              </div>
-            </thead>
+                  {canAccessMedicalRecord && (
+                    <button
+                      type="button"
+                      className="btn btn-pm-ghost rounded-pill btn-sm"
+                      onClick={() => onOpenMedicalRecord(patient)}
+                    >
+                      Prontuário
+                    </button>
+                  )}
 
-          </table>
+                  <button
+                    type="button"
+                    className="btn btn-pm-ghost rounded-pill btn-sm"
+                    onClick={() => onOpenPatientFile(patient.id)}
+                  >
+                    Ficha PDF
+                  </button>
 
+                  <button
+                    type="button"
+                    className="btn btn-pm-ghost rounded-pill btn-sm"
+                    onClick={() => onSendReminder(patient)}
+                    disabled={!patient.email}
+                    title={
+                      patient.email
+                        ? "Enviar lembrete por e-mail"
+                        : "Paciente não possui e-mail cadastrado"
+                    }
+                  >
+                    Lembrete
+                  </button>
 
-        </div>
-      ))}
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger rounded-pill btn-sm"
+                    onClick={() => onDelete(patient.id)}
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -145,20 +128,33 @@ export default function PatientList({
 const statusLabel = {
   ACTIVE: "Ativo",
   INACTIVE: "Inativo",
-  ARCHIVED: "Arquivado"
+  ARCHIVED: "Arquivado",
 };
 
-const genderLabel = {
-  female: "Feminino",
-  male: "Masculino",
-  non_binary: "Não binário",
-  not_informed: "Não informado"
-};
+function getStatusClass(status) {
+  if (status === "ACTIVE") return "status-pill";
+  if (status === "INACTIVE") return "status-pill bg-warning-subtle text-warning-emphasis";
+  if (status === "ARCHIVED") return "status-pill bg-secondary-subtle text-secondary-emphasis";
+
+  return "status-pill";
+}
+
+function getInitials(name = "") {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "P"
+  );
+}
 
 const formatDate = (dateString) => {
   if (!dateString) return "Não informado";
 
   return new Date(dateString).toLocaleDateString("pt-BR", {
-    timeZone: "UTC"
+    timeZone: "UTC",
   });
 };

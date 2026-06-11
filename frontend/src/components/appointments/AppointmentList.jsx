@@ -1,55 +1,38 @@
 const statusStyles = {
   scheduled: {
     label: "Agendado",
-    background: "#e3f2fd",
-    color: "#1565c0"
+    className: "status-pill",
   },
   confirmed: {
     label: "Confirmado",
-    background: "#e8f5e9",
-    color: "#2e7d32"
+    className: "status-pill",
   },
   pending: {
     label: "Pendente",
-    background: "#fff8e1",
-    color: "#8d6e00"
+    className: "status-pill bg-warning-subtle text-warning-emphasis",
   },
   canceled: {
     label: "Cancelado",
-    background: "#fdecea",
-    color: "#b42318"
+    className: "status-pill bg-danger-subtle text-danger-emphasis",
   },
   done: {
     label: "Concluído",
-    background: "#eeeeee",
-    color: "#555"
-  }
+    className: "status-pill bg-secondary-subtle text-secondary-emphasis",
+  },
 };
 
-export default function AppointmentList({
-  appointments,
-  onDelete,
-  onEdit
-}) {
+export default function AppointmentList({ appointments, onDelete, onEdit }) {
   if (!appointments?.length) {
     return (
-      <div
-        style={{
-          background: "#f8f9fc",
-          borderRadius: "12px",
-          padding: "14px",
-          color: "#666"
-        }}
-      >
-        Nenhum agendamento cadastrado.
+      <div className="soft-card p-4 text-center text-secondary">
+        <i className="bi bi-calendar-x fs-2 d-block mb-2"></i>
+        Nenhum agendamento encontrado.
       </div>
     );
   }
 
   return (
-    <div 
-      
-    >
+    <div className="d-grid gap-3">
       {appointments.map((appointment) => {
         const statusStyle =
           statusStyles[appointment.status] || statusStyles.scheduled;
@@ -57,65 +40,53 @@ export default function AppointmentList({
         return (
           <div
             key={appointment.id}
-            className="table-responsive"
+            className="soft-card p-3 d-flex align-items-center justify-content-between flex-wrap gap-3"
           >
-            <table className="table ">
-              <thead >
-                <tr>
-                  <th>Paciente:</th>{" "}
-                  {appointment.patient?.name || "Sem nome"}
-                </tr>
+            <div className="d-flex align-items-center gap-3">
+              <div className="avatar">
+                {getInitials(appointment.patient?.name || "Paciente")}
+              </div>
 
-                <tr>
-                  <th>Espaço:</th>{" "}
-                  {appointment.space?.name || "Sem espaço"}
-                </tr>
+              <div>
+                <div className="fw-bold fs-5">
+                  {formatTime(appointment.date)}
+                </div>
 
-                <tr>
-                  <th>Data:</th>{" "}
-                  {new Date(appointment.date).toLocaleDateString("pt-BR")}
-                </tr>
+                <div className="text-secondary">
+                  {appointment.patient?.name || "Paciente não informado"} ·{" "}
+                  {appointment.space?.name || "Espaço não informado"}
+                </div>
 
-                <tr>
-                  <th>Horário:</th>{" "}
-                  {new Date(appointment.date).toLocaleTimeString("pt-BR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false
-                  })}
-                </tr>
-                <tr>
-                  <th>Status:</th>{" "}
-                  {statusStyle.label}
-                </tr>
-                
-              </thead>
+                <div className="text-secondary small">
+                  {formatDate(appointment.date)}
+                  {appointment.psychologist?.name
+                    ? ` · ${appointment.psychologist.name}`
+                    : ""}
+                </div>
 
-            </table>
+               
+              </div>
+            </div>
 
-            <thead>
-              <tr>
-                <th><button
-                  type="button"
-                  onClick={() => onEdit(appointment)}
-                  className="btn btn-outline-primary"
-                >
-                  Editar
-                </button></th>
-                <th>  <button
-                  type="button"
-                  onClick={() => onDelete(appointment.id)}
-                  className="btn btn-outline-danger"
-                >
-                  Excluir
-                </button></th>
+            <div className="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+              <span className={statusStyle.className}>{statusStyle.label}</span>
 
-              </tr>
+              <button
+                type="button"
+                class="btn btn-warning rounded-pill btn-sm"
+                onClick={() => onEdit(appointment)}
+              >
+                Editar
+              </button>
 
-
-            </thead>
-
-
+              <button
+                type="button"
+                class="btn btn-danger rounded-pill btn-sm"
+                onClick={() => onDelete(appointment.id)}
+              >
+                Excluir
+              </button>
+            </div>
           </div>
         );
       })}
@@ -123,22 +94,40 @@ export default function AppointmentList({
   );
 }
 
-const editButton = {
-  border: "none",
-  background: "#fffb03",
-  color: "#000000",
-  padding: "8px 12px",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontWeight: "600"
-};
+function getInitials(name = "") {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "A"
+  );
+}
 
-const deleteButton = {
-  border: "none",
-  background: "#d32f2f",
-  color: "#fff",
-  padding: "8px 12px",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontWeight: "600"
-};
+function formatDate(dateString) {
+  if (!dateString) return "Data não informada";
+
+  return new Date(dateString).toLocaleDateString("pt-BR");
+}
+
+function formatTime(dateString) {
+  if (!dateString) return "--:--";
+
+  return new Date(dateString).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function translateGoogleStatus(status) {
+  const labels = {
+    synced: "sincronizado",
+    failed: "falhou",
+    pending: "pendente",
+  };
+
+  return labels[status] || status;
+}

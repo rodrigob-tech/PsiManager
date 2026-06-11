@@ -23,7 +23,7 @@ import auditLogRoutes from "./routes/auditLog.routes.js";
 import reminderRoutes from "./routes/reminder.routes.js";
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 1000,
   message: {
     error: "Muitas requisições realizadas. Tente novamente mais tarde.",
   },
