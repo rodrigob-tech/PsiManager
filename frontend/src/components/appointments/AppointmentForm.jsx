@@ -13,14 +13,13 @@ function formatDateTimeLocal(dateString) {
 
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
-function toLocalISOString(dateTimeLocalValue) {
+function toBrasiliaDateTime(dateTimeLocalValue) {
   if (!dateTimeLocalValue) return "";
 
-  const date = new Date(dateTimeLocalValue);
-  const timezoneOffset = date.getTimezoneOffset() * 60000;
-
-  return new Date(date.getTime() - timezoneOffset).toISOString();
+  return `${dateTimeLocalValue}:00-03:00`;
 }
+
+
 export default function AppointmentForm({
   patients,
   spaces,
@@ -66,13 +65,12 @@ export default function AppointmentForm({
       [name]: value
     }));
   };
-
- const handleSubmit = async (event) => {
+const handleSubmit = async (event) => {
   event.preventDefault();
 
   await onSubmit({
     ...formData,
-    date: toLocalISOString(formData.date),
+    date: formData.date,
   });
 
   if (!editingAppointment) {
