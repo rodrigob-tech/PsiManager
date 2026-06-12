@@ -8,8 +8,8 @@ import {
 import DashboardLayout from "../components/layout/DashboardLayout";
 
 export default function AdminBlockedTimesPage() {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
   const [blockedTimes, setBlockedTimes] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -34,61 +34,51 @@ export default function AdminBlockedTimesPage() {
     loadBlockedTimes();
   }, []);
 
-  function buildStartDateTime(date) {
-    return `${date}T00:00`;
+
+async function handleCreateBlockedTime(event) {
+  event.preventDefault();
+
+  if (!start || !end) {
+    alert("Por favor, preencha a data e horário de início e fim.");
+    return;
   }
 
-  function buildEndDateTime(date) {
-    return `${date}T23:59`;
+  if (new Date(start) >= new Date(end)) {
+    alert("A data e horário de início deve ser menor que a data e horário de fim.");
+    return;
   }
 
-  async function handleCreateBlockedTime(event) {
-    event.preventDefault();
+  try {
+    setLoading(true);
 
-    if (!startDate || !endDate) {
-      alert("Por favor, preencha as datas de início e fim.");
-      return;
-    }
+    const token = getUserToken();
+    const authHeaders = { Authorization: `Bearer ${token}` };
 
-    const start = buildStartDateTime(startDate);
-    const end = buildEndDateTime(endDate);
+    await createBlockedTime(
+      {
+        start,
+        end,
+      },
+      authHeaders
+    );
 
-    if (new Date(start) > new Date(end)) {
-      alert("A data de início não pode ser maior que a data de fim.");
-      return;
-    }
+    setStart("");
+    setEnd("");
 
-    try {
-      setLoading(true);
+    await loadBlockedTimes();
 
-      const token = getUserToken();
-      const authHeaders = { Authorization: `Bearer ${token}` };
+    alert("Bloqueio criado com sucesso.");
+  } catch (error) {
+    console.error("Erro ao criar bloqueio:", error);
 
-      await createBlockedTime(
-        {
-          start,
-          end,
-        },
-        authHeaders
-      );
+    const message =
+      error.response?.data?.error || "Erro ao criar bloqueio.";
 
-      setStartDate("");
-      setEndDate("");
-
-      await loadBlockedTimes();
-
-      alert("Bloqueio criado com sucesso.");
-    } catch (error) {
-      console.error("Erro ao criar bloqueio:", error);
-
-      const message =
-        error.response?.data?.error || "Erro ao criar bloqueio.";
-
-      alert(message);
-    } finally {
-      setLoading(false);
-    }
+    alert(message);
+  } finally {
+    setLoading(false);
   }
+}
 
   async function handleDeleteBlockedTime(blockedTimeId) {
     const confirmed = window.confirm("Deseja realmente excluir este bloqueio?");
@@ -118,34 +108,40 @@ export default function AdminBlockedTimesPage() {
   }
 
   function formatDateRange(start, end) {
-    if (!start || !end) return "Período não informado";
+  if (!start || !end) return "Período não informado";
 
-    const initialDate = new Date(start);
-    const finalDate = new Date(end);
+  const initialDate = new Date(start);
+  const finalDate = new Date(end);
 
-    const sameDay =
-      initialDate.toDateString() === finalDate.toDateString();
+  return `${initialDate.toLocaleString("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  })} a ${finalDate.toLocaleString("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  })}`;
+}
+function getBlockedDuration(start, end) {
+  if (!start || !end) return "Duração não informada";
 
-    if (sameDay) {
-      return `${initialDate.toLocaleDateString("pt-BR")} (dia todo)`;
-    }
+  const initialDate = new Date(start);
+  const finalDate = new Date(end);
 
-    return `${initialDate.toLocaleDateString(
-      "pt-BR"
-    )} a ${finalDate.toLocaleDateString("pt-BR")}`;
+  const diffInMinutes = Math.round((finalDate - initialDate) / (1000 * 60));
+
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minuto${diffInMinutes !== 1 ? "s" : ""}`;
   }
 
-  function getBlockedDays(start, end) {
-    if (!start || !end) return 0;
+  const hours = Math.floor(diffInMinutes / 60);
+  const minutes = diffInMinutes % 60;
 
-    const initialDate = new Date(start);
-    const finalDate = new Date(end);
-
-    const diffInMs = finalDate - initialDate;
-    const days = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-
-    return Math.max(days, 1);
+  if (minutes === 0) {
+    return `${hours} hora${hours !== 1 ? "s" : ""}`;
   }
+
+  return `${hours} hora${hours !== 1 ? "s" : ""} e ${minutes} minuto${minutes !== 1 ? "s" : ""}`;
+}
 
   return (
     <DashboardLayout
@@ -164,15 +160,15 @@ export default function AdminBlockedTimesPage() {
                   className="form-label fw-semibold"
                   htmlFor="block-start"
                 >
-                  Data de início
+                  Inicio do bloqueio
                 </label>
 
                 <input
                   id="block-start"
-                  type="date"
+                  type="datetime-local"
                   className="form-control"
-                  value={startDate}
-                  onChange={(event) => setStartDate(event.target.value)}
+                  value={start}
+                  onChange={(event) => setStart(event.target.value)}
                   disabled={loading}
                 />
               </div>
@@ -182,15 +178,15 @@ export default function AdminBlockedTimesPage() {
                   className="form-label fw-semibold"
                   htmlFor="block-end"
                 >
-                  Data de fim
+                  Fim do bloqueio
                 </label>
 
                 <input
                   id="block-end"
-                  type="date"
+                  type="datetime-local"
                   className="form-control"
-                  value={endDate}
-                  onChange={(event) => setEndDate(event.target.value)}
+                  value={end}
+                  onChange={(event) => setEnd(event.target.value)}
                   disabled={loading}
                 />
               </div>
@@ -250,7 +246,7 @@ export default function AdminBlockedTimesPage() {
             ) : (
               <div className="d-grid gap-3">
                 {blockedTimes.map((blockedTime) => {
-                  const days = getBlockedDays(
+                  const days = getBlockedDuration(
                     blockedTime.start,
                     blockedTime.end
                   );
@@ -274,7 +270,7 @@ export default function AdminBlockedTimesPage() {
                           </h3>
 
                           <div className="pm-text-muted small">
-                            {days} dia{days > 1 ? "s" : ""} bloqueado
+                            {days}{days > 1 ? "s" : ""} bloqueado
                             {days > 1 ? "s" : ""}
                           </div>
                         </div>
