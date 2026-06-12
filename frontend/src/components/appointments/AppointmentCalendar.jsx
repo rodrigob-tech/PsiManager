@@ -45,7 +45,7 @@ export default function AppointmentCalendar({
   const calendarEvents = buildCalendarEvents(appointments, events);
 
   return (
-    
+
     <div >
       <div className="calendar-legend mb-3">
         {Object.entries(STATUS_CONFIG).map(([status, config]) => (
@@ -126,15 +126,15 @@ function buildCalendarEvents(appointments, fallbackEvents) {
 
       const status = appointment.status || "scheduled";
       const config = STATUS_CONFIG[status] || STATUS_CONFIG.scheduled;
+      const statusLabel = config.label;
 
-      const title = `${appointment.patient?.name || "Paciente"} · ${
-        appointment.space?.name || "Espaço"
-      }`;
-
+      const title = `${appointment.patient?.name || "Paciente"} · ${appointment.space?.name || "Espaço"
+        } · ${statusLabel}`;
       const commonExtendedProps = {
         appointment,
         appointmentId: appointment.id,
         status,
+        statusLabel,
         patientId: appointment.patientId,
         spaceId: appointment.spaceId,
         psychologistId: appointment.psychologistId,

@@ -192,7 +192,7 @@ export default function AdminAppointmentsPage() {
 
               <button
                 type="button"
-                className="btn btn-pm-primary rounded-pill"
+                className="btn btn-success rounded-pill"
                 onClick={handleOpenCreateForm}
               >
                 {showAppointmentForm ? "Voltar" : "Criar agendamento"}

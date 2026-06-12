@@ -363,7 +363,7 @@ export default function CalendarPage() {
         }}
       >
         <div className="card app-card mb-4">
-          <h2 style={{ marginTop: 0 }}>Calendário geral</h2>
+            
 
           <div
             style={{

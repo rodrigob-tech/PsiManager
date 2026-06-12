@@ -224,7 +224,7 @@ const filteredPatients = patients.filter((patient) => {
 
         <button
           type="button"
-          className="btn btn-pm-primary rounded-pill"
+          className="btn btn-success rounded-pill px-4"
           onClick={() => {
             setEditingPatient(null);
             setShowPatientForm((prev) => !prev);
@@ -246,16 +246,7 @@ const filteredPatients = patients.filter((patient) => {
               </p>
             </div>
 
-            <button
-              type="button"
-              className="btn btn-pm-ghost rounded-pill btn-sm"
-              onClick={() => {
-                setEditingPatient(null);
-                setShowPatientForm(false);
-              }}
-            >
-              Cancelar
-            </button>
+        
           </div>
 
           <PatientForm

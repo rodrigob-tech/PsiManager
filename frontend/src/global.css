@@ -208,6 +208,14 @@
       background: var(--pm-soft);
       color: var(--pm-primary);
     }
+    .status-pill-success {
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--pm-soft);
+      color: var(--pm-accent);
+    }
 
     .avatar {
       width: 42px;

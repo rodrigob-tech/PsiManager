@@ -13,7 +13,7 @@ import {
 
 import { getBlockedTimes } from "../services/blockedTime.service";
 import { getUserToken, getUserData } from "../storages/userAuthStorage";
-
+import { STATUS_OPTIONS } from "../../constants/appointmentStatus";
 function MetricCard({ icon, label, value, helper }) {
   return (
     <div className="premium-card p-4 h-100">
@@ -43,7 +43,9 @@ function formatDateTime(dateValue) {
     timeStyle: "short",
   });
 }
-
+function getStatusLabel(status) {
+  return STATUS_OPTIONS.find((option) => option.value === status)?.label || status || "Sem status";
+}
 export default function AdminDashboardPage() {
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -149,7 +151,7 @@ export default function AdminDashboardPage() {
 
               <button
                 type="button"
-                className="btn btn-pm-primary rounded-pill px-4"
+                className="btn btn-info rounded-pill px-4"
                 onClick={loadDashboardData}
               >
                 <i className="bi bi-arrow-clockwise me-2"></i>
@@ -237,7 +239,7 @@ export default function AdminDashboardPage() {
                         </div>
 
                         <span className="status-pill">
-                          {appointment.status || "Sem status"}
+                          {getStatusLabel(appointment.status)}
                         </span>
                       </div>
                     ))}

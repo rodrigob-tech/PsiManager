@@ -3,41 +3,41 @@ import AppointmentCalendar from "../components/appointments/AppointmentCalendar"
 
 
 import {
-  getAppointments,
-  createAppointment,
-  updateAppointment,
-  deleteAppointment
+    getAppointments,
+    createAppointment,
+    updateAppointment,
+    deleteAppointment
 } from "../services/appointmentService";
 
 import {
-  mapAppointmentsToEvents,
-  mapBlockedTimesToEvents
+    mapAppointmentsToEvents,
+    mapBlockedTimesToEvents
 } from "/src/utils/appointmentMapper";
 
 import {
-  getBlockedTimes,
-  createBlockedTime,
-  deleteBlockedTime
+    getBlockedTimes,
+    createBlockedTime,
+    deleteBlockedTime
 } from "../services/blockedTime.service";
 
 import { getPatients, createPatient, updatePatient, deletePatient } from "../services/patientService";
 import {
-  getSpaces,
-  createSpace,
-  updateSpace,
-  deleteSpace
+    getSpaces,
+    createSpace,
+    updateSpace,
+    deleteSpace
 } from "../services/spaceService";
-import { getUserToken} from "../storages/userAuthStorage";
+import { getUserToken } from "../storages/userAuthStorage";
 import { getPsychologists } from "../services/userService";
 import DashboardLayout from "../components/layout/DashboardLayout";
 
 export default function AdminAgendaPage() {
-     const [events, setEvents] = useState([]);
-     const [spaces, setSpaces] = useState([]);
+    const [events, setEvents] = useState([]);
+    const [spaces, setSpaces] = useState([]);
     const [selectedStatusFilter, setSelectedStatusFilter] = useState("all");
     const [selectedSpaceFilter, setSelectedSpaceFilter] = useState("all");
     const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
-
+    const [showSidebar, setShowSidebar] = useState(true);
     async function loadData() {
         try {
             const token = getUserToken();
@@ -90,53 +90,95 @@ export default function AdminAgendaPage() {
         const matchesSpace =
             selectedSpaceFilter === "all" || eventSpace === selectedSpaceFilter;
 
+
+        
         return matchesStatus && matchesSpace;
     });
 
     useEffect(() => {
         loadData();
     }, []);
+    function getStatusLabel(status) {
+            const statusLabels = {
+                scheduled: "Agendado",
+                confirmed: "Confirmado",
+                pending: "Pendente",
+                canceled: "Cancelado",
+                done: "Concluído",
+            };
+
+            return statusLabels[status] || status || "Não informado";
+        }
     return (
-        <DashboardLayout>
+        <DashboardLayout
+            title="Calendário Geral"
+            subtitle="Visualize agendamentos e bloqueios da clínica."
+            current="agenda"
+            showSidebar={showSidebar}
+        >
             <div className="card app-card mb-4">
-                <h2 style={{ marginTop: 0 }}>Calendário geral</h2>
+
 
                 <div
-                    style={{
-                        display: "flex",
-                        gap: "12px",
-                        flexWrap: "wrap",
-                        marginBottom: "20px"
-                    }}
+
                 >
-                    <select
-                        className="form-select"
-                        value={selectedStatusFilter}
-                        onChange={(e) => setSelectedStatusFilter(e.target.value)}
-
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-end",
+                            gap: "12px",
+                            flexWrap: "wrap",
+                            marginBottom: "20px"
+                        }}
                     >
-                        <option value="all">Todos os status</option>
-                        <option value="scheduled">Agendado</option>
-                        <option value="confirmed">Confirmado</option>
-                        <option value="pending">Pendente</option>
-                        <option value="canceled">Cancelado</option>
-                        <option value="done">Concluído</option>
-                        <option value="blocked">Bloqueios</option>
-                    </select>
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: "12px",
+                                flexWrap: "wrap"
+                            }}
+                        >
+                            <select
+                                className="form-select"
+                                style={{ width: "220px" }}
+                                value={selectedStatusFilter}
+                                onChange={(e) => setSelectedStatusFilter(e.target.value)}
+                            >
+                                <option value="all">Todos os status</option>
+                                <option value="scheduled">Agendado</option>
+                                <option value="confirmed">Confirmado</option>
+                                <option value="pending">Pendente</option>
+                                <option value="canceled">Cancelado</option>
+                                <option value="done">Concluído</option>
+                                <option value="blocked">Bloqueios</option>
+                            </select>
 
-                    <select
-                        className="form-select"
-                        value={selectedSpaceFilter}
-                        onChange={(e) => setSelectedSpaceFilter(e.target.value)}
+                            <select
+                                className="form-select"
+                                style={{ width: "220px" }}
+                                value={selectedSpaceFilter}
+                                onChange={(e) => setSelectedSpaceFilter(e.target.value)}
+                            >
+                                <option value="all">Todos os espaços</option>
+                                {spaces.map((space) => (
+                                    <option key={space.id} value={space.name}>
+                                        {space.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                class="btn btn-info rounded-pill px-4"
+                                onClick={() => setShowSidebar((current) => !current)}
+                            >
+                                <i className={`bi ${showSidebar ? "bi-arrows-fullscreen" : "bi-layout-sidebar"} me-1`}></i>
+                                {showSidebar ? "Expandir calendário" : "Mostrar menu lateral"}
+                            </button>
+                        </div>
 
-                    >
-                        <option value="all">Todos os espaços</option>
-                        {spaces.map((space) => (
-                            <option key={space.id} value={space.name}>
-                                {space.name}
-                            </option>
-                        ))}
-                    </select>
+
+                    </div>
                 </div>
 
                 <AppointmentCalendar
@@ -198,7 +240,7 @@ export default function AdminAgendaPage() {
                                         </div>
                                         <div>
                                             <strong>Status:</strong>{" "}
-                                            {selectedCalendarEvent.extendedProps?.status}
+                                            {getStatusLabel(selectedCalendarEvent.extendedProps?.status)}
                                         </div>
                                         <div>
                                             <strong>Data/Hora:</strong>{" "}
@@ -211,15 +253,7 @@ export default function AdminAgendaPage() {
                             <button
                                 type="button"
                                 onClick={() => setSelectedCalendarEvent(null)}
-                                style={{
-                                    border: "1px solid #d0d7e2",
-                                    background: "#fff",
-                                    color: "#333",
-                                    padding: "10px 14px",
-                                    borderRadius: "10px",
-                                    cursor: "pointer",
-                                    fontWeight: "600"
-                                }}
+                                class="btn btn-danger rounded-pill"
                             >
                                 Fechar
                             </button>

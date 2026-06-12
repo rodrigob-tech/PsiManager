@@ -194,7 +194,7 @@ export default function AppointmentForm({
         </button>
       )}
 
-      <button type="submit" class="btn btn-success rounded-pill">
+      <button type="submit" class="btn btn-info rounded-pill">
         {editingAppointment ? "Salvar alterações" : "Salvar agendamento"}
       </button>
     </div>

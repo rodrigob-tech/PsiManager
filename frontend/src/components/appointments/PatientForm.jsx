@@ -202,7 +202,7 @@ export default function PatientForm({
       />
 
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-success">
           {editingPatient ? "Salvar alterações" : "Criar paciente"}
         </button>
 
@@ -210,7 +210,7 @@ export default function PatientForm({
           <button
             type="button"
             onClick={onCancelEdit}
-            className="btn btn-outline-secondary"
+            className="btn btn-danger"
           >
             Cancelar edição
           </button>

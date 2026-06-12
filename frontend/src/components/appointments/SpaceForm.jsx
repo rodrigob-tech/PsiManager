@@ -78,7 +78,7 @@ export default function SpaceForm({ onSubmit, editingSpace, onCancelEdit }) {
       />          
 
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-success">
           {editingSpace ? "Salvar alterações" : "Criar espaço"}
         </button>
 

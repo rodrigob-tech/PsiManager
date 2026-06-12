@@ -70,7 +70,7 @@ export default function PatientList({
                 <div className="d-flex justify-content-end gap-2 flex-wrap">
                   <button
                     type="button"
-                    className="btn btn-pm-ghost rounded-pill btn-sm"
+                    className="btn btn-warning rounded-pill btn-sm"
                     onClick={() => onEdit(patient)}
                   >
                     Editar
@@ -79,7 +79,7 @@ export default function PatientList({
                   {canAccessMedicalRecord && (
                     <button
                       type="button"
-                      className="btn btn-pm-ghost rounded-pill btn-sm"
+                      className="btn btn-info rounded-pill btn-sm"
                       onClick={() => onOpenMedicalRecord(patient)}
                     >
                       Prontuário
@@ -88,7 +88,7 @@ export default function PatientList({
 
                   <button
                     type="button"
-                    className="btn btn-pm-ghost rounded-pill btn-sm"
+                    className="btn btn-outline-info rounded-pill btn-sm"
                     onClick={() => onOpenPatientFile(patient.id)}
                   >
                     Ficha PDF
@@ -96,7 +96,7 @@ export default function PatientList({
 
                   <button
                     type="button"
-                    className="btn btn-pm-ghost rounded-pill btn-sm"
+                    className="btn btn-primary rounded-pill btn-sm"
                     onClick={() => onSendReminder(patient)}
                     disabled={!patient.email}
                     title={
@@ -110,7 +110,7 @@ export default function PatientList({
 
                   <button
                     type="button"
-                    className="btn btn-outline-danger rounded-pill btn-sm"
+                    className="btn btn-danger rounded-pill btn-sm"
                     onClick={() => onDelete(patient.id)}
                   >
                     Excluir

@@ -5,7 +5,7 @@ const statusStyles = {
   },
   confirmed: {
     label: "Confirmado",
-    className: "status-pill",
+    className: "status-pill-success",
   },
   pending: {
     label: "Pendente",
