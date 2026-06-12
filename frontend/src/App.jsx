@@ -1,14 +1,12 @@
-import { BrowserRouter, Routes, Route, Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, NavLink, useLocation, useNavigate, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import CalendarPage from "../src/pages/CalendarPage.jsx";
-import MyAppointmentsPage from "../src/pages/MyAppointmentsPage.jsx";
+
+
 
 import AdminProtectedRoute from "./components/admin/AdminProtectedRoute.jsx";
 
-import PublicBookingPage from "../src/pages/PublicBookingPage.jsx";
-import PatientRegisterPage from "../src/pages/PatientRegisterPage.jsx";
-import PatientLoginPage from "../src/pages/PatientLoginPage.jsx";
+
 import PatientProtectedRoute from "./components/publicBooking/PatientProtectedRoute.jsx";
 import UserLoginPage from "./pages/UserLoginPage.jsx";
 import MedicalRecordPage from "./pages/MedicalRecordPage.jsx";
@@ -68,14 +66,7 @@ function AppLayout() {
         <Routes>
           <Route path="/login-admin" element={<UserLoginPage />} />
 
-          <Route
-            path="/"
-            element={
-              <AdminProtectedRoute>
-                <CalendarPage />
-              </AdminProtectedRoute>
-            }
-          />
+          
 
           <Route
             path="/admin/agenda"
@@ -174,26 +165,11 @@ function AppLayout() {
               </AdminProtectedRoute>
             }
           />
-          <Route
-            path="/agendar"
-            element={
-              <PatientProtectedRoute>
-                <PublicBookingPage />
-              </PatientProtectedRoute>
-            }
-          />
+         
 
-          <Route
-            path="/meus-agendamentos"
-            element={
-              <PatientProtectedRoute>
-                <MyAppointmentsPage />
-              </PatientProtectedRoute>
-            }
-          />
+          
 
-          <Route path="/cadastro-paciente" element={<PatientRegisterPage />} />
-          <Route path="/login-paciente" element={<PatientLoginPage />} />
+         
 
           <Route
             path="/landing-page"

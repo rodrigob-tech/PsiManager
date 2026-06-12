@@ -116,7 +116,7 @@ export default function AdminAgendaPage() {
             current="agenda"
             showSidebar={showSidebar}
         >
-            <div className="card app-card mb-4">
+            <div className="premium-card p-4 mb-4">
 
 
                 <div
