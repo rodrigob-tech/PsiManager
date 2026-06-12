@@ -192,11 +192,15 @@ export default function AdminAppointmentsPage() {
 
               <button
                 type="button"
-                className="btn btn-pm-primary rounded-pill py-2"
+                className={`btn ${showAppointmentForm ? "btn-danger" : "btn-pm-primary"
+              } rounded-pill py-2`}
                 onClick={handleOpenCreateForm}
               >
-                <i className="bi bi-plus-lg me-2"></i>
-                {showAppointmentForm ? "Voltar" : "Criar agendamento"}
+                 <i
+              className={`bi ${showAppointmentForm? "bi-x-lg" : "bi-plus-lg"
+                } me-2`}
+            ></i>
+                {showAppointmentForm ? "Cancelar" : "Criar agendamento"}
               </button>
             </div>
 

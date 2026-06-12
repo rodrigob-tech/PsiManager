@@ -27,18 +27,48 @@ function getStatusLabel(status) {
     confirmed: "Confirmado",
     pending: "Pendente",
     canceled: "Cancelado",
-    done: "Realizado",
+    done: "Concluído",
     SCHEDULED: "Agendado",
     CONFIRMED: "Confirmado",
     PENDING: "Pendente",
     CANCELED: "Cancelado",
-    DONE: "Realizado",
+    DONE: "Concluído",
     PAID: "Pago",
   };
 
   return labels[status] || status || "Sem status";
 }
+function getAppointmentStatusStyle(status) {
+  const normalizedStatus = status?.toLowerCase();
 
+  const styles = {
+    scheduled: {
+      label: "Agendado",
+      className: "status-pill",
+    },
+    confirmed: {
+      label: "Confirmado",
+      className: "status-pill-success",
+    },
+    pending: {
+      label: "Pendente",
+      className: "status-pill bg-warning-subtle text-warning-emphasis",
+    },
+    canceled: {
+      label: "Cancelado",
+      className: "status-pill bg-danger-subtle text-danger-emphasis",
+    },
+    done: {
+      label: "Concluído",
+      className: "status-pill bg-secondary-subtle text-secondary-emphasis",
+    },
+  };
+
+  return styles[normalizedStatus] || {
+    label: status || "Sem status",
+    className: "status-pill",
+  };
+}
 function getPaymentStatusLabel(status) {
   const labels = {
     PENDING: "Pendente",
@@ -385,9 +415,15 @@ export default function ReportsPage() {
                             <td>{formatDateTime(appointment.date)}</td>
 
                             <td>
-                              <span className="status-pill">
-                                {getStatusLabel(appointment.status)}
-                              </span>
+                              {(() => {
+                                const statusStyle = getAppointmentStatusStyle(appointment.status);
+
+                                return (
+                                  <span className={statusStyle.className}>
+                                    {statusStyle.label}
+                                  </span>
+                                );
+                              })()}
                             </td>
                           </tr>
                         ))}

@@ -46,6 +46,38 @@ function formatDateTime(dateValue) {
 function getStatusLabel(status) {
   return STATUS_OPTIONS.find((option) => option.value === status)?.label || status || "Sem status";
 }
+function getAppointmentStatusStyle(status) {
+  const normalizedStatus = status?.toLowerCase();
+
+  const styles = {
+    scheduled: {
+      label: "Agendado",
+      className: "status-pill",
+    },
+    confirmed: {
+      label: "Confirmado",
+      className: "status-pill-success",
+    },
+    pending: {
+      label: "Pendente",
+      className: "status-pill bg-warning-subtle text-warning-emphasis",
+    },
+    canceled: {
+      label: "Cancelado",
+      className: "status-pill bg-danger-subtle text-danger-emphasis",
+    },
+    done: {
+      label: "Concluído",
+      className: "status-pill bg-secondary-subtle text-secondary-emphasis",
+    },
+  };
+
+  return styles[normalizedStatus] || {
+    label: status || "Sem status",
+    className: "status-pill",
+  };
+}
+
 export default function AdminDashboardPage() {
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -140,7 +172,7 @@ export default function AdminDashboardPage() {
           <div className="premium-card p-4 mb-4">
             <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
               <div>
-                
+
                 <h2 className="h4 fw-bold mt-3 mb-1">
                   Bem-vindo{user?.name ? `, ${user.name}` : ""}
                 </h2>
@@ -238,9 +270,15 @@ export default function AdminDashboardPage() {
                           </div>
                         </div>
 
-                        <span className="status-pill">
-                          {getStatusLabel(appointment.status)}
-                        </span>
+                        {(() => {
+                          const statusStyle = getAppointmentStatusStyle(appointment.status);
+
+                          return (
+                            <span className={statusStyle.className}>
+                              {statusStyle.label}
+                            </span>
+                          );
+                        })()}
                       </div>
                     ))}
                   </div>

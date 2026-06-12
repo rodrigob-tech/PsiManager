@@ -281,7 +281,7 @@ export default function AdminBlockedTimesPage() {
 
                         <button
                           type="button"
-                          className="btn btn-sm btn-outline-danger rounded-pill"
+                          className="btn btn-sm btn-danger rounded-pill"
                           onClick={() =>
                             handleDeleteBlockedTime(blockedTime.id)
                           }

@@ -313,7 +313,7 @@ export default function FinancePage() {
                                 {payment.appointment?.patient?.name ||
                                   "Paciente não informado"}
                               </strong>
-                              <div className="text-secondary small">
+                              <div className="text-main small">
                                 {payment.appointment?.psychologist?.name
                                   ? `Psicólogo: ${payment.appointment.psychologist.name}`
                                   : "Psicólogo não informado"}
@@ -324,7 +324,7 @@ export default function FinancePage() {
                               <div>
                                 {formatDateTime(payment.appointment?.date)}
                               </div>
-                              <div className="text-secondary small">
+                              <div className="fw-bold small">
                                 {payment.appointment?.space?.name ||
                                   "Espaço não informado"}
                               </div>

@@ -119,7 +119,7 @@ export default function Topbar({ title, subtitle }) {
         {googleLoading ? (
           <button
             type="button"
-            className="btn btn-sm btn-outline-secondary rounded-pill"
+            className="btn btn-sm btn-secondary rounded-pill"
             disabled
           >
             <i className="bi bi-calendar2-week me-1"></i>
@@ -128,7 +128,7 @@ export default function Topbar({ title, subtitle }) {
         ) : googleStatus.googleConnected ? (
           <button
             type="button"
-            className="btn btn-sm btn-outline-success rounded-pill"
+            className="btn btn-sm btn-success rounded-pill"
             title={googleStatus.googleCalendarEmail || "Google Agenda conectado"}
             onClick={loadGoogleStatus}
           >
@@ -150,19 +150,10 @@ export default function Topbar({ title, subtitle }) {
         )}
 
         <div className="d-flex align-items-center gap-2">
-          <div className="avatar">
-            {user?.name
-              ? user.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()
-              : "PM"}
-          </div>
+          
 
           <button
-            className="btn btn-outline-danger btn-sm rounded-pill"
+            className="btn btn-danger btn-sm rounded-pill"
             onClick={handleLogout}
           >
             Sair

@@ -205,10 +205,11 @@ export default function AdminSpacesPage() {
                 {editingSpace && (
                   <button
                     type="button"
-                    className="btn btn-pm-ghost rounded-pill w-100 py-2"
+                    className="btn btn-danger rounded-pill w-100 py-2"
                     onClick={handleCancelEdit}
                     disabled={loading}
                   >
+                    <i className="bi bi-trash me-2"></i>
                     Cancelar edição
                   </button>
                 )}
