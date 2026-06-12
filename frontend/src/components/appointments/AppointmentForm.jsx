@@ -13,7 +13,14 @@ function formatDateTimeLocal(dateString) {
 
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
+function toLocalISOString(dateTimeLocalValue) {
+  if (!dateTimeLocalValue) return "";
 
+  const date = new Date(dateTimeLocalValue);
+  const timezoneOffset = date.getTimezoneOffset() * 60000;
+
+  return new Date(date.getTime() - timezoneOffset).toISOString();
+}
 export default function AppointmentForm({
   patients,
   spaces,
@@ -60,19 +67,24 @@ export default function AppointmentForm({
     }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    await onSubmit(formData);
+ const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    if (!editingAppointment) {
-      setFormData({
-        patientId: "",
-        spaceId: "",
-        date: "",
-        status: "scheduled"
-      });
-    }
-  };
+  await onSubmit({
+    ...formData,
+    date: toLocalISOString(formData.date),
+  });
+
+  if (!editingAppointment) {
+    setFormData({
+      patientId: "",
+      spaceId: "",
+      psychologistId: "",
+      date: "",
+      status: "scheduled"
+    });
+  }
+};
 
   return (
   <form onSubmit={handleSubmit} className="d-grid gap-3">
@@ -184,7 +196,7 @@ export default function AppointmentForm({
     </div>
 
     <div className="d-flex justify-content-end gap-2 mt-2 flex-wrap">
-      <button type="submit" class="btn btn-success rounded-pill">
+      <button type="submit" className="btn btn-success rounded-pill">
         {editingAppointment ? "Salvar alterações" : "Salvar agendamento"}
       </button>
       {editingAppointment && (
