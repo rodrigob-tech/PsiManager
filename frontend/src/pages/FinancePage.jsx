@@ -14,7 +14,10 @@ import {
 } from "../services/paymentService";
 
 import { getUserToken } from "../storages/userAuthStorage";
-import { getPaymentReceipt } from "../services/documentService";
+import {
+  getPaymentReceipt,
+  sendPaymentReceiptByEmail,
+} from "../services/documentService";
 function formatCurrency(value) {
   const numberValue = Number(value || 0);
 
@@ -138,32 +141,46 @@ export default function FinancePage() {
       alert(message);
     }
   }
-  async function handleOpenReceipt(paymentId) {
+ async function handleOpenReceipt(paymentId) {
+  try {
+    const token = getUserToken();
+
+    const authHeaders = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const response = await getPaymentReceipt(paymentId, authHeaders);
+
+    const file = new Blob([response.data], {
+      type: "application/pdf",
+    });
+
+    const fileURL = URL.createObjectURL(file);
+
+    window.open(fileURL, "_blank");
+
     try {
-      const token = getUserToken();
-
-      const authHeaders = {
-        Authorization: `Bearer ${token}`,
-      };
-
-      const response = await getPaymentReceipt(paymentId, authHeaders);
-
-      const file = new Blob([response.data], {
-        type: "application/pdf",
-      });
-
-      const fileURL = URL.createObjectURL(file);
-
-      window.open(fileURL, "_blank");
-    } catch (error) {
-      console.error("Erro ao gerar recibo:", error);
+      await sendPaymentReceiptByEmail(paymentId, authHeaders);
+      alert("Recibo gerado e enviado por e-mail com sucesso.");
+    } catch (emailError) {
+      console.error("Erro ao enviar recibo por e-mail:", emailError);
 
       const message =
-        error.response?.data?.error || "Erro ao gerar recibo de pagamento";
+        emailError.response?.data?.error ||
+        "O recibo foi gerado, mas não foi possível enviar por e-mail.";
 
       alert(message);
     }
+  } catch (error) {
+    console.error("Erro ao gerar recibo:", error);
+
+    const message =
+      error.response?.data?.error || "Erro ao gerar recibo de pagamento";
+
+    alert(message);
   }
+}
+
   useEffect(() => {
     loadData();
   }, []);
@@ -276,7 +293,7 @@ export default function FinancePage() {
 
                   <button
                     type="button"
-                    className="btn btn-success rounded-pill px-4"
+                    className="btn btn-primary rounded-pill px-4"
                     onClick={loadData}
                   >
                     <i className="bi bi-arrow-clockwise me-2"></i>

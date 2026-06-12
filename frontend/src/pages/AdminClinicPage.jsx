@@ -286,6 +286,7 @@ async function handleConnectGoogleCalendar() {
                     type="submit"
                     className="btn btn-pm-primary rounded-pill px-4"
                   >
+                    <i className="bi bi-plus-lg me-2"></i>
                     Salvar alterações
                   </button>
                 )}
@@ -424,8 +425,8 @@ async function handleConnectGoogleCalendar() {
                                 type="button"
                                 className={`btn btn-sm rounded-pill ${
                                   user.isActive
-                                    ? "btn-outline-danger"
-                                    : "btn-outline-success"
+                                    ? "btn-danger"
+                                    : "btn-success"
                                 }`}
                                 onClick={() => handleToggleUserStatus(user)}
                               >

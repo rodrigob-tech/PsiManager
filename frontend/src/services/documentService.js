@@ -16,3 +16,5 @@ export const getPaymentReceipt = (paymentId, headers = {}) =>
     headers,
     responseType: "blob",
   });
+  export const sendPaymentReceiptByEmail = (paymentId, headers = {}) =>
+  api.post(`/documents/payments/${paymentId}/receipt/email`, {}, { headers });

@@ -79,6 +79,16 @@ function getPaymentStatusLabel(status) {
 
   return labels[status] || status || "Sem status";
 }
+function getPaymentStatusBadgeClass(status) {
+  const styles = {
+    PENDING: "status-pill bg-warning-subtle text-warning-emphasis",
+    PAID: "status-pill-success",
+    CANCELED: "status-pill bg-danger-subtle text-danger-emphasis",
+    REFUNDED: "text-bg-secondary",
+  };
+
+  return styles[status] || "text-bg-light";
+}
 
 export default function ReportsPage() {
   const [report, setReport] = useState(null);
@@ -473,7 +483,7 @@ export default function ReportsPage() {
                             </td>
 
                             <td>
-                              <span className="status-pill">
+                              <span className={`badge ${getPaymentStatusBadgeClass(payment.status)}`}>
                                 {getPaymentStatusLabel(payment.status)}
                               </span>
                             </td>

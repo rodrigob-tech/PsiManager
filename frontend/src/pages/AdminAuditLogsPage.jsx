@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 
 import DashboardLayout from "../components/layout/DashboardLayout";
-import { getAuditLogs } from "../services/auditLogService";
-import { getUserToken} from "../storages/userAuthStorage";
+import {
+  getAuditLogs,
+  clearAuditLogs
+} from "../services/auditLogService";
+import { getUserToken } from "../storages/userAuthStorage";
 
 function formatDateTime(value) {
   if (!value) return "Não informado";
@@ -31,6 +34,7 @@ function getActionLabel(action) {
     PAYMENT_DELETED: "Pagamento excluído",
 
     PAYMENT_RECEIPT_GENERATED: "Recibo gerado",
+    PAYMENT_RECEIPT_EMAIL_SENT: "Recibo enviado por e-mail",
     PATIENT_FILE_GENERATED: "Ficha do paciente gerada",
     FINANCIAL_REPORT_GENERATED: "Relatório financeiro gerado",
 
@@ -117,6 +121,39 @@ export default function AdminAuditLogsPage() {
       setLoading(false);
     }
   }
+  async function handleClearAuditLogs() {
+    const confirmed = window.confirm(
+      "Deseja realmente limpar todos os logs de auditoria? Essa ação não poderá ser desfeita."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+
+      const token = getUserToken();
+
+      const authHeaders = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      await clearAuditLogs(authHeaders);
+
+      setLogs([]);
+      setSelectedLog(null);
+
+      alert("Logs de auditoria limpos com sucesso.");
+    } catch (error) {
+      console.error("Erro ao limpar logs de auditoria:", error);
+
+      const message =
+        error.response?.data?.error || "Erro ao limpar logs de auditoria";
+
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function handleFilterChange(event) {
     const { name, value } = event.target;
@@ -177,15 +214,15 @@ export default function AdminAuditLogsPage() {
 
       const matchesSearch = search
         ? [
-            log.action,
-            log.entity,
-            log.entityId,
-            log.description,
-            log.user?.name,
-            log.user?.email,
-          ]
-            .filter(Boolean)
-            .some((value) => String(value).toLowerCase().includes(search))
+          log.action,
+          log.entity,
+          log.entityId,
+          log.description,
+          log.user?.name,
+          log.user?.email,
+        ]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(search))
         : true;
 
       return matchesAction && matchesEntity && matchesSearch;
@@ -271,10 +308,20 @@ export default function AdminAuditLogsPage() {
 
           <button
             type="button"
-            className="btn btn-outline-primary rounded-pill px-4"
+            className="btn btn-primary rounded-pill px-4"
             onClick={loadAuditLogs}
           >
+            <i className="bi bi-arrow-clockwise me-2"></i>
             Atualizar
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger rounded-pill px-4"
+            onClick={handleClearAuditLogs}
+            disabled={loading || logs.length === 0}
+          >
+            <i className="bi bi-trash me-2"></i>
+            Limpar logs
           </button>
         </div>
 

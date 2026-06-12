@@ -8,7 +8,7 @@ export default function Sidebar() {
   const user = getUserData();
 const isAdmin = user?.role === "ADMIN";
 const navItems = [
-   { to: "/landing-page", label: "Pagina Inicial", icon: "bi-calendar-x" },
+  
   { to: "/admin/dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
   { to: "/admin/agenda", label: "Calendário", icon: "bi-calendar2-week" },
   { to: "/admin/pacientes", label: "Pacientes", icon: "bi-people" },

@@ -183,7 +183,7 @@ export default function AdminDashboardPage() {
 
               <button
                 type="button"
-                className="btn btn-info rounded-pill px-4"
+                className="btn btn-primary rounded-pill px-4"
                 onClick={loadDashboardData}
               >
                 <i className="bi bi-arrow-clockwise me-2"></i>

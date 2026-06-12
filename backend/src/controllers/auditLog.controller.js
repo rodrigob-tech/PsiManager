@@ -39,3 +39,31 @@ export const getAuditLogs = async (req, res) => {
     });
   }
 };
+export const clearAuditLogs = async (req, res) => {
+  try {
+    const clinicId = req.user?.clinicId;
+
+    if (!clinicId) {
+      return res.status(400).json({
+        error: "Usuário não está vinculado a uma clínica",
+      });
+    }
+
+    const result = await prisma.auditLog.deleteMany({
+      where: {
+        clinicId,
+      },
+    });
+
+    return res.json({
+      message: "Logs de auditoria limpos com sucesso",
+      deletedCount: result.count,
+    });
+  } catch (error) {
+    console.error("Erro ao limpar logs de auditoria:", error);
+
+    return res.status(500).json({
+      error: "Erro ao limpar logs de auditoria",
+    });
+  }
+};
