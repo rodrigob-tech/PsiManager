@@ -276,7 +276,7 @@ export default function FinancePage() {
 
                   <button
                     type="button"
-                    className="btn btn-pm-ghost rounded-pill px-4"
+                    className="btn btn-success rounded-pill px-4"
                     onClick={loadData}
                   >
                     <i className="bi bi-arrow-clockwise me-2"></i>
@@ -294,7 +294,7 @@ export default function FinancePage() {
                   <div className="table-responsive">
                     <table className="table align-middle">
                       <thead>
-                        <tr className="text-secondary">
+                        <tr className="text-main">
                           <th>Paciente</th>
                           <th>Agendamento</th>
                           <th>Valor</th>
@@ -352,26 +352,29 @@ export default function FinancePage() {
                               <div className="d-flex justify-content-end gap-2">
                                 <button
                                   type="button"
-                                  className="btn btn-sm btn-outline-primary rounded-pill"
+                                  className="btn btn-sm btn-warning rounded-pill"
                                   onClick={() => setEditingPayment(payment)}
                                 >
+                                  <i className="bi bi-pencil me-1"></i>
                                   Editar
                                 </button>
-
-                                <button
+                                 <button
                                   type="button"
-                                  className="btn btn-sm btn-outline-danger rounded-pill"
-                                  onClick={() => handleDeletePayment(payment.id)}
-                                >
-                                  Excluir
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-outline-primary"
+                                  className="btn btn-sm btn-info rounded-pill"
                                   onClick={() => handleOpenReceipt(payment.id)}
                                 >
+                                  <i className="bi bi-files me-1"></i>
                                   Recibo
                                 </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-danger rounded-pill"
+                                  onClick={() => handleDeletePayment(payment.id)}
+                                >
+                                  <i className="bi bi-trash me-1"></i>
+                                  Excluir
+                                </button>
+                               
                               </div>
                             </td>
                           </tr>

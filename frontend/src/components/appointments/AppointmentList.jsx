@@ -52,12 +52,12 @@ export default function AppointmentList({ appointments, onDelete, onEdit }) {
                   {formatTime(appointment.date)}
                 </div>
 
-                <div className="text-secondary">
+                <div className="text-main">
                   {appointment.patient?.name || "Paciente não informado"} ·{" "}
                   {appointment.space?.name || "Espaço não informado"}
                 </div>
 
-                <div className="text-secondary small">
+                <div className="text-main small">
                   {formatDate(appointment.date)}
                   {appointment.psychologist?.name
                     ? ` · ${appointment.psychologist.name}`
@@ -76,6 +76,7 @@ export default function AppointmentList({ appointments, onDelete, onEdit }) {
                 class="btn btn-warning rounded-pill btn-sm"
                 onClick={() => onEdit(appointment)}
               >
+                <i className="bi bi-pencil me-1"></i>
                 Editar
               </button>
 
@@ -84,6 +85,7 @@ export default function AppointmentList({ appointments, onDelete, onEdit }) {
                 class="btn btn-danger rounded-pill btn-sm"
                 onClick={() => onDelete(appointment.id)}
               >
+                <i className="bi bi-trash me-1"></i>
                 Excluir
               </button>
             </div>

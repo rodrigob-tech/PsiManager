@@ -20,7 +20,7 @@ export default function PatientList({
     <div className="table-responsive">
       <table className="table align-middle">
         <thead>
-          <tr className="text-secondary">
+          <tr className="text-table-header">
             <th>Paciente</th>
             <th>Status</th>
             <th>Contato</th>
@@ -39,7 +39,7 @@ export default function PatientList({
 
                   <div>
                     <strong>{patient.name}</strong>
-                    <div className="text-secondary small">
+                    <div className="text-main small">
                       CPF: {patient.cpf || "Não informado"}
                     </div>
                   </div>
@@ -54,14 +54,14 @@ export default function PatientList({
 
               <td>
                 <div>{patient.email || "E-mail não informado"}</div>
-                <div className="text-secondary small">
+                <div className="text-main small">
                   {patient.phone || "Telefone não informado"}
                 </div>
               </td>
 
-              <td className="text-secondary">{formatDate(patient.birthDate)}</td>
+              <td className="text-main">{formatDate(patient.birthDate)}</td>
 
-              <td className="text-secondary">
+              <td className="text-main">
                 {patient.emergencyName || "Não informado"}
                 {patient.emergencyPhone ? ` - ${patient.emergencyPhone}` : ""}
               </td>
@@ -73,6 +73,7 @@ export default function PatientList({
                     className="btn btn-warning rounded-pill btn-sm"
                     onClick={() => onEdit(patient)}
                   >
+                    <i className="bi bi-pencil me-1"></i>
                     Editar
                   </button>
 
@@ -82,6 +83,7 @@ export default function PatientList({
                       className="btn btn-info rounded-pill btn-sm"
                       onClick={() => onOpenMedicalRecord(patient)}
                     >
+                      <i className="bi bi-file-earmark-medical me-1"></i>
                       Prontuário
                     </button>
                   )}
@@ -91,12 +93,13 @@ export default function PatientList({
                     className="btn btn-outline-info rounded-pill btn-sm"
                     onClick={() => onOpenPatientFile(patient.id)}
                   >
+                    <i className="bi bi-filetype-pdf me-1"></i>
                     Ficha PDF
                   </button>
 
                   <button
                     type="button"
-                    className="btn btn-primary rounded-pill btn-sm"
+                    className="btn btn-success rounded-pill btn-sm"
                     onClick={() => onSendReminder(patient)}
                     disabled={!patient.email}
                     title={
@@ -104,7 +107,7 @@ export default function PatientList({
                         ? "Enviar lembrete por e-mail"
                         : "Paciente não possui e-mail cadastrado"
                     }
-                  >
+                  ><i className="bi bi-bell me-1"></i>
                     Lembrete
                   </button>
 
@@ -113,6 +116,7 @@ export default function PatientList({
                     className="btn btn-danger rounded-pill btn-sm"
                     onClick={() => onDelete(patient.id)}
                   >
+                    <i className="bi bi-trash me-1"></i>
                     Excluir
                   </button>
                 </div>

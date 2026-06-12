@@ -184,19 +184,20 @@ export default function AppointmentForm({
     </div>
 
     <div className="d-flex justify-content-end gap-2 mt-2 flex-wrap">
+      <button type="submit" class="btn btn-success rounded-pill">
+        {editingAppointment ? "Salvar alterações" : "Salvar agendamento"}
+      </button>
       {editingAppointment && (
         <button
           type="button"
           onClick={onCancelEdit}
-          className="btn btn-pm-ghost rounded-pill px-4"
+          className="btn btn-danger rounded-pill px-4"
         >
           Cancelar
         </button>
       )}
 
-      <button type="submit" class="btn btn-info rounded-pill">
-        {editingAppointment ? "Salvar alterações" : "Salvar agendamento"}
-      </button>
+      
     </div>
   </form>
 );

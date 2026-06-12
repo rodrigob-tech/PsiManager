@@ -224,12 +224,13 @@ const filteredPatients = patients.filter((patient) => {
 
         <button
           type="button"
-          className="btn btn-success rounded-pill px-4"
+          className="btn btn-pm-primary rounded-pill py-2"
           onClick={() => {
             setEditingPatient(null);
             setShowPatientForm((prev) => !prev);
           }}
         >
+          <i className="bi bi-plus-lg me-2"></i>
           {showPatientForm ? "Fechar cadastro" : "Criar paciente"}
         </button>
       </div>

@@ -50,7 +50,43 @@ function translatePaymentMethod(method) {
 
   return map[method] || method || "Não informado";
 }
+function translatePatientStatus(status) {
+  const map = {
+    ACTIVE: "Ativo",
+    INACTIVE: "Inativo",
+    ARCHIVED: "Arquivado",
+  };
 
+  return map[status] || status || "Não informado";
+}
+
+function translateMedicalRecordStatus(status) {
+  const map = {
+    OPEN: "Aberto",
+    CLOSED: "Fechado",
+    ARCHIVED: "Arquivado",
+  };
+
+  return map[status] || status || "Não informado";
+}
+
+function translateAppointmentStatus(status) {
+  const map = {
+    scheduled: "Agendado",
+    confirmed: "Confirmado",
+    pending: "Pendente",
+    canceled: "Cancelado",
+    done: "Concluído",
+
+    SCHEDULED: "Agendado",
+    CONFIRMED: "Confirmado",
+    PENDING: "Pendente",
+    CANCELED: "Cancelado",
+    DONE: "Concluído",
+  };
+
+  return map[status] || status || "Sem status";
+}
 export const generatePaymentReceipt = async (req, res) => {
   try {
     const clinicId = getClinicId(req);
@@ -352,7 +388,7 @@ export const generatePatientFile = async (req, res) => {
     doc.text(`CPF: ${patient.cpf || "Não informado"}`);
     doc.text(`Data de nascimento: ${formatDate(patient.birthDate)}`);
     doc.text(`Gênero: ${patient.gender || "Não informado"}`);
-    doc.text(`Status: ${patient.status || "Não informado"}`);
+    doc.text(`Status: ${translatePatientStatus(patient.status)}`);
 
     doc.moveDown(1.5);
 
@@ -387,26 +423,51 @@ export const generatePatientFile = async (req, res) => {
 
     doc.moveDown(0.5);
 
-    doc.fontSize(11);
-    doc.text(`Observações: ${patient.notes || "Não informado"}`);
+   doc.fontSize(11);
+doc.text(`Observações do paciente: ${patient.notes || "Não informado"}`);
 
-    if (patient.medicalRecord) {
-      doc.moveDown(0.7);
-      doc.text(`Status do prontuário: ${patient.medicalRecord.status || "Não informado"}`);
-      doc.text(`Queixa principal: ${patient.medicalRecord.mainComplaint || "Não informado"}`);
-      doc.text(
-        `Hipótese diagnóstica: ${patient.medicalRecord.diagnosisHypothesis || "Não informado"
-        }`
-      );
-      doc.text(`Notas clínicas: ${patient.medicalRecord.clinicalNotes || "Não informado"}`);
-      doc.text(
-        `Psicólogo responsável: ${patient.medicalRecord.psychologist?.name || "Não informado"
-        }`
-      );
-    } else {
-      doc.text("Prontuário: Não cadastrado");
-    }
+doc.moveDown(0.7);
 
+doc.fontSize(12).text("Dados principais do prontuário", {
+  underline: true,
+});
+
+doc.moveDown(0.4);
+doc.fontSize(11);
+
+if (patient.medicalRecord) {
+  doc.text(
+    `Status do prontuário: ${translateMedicalRecordStatus(
+      patient.medicalRecord.status
+    )}`
+  );
+
+  doc.text(
+    `Queixa principal: ${
+      patient.medicalRecord.mainComplaint || "Não informado"
+    }`
+  );
+
+  doc.text(
+    `Hipótese diagnóstica: ${
+      patient.medicalRecord.diagnosisHypothesis || "Não informado"
+    }`
+  );
+
+  doc.text(
+    `Notas clínicas: ${
+      patient.medicalRecord.clinicalNotes || "Não informado"
+    }`
+  );
+
+  doc.text(
+    `Psicólogo responsável: ${
+      patient.medicalRecord.psychologist?.name || "Não informado"
+    }`
+  );
+} else {
+  doc.text("Prontuário: Não cadastrado");
+}
     doc.moveDown(1.5);
 
     doc.fontSize(14).text("Últimos Agendamentos", {
@@ -421,8 +482,9 @@ export const generatePatientFile = async (req, res) => {
       patient.appointments.forEach((appointment, index) => {
         doc.fontSize(11).text(
           `${index + 1}. ${formatDateTime(appointment.date)} - ${appointment.psychologist?.name || "Psicólogo não informado"
-          } - ${appointment.space?.name || "Espaço não informado"} - ${appointment.status || "Sem status"
-          }`
+          } - ${appointment.space?.name || "Espaço não informado"} - ${translateAppointmentStatus(
+            appointment.status
+          )}`
         );
       });
     }

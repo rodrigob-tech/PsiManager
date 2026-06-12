@@ -24,10 +24,10 @@ function MetricCard({ icon, label, value, helper }) {
       </div>
 
       <div className="fs-2 fw-bold mt-3">{value}</div>
-      <div className="text-secondary">{label}</div>
+      <div className="metric-label">{label}</div>
 
       {helper && (
-        <div className="small text-secondary mt-2">
+        <div className="small metric-helper mt-2">
           {helper}
         </div>
       )}
@@ -140,11 +140,11 @@ export default function AdminDashboardPage() {
           <div className="premium-card p-4 mb-4">
             <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
               <div>
-                <span className="status-pill">PsiManager</span>
+                
                 <h2 className="h4 fw-bold mt-3 mb-1">
                   Bem-vindo{user?.name ? `, ${user.name}` : ""}
                 </h2>
-                <p className="text-secondary mb-0">
+                <p className="metric-label mb-0">
                   Perfil: {user?.role || "Usuário interno"}
                 </p>
               </div>
@@ -204,7 +204,7 @@ export default function AdminDashboardPage() {
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
                     <h2 className="h5 fw-bold mb-1">Próximos agendamentos</h2>
-                    <p className="text-secondary mb-0">
+                    <p className="metric-helper mb-0">
                       Atendimentos mais próximos na agenda.
                     </p>
                   </div>
@@ -227,7 +227,7 @@ export default function AdminDashboardPage() {
                           <div className="fw-bold">
                             {appointment.patient?.name || "Paciente não informado"}
                           </div>
-                          <div className="text-secondary small">
+                          <div className="metric-helper small">
                             {formatDateTime(appointment.date)}
                             {appointment.psychologist?.name
                               ? ` · ${appointment.psychologist.name}`
@@ -254,22 +254,22 @@ export default function AdminDashboardPage() {
 
                 <div className="d-grid gap-3">
                   <div className="soft-card p-3 d-flex justify-content-between">
-                    <span className="text-secondary">Pacientes cadastrados</span>
+                    <span className="metric-label">Pacientes cadastrados</span>
                     <strong>{patients.length}</strong>
                   </div>
 
                   <div className="soft-card p-3 d-flex justify-content-between">
-                    <span className="text-secondary">Agendamentos totais</span>
+                    <span className="metric-label">Agendamentos totais</span>
                     <strong>{appointments.length}</strong>
                   </div>
 
                   <div className="soft-card p-3 d-flex justify-content-between">
-                    <span className="text-secondary">Espaços cadastrados</span>
+                    <span className="metric-label">Espaços cadastrados</span>
                     <strong>{spaces.length}</strong>
                   </div>
 
                   <div className="soft-card p-3 d-flex justify-content-between">
-                    <span className="text-secondary">Bloqueios de agenda</span>
+                    <span className="metric-label">Bloqueios de agenda</span>
                     <strong>{blockedTimes.length}</strong>
                   </div>
                 </div>

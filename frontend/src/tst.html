@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR" class="h-full">
- <head>
+ <head><script src="/_sdk/telemetry_sdk.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PsiManager</title>
@@ -11,7 +11,290 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
- 
+  <style>
+    html, body, #root {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+      background: #f6f7fb;
+    }
+
+    :root {
+      --pm-bg: #f6f7fb;
+      --pm-surface: #ffffff;
+      --pm-text: #172033;
+      --pm-primary: #2563eb;
+      --pm-accent: #13b8a6;
+      --pm-muted: #64748b;
+      --pm-border: rgba(23, 32, 51, 0.1);
+      --pm-soft: rgba(37, 99, 235, 0.09);
+      --pm-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+      --pm-radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .app-shell {
+      height: 100%;
+      width: 100%;
+      overflow: auto;
+      color: var(--pm-text);
+      font-family: "Aptos Display", "Manrope", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 5%, rgba(37, 99, 235, 0.14), transparent 34%),
+        radial-gradient(circle at 88% 10%, rgba(19, 184, 166, 0.16), transparent 32%),
+        linear-gradient(135deg, #f8fafc 0%, var(--pm-bg) 48%, #eef6ff 100%);
+    }
+
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--pm-border);
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background:
+        linear-gradient(135deg, var(--pm-primary), var(--pm-accent));
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.22);
+      font-weight: 900;
+    }
+
+    .hero-card {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.86);
+      border-radius: 34px;
+      box-shadow: var(--pm-shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .premium-card {
+      background: var(--pm-surface);
+      border: 1px solid var(--pm-border);
+      border-radius: var(--pm-radius);
+      box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
+    }
+
+    .soft-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--pm-border);
+      border-radius: 22px;
+    }
+
+    .btn-pm-primary {
+      border: 0;
+      color: white;
+      background: linear-gradient(135deg, var(--pm-primary), #1748c6);
+      box-shadow: 0 16px 28px rgba(37, 99, 235, 0.24);
+    }
+
+    .btn-pm-primary:hover {
+      color: white;
+      transform: translateY(-1px);
+      filter: brightness(0.96);
+    }
+
+    .btn-pm-ghost {
+      border: 1px solid var(--pm-border);
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--pm-text);
+    }
+
+    .btn-pm-ghost:hover {
+      background: var(--pm-soft);
+      color: var(--pm-primary);
+      border-color: rgba(37, 99, 235, 0.24);
+    }
+
+    .sidebar {
+      width: 284px;
+      flex: 0 0 284px;
+      background: #0f172a;
+      color: #e5e7eb;
+      border-radius: 0 34px 34px 0;
+      box-shadow: 18px 0 48px rgba(15, 23, 42, 0.16);
+    }
+
+    .sidebar-link {
+      width: 100%;
+      border: 0;
+      color: rgba(255, 255, 255, 0.72);
+      background: transparent;
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      transition: all 0.18s ease;
+    }
+
+    .sidebar-link:hover,
+    .sidebar-link.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-link.active {
+      box-shadow: inset 3px 0 0 var(--pm-accent);
+    }
+
+    .topbar {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--pm-border);
+      border-radius: 24px;
+      backdrop-filter: blur(18px);
+    }
+
+    .metric-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: var(--pm-soft);
+      color: var(--pm-primary);
+    }
+
+    .mini-chart {
+      height: 170px;
+      display: flex;
+      align-items: end;
+      gap: 12px;
+      padding: 18px;
+      border-radius: 20px;
+      background:
+        linear-gradient(180deg, rgba(37, 99, 235, 0.08), rgba(19, 184, 166, 0.06));
+    }
+
+    .bar {
+      flex: 1;
+      min-width: 18px;
+      border-radius: 999px 999px 8px 8px;
+      background: linear-gradient(180deg, var(--pm-primary), var(--pm-accent));
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+    }
+
+    .donut {
+      width: 168px;
+      height: 168px;
+      border-radius: 50%;
+      background:
+        conic-gradient(var(--pm-primary) 0 62%, var(--pm-accent) 62% 82%, #dbeafe 82% 100%);
+      position: relative;
+      margin: auto;
+    }
+
+    .donut::after {
+      content: "";
+      position: absolute;
+      inset: 26px;
+      border-radius: 50%;
+      background: var(--pm-surface);
+    }
+
+    .donut-label {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      z-index: 2;
+      font-weight: 800;
+    }
+
+    .status-pill {
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--pm-soft);
+      color: var(--pm-primary);
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: white;
+      background: linear-gradient(135deg, var(--pm-primary), var(--pm-accent));
+    }
+
+    .form-control, .form-select {
+      border-radius: 15px;
+      border-color: var(--pm-border);
+      padding: 12px 14px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+      border-color: var(--pm-primary);
+    }
+
+    .table {
+      --bs-table-bg: transparent;
+    }
+
+    .route-fade {
+      animation: fadeUp 0.36s ease both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    button, a, input, select, textarea {
+      outline-color: var(--pm-accent);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 992px) {
+      .dashboard-layout {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        flex: auto;
+        border-radius: 0 0 28px 28px;
+      }
+
+      .sidebar-nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 576px) {
+      .sidebar-nav {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card {
+        border-radius: 24px;
+      }
+    }
+  </style>
   <style>body { box-sizing: border-box; }</style>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
@@ -139,11 +422,16 @@
       { key: "criar-agendamento", label: "Criar agendamento", icon: "bi-calendar-plus" },
       { key: "pacientes", label: "Pacientes", icon: "bi-people" },
       { key: "criar-paciente", label: "Criar paciente", icon: "bi-person-plus" },
+      { key: "espaços", label: "Espaços", icon: "bi-door-open" },
+      { key: "bloqueio-horarios", label: "Bloqueio de horários", icon: "bi-calendar-x" },
       { key: "financeiro", label: "Financeiro", icon: "bi-wallet2" },
       { key: "relatorios", label: "Relatórios", icon: "bi-bar-chart" },
       { key: "perfil", label: "Perfil profissional", icon: "bi-person-badge" },
       { key: "configuracoes", label: "Configurações", icon: "bi-sliders" }
     ];
+
+    // Mock patient ID for demonstration
+    let currentPatientId = "patient-001";
 
     const patients = [
       { name: "Marina Alves", age: 32, status: "Em acompanhamento", next: "Hoje, 14:00" },
@@ -667,7 +955,11 @@
                       <td>{p.age}</td>
                       <td><span className="status-pill">{p.status}</span></td>
                       <td className="text-secondary">{p.next}</td>
-                      <td><button className="btn btn-pm-ghost rounded-pill btn-sm">Ver perfil</button></td>
+                      <td>
+                        <button className="btn btn-pm-ghost rounded-pill btn-sm" onClick={() => { currentPatientId = "patient-" + p.name.toLowerCase().replace(/\s/g, "-"); go("prontuario"); }}>
+                          Ver prontuário
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -866,6 +1158,781 @@
       );
     }
 
+    function Spaces({ go }) {
+      const [spaceName, setSpaceName] = useState("");
+      const [spaceDescription, setSpaceDescription] = useState("");
+      const [spaces, setSpaces] = useState([]);
+      const [loading, setLoading] = useState(false);
+
+      React.useEffect(() => {
+        const initializeSpaces = async () => {
+          if (window.dataSdk) {
+            const handler = {
+              onDataChanged(data) {
+                setSpaces(data.filter(s => !s.start_date));
+              }
+            };
+            const result = await window.dataSdk.init(handler);
+            if (!result.isOk) {
+              console.error("Failed to initialize Data SDK");
+            }
+          }
+        };
+        initializeSpaces();
+      }, []);
+
+      const handleCreateSpace = async (e) => {
+        e.preventDefault();
+
+        if (!spaceName.trim()) {
+          alert("Por favor, preencha o nome do espaço.");
+          return;
+        }
+
+        if (spaces.length >= 999) {
+          alert("Limite máximo de 999 espaços atingido.");
+          return;
+        }
+
+        setLoading(true);
+
+        const result = await window.dataSdk.create({
+          name: spaceName,
+          description: spaceDescription,
+          created_at: new Date().toISOString(),
+          start_date: "",
+          end_date: ""
+        });
+
+        if (result.isOk) {
+          setSpaceName("");
+          setSpaceDescription("");
+        } else {
+          alert("Erro ao criar espaço: " + result.error.message);
+        }
+
+        setLoading(false);
+      };
+
+      const handleDeleteSpace = async (space) => {
+        setLoading(true);
+        const result = await window.dataSdk.delete(space);
+
+        if (!result.isOk) {
+          alert("Erro ao deletar espaço: " + result.error.message);
+        }
+
+        setLoading(false);
+      };
+
+      return (
+        <DashboardLayout current="espaços" go={go} title="Espaços" subtitle="Gerencie salas e ambientes de atendimento.">
+          <div className="row g-4">
+            <div className="col-lg-6">
+              <div className="premium-card p-4">
+                <h2 className="h5 fw-bold mb-4">Criar novo espaço</h2>
+
+                <form onSubmit={handleCreateSpace}>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold" htmlFor="space-name">Nome do espaço</label>
+                    <input
+                      id="space-name"
+                      className="form-control"
+                      placeholder="Ex: Consultório A, Sala de espera, Reunião"
+                      value={spaceName}
+                      onChange={(e) => setSpaceName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold" htmlFor="space-description">Descrição</label>
+                    <textarea
+                      id="space-description"
+                      className="form-control"
+                      rows="4"
+                      placeholder="Ex: Consultório principal com ar condicionado, sofá de espera, armários..."
+                      value={spaceDescription}
+                      onChange={(e) => setSpaceDescription(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-pm-primary rounded-pill w-100 py-2"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Criando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-plus-lg me-2"></i>Criar espaço
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <div className="col-lg-6">
+              <div className="premium-card p-4 h-100">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h2 className="h5 fw-bold mb-0">Espaços existentes</h2>
+                  <span className="badge bg-primary rounded-pill">{spaces.length}</span>
+                </div>
+
+                {spaces.length === 0 ? (
+                  <div className="soft-card p-4 text-center">
+                    <i className="bi bi-door-open fs-2 text-muted mb-2 d-block"></i>
+                    <p className="text-secondary mb-0">Nenhum espaço criado ainda. Comece criando um novo espaço!</p>
+                  </div>
+                ) : (
+                  <div className="d-grid gap-3">
+                    {spaces.map((space) => (
+                      <div className="soft-card p-3" key={space.__backendId}>
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <h3 className="h6 fw-bold mb-1">{space.name}</h3>
+                            <p className="text-secondary small mb-0">{space.description}</p>
+                          </div>
+                          <button
+                            className="btn btn-sm btn-outline-danger rounded-pill"
+                            onClick={() => handleDeleteSpace(space)}
+                            disabled={loading}
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                        <div className="text-secondary small">
+                          Criado em {new Date(space.created_at).toLocaleDateString("pt-BR")}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function BlockSchedule({ go }) {
+      const [startDate, setStartDate] = useState("");
+      const [endDate, setEndDate] = useState("");
+      const [blocks, setBlocks] = useState([]);
+      const [loading, setLoading] = useState(false);
+
+      React.useEffect(() => {
+        const initializeBlocks = async () => {
+          if (window.dataSdk) {
+            const handler = {
+              onDataChanged(data) {
+                setBlocks(data.filter(b => b.start_date));
+              }
+            };
+            const result = await window.dataSdk.init(handler);
+            if (!result.isOk) {
+              console.error("Failed to initialize Data SDK");
+            }
+          }
+        };
+        initializeBlocks();
+      }, []);
+
+      const handleCreateBlock = async (e) => {
+        e.preventDefault();
+
+        if (!startDate || !endDate) {
+          alert("Por favor, preencha as datas de início e fim.");
+          return;
+        }
+
+        if (new Date(startDate) > new Date(endDate)) {
+          alert("A data de início não pode ser maior que a data de fim.");
+          return;
+        }
+
+        if (blocks.length >= 999) {
+          alert("Limite máximo de 999 bloqueios atingido.");
+          return;
+        }
+
+        setLoading(true);
+
+        const result = await window.dataSdk.create({
+          name: `Bloqueio ${new Date(startDate).toLocaleDateString("pt-BR")}`,
+          description: "",
+          created_at: new Date().toISOString(),
+          start_date: startDate,
+          end_date: endDate,
+          patient_id: "",
+          status: "",
+          queixa_principal: "",
+          hipotese_diagnostica: "",
+          notas_clinicas: "",
+          tipo: "",
+          data_evolucao: "",
+          evolucao_sessao: "",
+          conduta: "",
+          notas_privadas: ""
+        });
+
+        if (result.isOk) {
+          setStartDate("");
+          setEndDate("");
+        } else {
+          alert("Erro ao criar bloqueio: " + result.error.message);
+        }
+
+        setLoading(false);
+      };
+
+      const handleDeleteBlock = async (block) => {
+        setLoading(true);
+        const result = await window.dataSdk.delete(block);
+
+        if (!result.isOk) {
+          alert("Erro ao deletar bloqueio: " + result.error.message);
+        }
+
+        setLoading(false);
+      };
+
+      const formatDateRange = (start, end) => {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const sameDay = startDate.toDateString() === endDate.toDateString();
+
+        if (sameDay) {
+          return startDate.toLocaleDateString("pt-BR") + " (dia todo)";
+        } else {
+          return `${startDate.toLocaleDateString("pt-BR")} a ${endDate.toLocaleDateString("pt-BR")}`;
+        }
+      };
+
+      return (
+        <DashboardLayout current="bloqueio-horarios" go={go} title="Bloqueio de horários" subtitle="Bloqueie períodos de indisponibilidade para consultas.">
+          <div className="row g-4">
+            <div className="col-lg-6">
+              <div className="premium-card p-4">
+                <h2 className="h5 fw-bold mb-4">Criar novo bloqueio</h2>
+
+                <form onSubmit={handleCreateBlock}>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold" htmlFor="block-start">Data de início</label>
+                    <input
+                      id="block-start"
+                      type="date"
+                      className="form-control"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold" htmlFor="block-end">Data de fim</label>
+                    <input
+                      id="block-end"
+                      type="date"
+                      className="form-control"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="soft-card p-3 mb-4">
+                    <div className="small text-secondary">
+                      <i className="bi bi-info-circle me-2"></i>
+                      Use esse bloqueio para férias, eventos, manutenção ou períodos de indisponibilidade.
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-pm-primary rounded-pill w-100 py-2"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Bloqueando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-calendar-x me-2"></i>Criar bloqueio
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <div className="col-lg-6">
+              <div className="premium-card p-4 h-100">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h2 className="h5 fw-bold mb-0">Horários bloqueados</h2>
+                  <span className="badge bg-danger rounded-pill">{blocks.length}</span>
+                </div>
+
+                {blocks.length === 0 ? (
+                  <div className="soft-card p-4 text-center">
+                    <i className="bi bi-calendar-check fs-2 text-muted mb-2 d-block"></i>
+                    <p className="text-secondary mb-0">Nenhum bloqueio criado. Sua agenda está completamente disponível!</p>
+                  </div>
+                ) : (
+                  <div className="d-grid gap-3">
+                    {blocks.map((block) => (
+                      <div className="soft-card p-3" key={block.__backendId} style={{ borderLeft: "4px solid var(--pm-primary)" }}>
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <h3 className="h6 fw-bold mb-1 d-flex align-items-center gap-2">
+                              <i className="bi bi-calendar-x"></i>
+                              {formatDateRange(block.start_date, block.end_date)}
+                            </h3>
+                            <div className="text-secondary small">
+                              {(() => {
+                                const start = new Date(block.start_date);
+                                const end = new Date(block.end_date);
+                                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                                return `${days} dia${days > 1 ? "s" : ""} bloqueado${days > 1 ? "s" : ""}`;
+                              })()}
+                            </div>
+                          </div>
+                          <button
+                            className="btn btn-sm btn-outline-danger rounded-pill"
+                            onClick={() => handleDeleteBlock(block)}
+                            disabled={loading}
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
+    function MedicalRecord({ go }) {
+      const [prontuarios, setProntuarios] = useState([]);
+      const [evolucoes, setEvolucoes] = useState([]);
+      const [loading, setLoading] = useState(false);
+      
+      // Prontuário principal
+      const [status, setStatus] = useState("aberto");
+      const [queixaPrincipal, setQueixaPrincipal] = useState("");
+      const [hipoteseDiagnostica, setHipoteseDiagnostica] = useState("");
+      const [notasClinicas, setNotasClinicas] = useState("");
+      
+      // Evolução
+      const [dataEvolucao, setDataEvolucao] = useState("");
+      const [evolucaoSessao, setEvolucaoSessao] = useState("");
+      const [conduta, setConduta] = useState("");
+      const [notasPrivadas, setNotasPrivadas] = useState("");
+
+      React.useEffect(() => {
+        const initializeMedicalRecord = async () => {
+          if (window.dataSdk) {
+            const handler = {
+              onDataChanged(data) {
+                const records = data.filter(r => r.patient_id === currentPatientId);
+                setProntuarios(records.filter(r => r.status && !r.data_evolucao));
+                setEvolucoes(records.filter(r => r.data_evolucao));
+              }
+            };
+            const result = await window.dataSdk.init(handler);
+            if (!result.isOk) {
+              console.error("Failed to initialize Data SDK");
+            }
+          }
+        };
+        initializeMedicalRecord();
+      }, []);
+
+      const handleSaveProntuario = async (e) => {
+        e.preventDefault();
+
+        if (!queixaPrincipal.trim() || !hipoteseDiagnostica.trim()) {
+          alert("Por favor, preencha queixa principal e hipótese diagnóstica.");
+          return;
+        }
+
+        setLoading(true);
+
+        const result = await window.dataSdk.create({
+          name: `Prontuário ${currentPatientId}`,
+          description: queixaPrincipal,
+          created_at: new Date().toISOString(),
+          start_date: "",
+          end_date: "",
+          patient_id: currentPatientId,
+          status: status,
+          queixa_principal: queixaPrincipal,
+          hipotese_diagnostica: hipoteseDiagnostica,
+          notas_clinicas: notasClinicas,
+          tipo: "prontuario",
+          data_evolucao: "",
+          evolucao_sessao: "",
+          conduta: "",
+          notas_privadas: ""
+        });
+
+        if (result.isOk) {
+          setQueixaPrincipal("");
+          setHipoteseDiagnostica("");
+          setNotasClinicas("");
+          setStatus("aberto");
+        } else {
+          alert("Erro ao salvar prontuário: " + result.error.message);
+        }
+
+        setLoading(false);
+      };
+
+      const handleSaveEvolucao = async (e) => {
+        e.preventDefault();
+
+        if (!dataEvolucao || !evolucaoSessao.trim() || !conduta.trim()) {
+          alert("Por favor, preencha data, evolução da sessão e conduta.");
+          return;
+        }
+
+        if (evolucoes.length >= 999) {
+          alert("Limite máximo de 999 evoluções atingido.");
+          return;
+        }
+
+        setLoading(true);
+
+        const result = await window.dataSdk.create({
+          name: `Evolução ${dataEvolucao}`,
+          description: evolucaoSessao,
+          created_at: new Date().toISOString(),
+          start_date: "",
+          end_date: "",
+          patient_id: currentPatientId,
+          status: "",
+          queixa_principal: "",
+          hipotese_diagnostica: "",
+          notas_clinicas: "",
+          tipo: "evolucao",
+          data_evolucao: dataEvolucao,
+          evolucao_sessao: evolucaoSessao,
+          conduta: conduta,
+          notas_privadas: notasPrivadas
+        });
+
+        if (result.isOk) {
+          setDataEvolucao("");
+          setEvolucaoSessao("");
+          setConduta("");
+          setNotasPrivadas("");
+        } else {
+          alert("Erro ao registrar evolução: " + result.error.message);
+        }
+
+        setLoading(false);
+      };
+
+      const handleDeleteEvolucao = async (evolucao) => {
+        setLoading(true);
+        const result = await window.dataSdk.delete(evolucao);
+
+        if (!result.isOk) {
+          alert("Erro ao deletar evolução: " + result.error.message);
+        }
+
+        setLoading(false);
+      };
+
+      const handleDeleteProntuario = async (prontuario) => {
+        setLoading(true);
+        const result = await window.dataSdk.delete(prontuario);
+
+        if (!result.isOk) {
+          alert("Erro ao deletar prontuário: " + result.error.message);
+        }
+
+        setLoading(false);
+      };
+
+      const currentProntuario = prontuarios.length > 0 ? prontuarios[0] : null;
+
+      return (
+        <DashboardLayout current="pacientes" go={go} title="Prontuário do paciente" subtitle="Gerencie dados clínicos e evolução de atendimento.">
+          <div className="row g-4 mb-4">
+            <div className="col-12">
+              <button className="btn btn-pm-ghost rounded-pill" onClick={() => go("pacientes")}>
+                <i className="bi bi-arrow-left me-2"></i>Voltar para pacientes
+              </button>
+            </div>
+          </div>
+
+          {/* Seção Prontuário Principal */}
+          <div className="row g-4 mb-4">
+            <div className="col-lg-7">
+              <div className="premium-card p-4">
+                <h2 className="h5 fw-bold mb-4">Prontuário principal</h2>
+
+                <form onSubmit={handleSaveProntuario}>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold" htmlFor="status-select">Status</label>
+                    <select
+                      id="status-select"
+                      className="form-select"
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                    >
+                      <option value="aberto">Aberto</option>
+                      <option value="fechado">Fechado</option>
+                      <option value="arquivado">Arquivado</option>
+                    </select>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold" htmlFor="queixa-principal">Queixa principal</label>
+                    <textarea
+                      id="queixa-principal"
+                      className="form-control"
+                      rows="3"
+                      placeholder="Descreva a queixa principal do paciente..."
+                      value={queixaPrincipal}
+                      onChange={(e) => setQueixaPrincipal(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold" htmlFor="hipotese-diag">Hipótese diagnóstica</label>
+                    <textarea
+                      id="hipotese-diag"
+                      className="form-control"
+                      rows="3"
+                      placeholder="Indique a hipótese diagnóstica baseada na avaliação clínica..."
+                      value={hipoteseDiagnostica}
+                      onChange={(e) => setHipoteseDiagnostica(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold" htmlFor="notas-clinicas">Notas clínicas</label>
+                    <textarea
+                      id="notas-clinicas"
+                      className="form-control"
+                      rows="4"
+                      placeholder="Observações clínicas gerais, antecedentes, medicação em uso, etc..."
+                      value={notasClinicas}
+                      onChange={(e) => setNotasClinicas(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-pm-primary rounded-pill w-100 py-2"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-save me-2"></i>Salvar prontuário
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Prontuário Atual */}
+            <div className="col-lg-5">
+              <div className="premium-card p-4 h-100">
+                <h2 className="h5 fw-bold mb-4">Prontuário atual</h2>
+
+                {currentProntuario ? (
+                  <div>
+                    <div className="soft-card p-3 mb-3">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                          <div className="fw-bold text-secondary small">Status</div>
+                          <span className="status-pill">{currentProntuario.status}</span>
+                        </div>
+                        <button
+                          className="btn btn-sm btn-outline-danger rounded-pill"
+                          onClick={() => handleDeleteProntuario(currentProntuario)}
+                          disabled={loading}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="soft-card p-3 mb-3">
+                      <div className="fw-bold text-secondary small mb-2">Queixa principal</div>
+                      <p className="mb-0">{currentProntuario.queixa_principal}</p>
+                    </div>
+
+                    <div className="soft-card p-3 mb-3">
+                      <div className="fw-bold text-secondary small mb-2">Hipótese diagnóstica</div>
+                      <p className="mb-0">{currentProntuario.hipotese_diagnostica}</p>
+                    </div>
+
+                    <div className="soft-card p-3">
+                      <div className="fw-bold text-secondary small mb-2">Notas clínicas</div>
+                      <p className="mb-0">{currentProntuario.notas_clinicas || "Sem notas"}</p>
+                    </div>
+
+                    <div className="text-secondary small mt-3">
+                      <i className="bi bi-calendar me-1"></i>
+                      Criado em {new Date(currentProntuario.created_at).toLocaleDateString("pt-BR")}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="soft-card p-4 text-center">
+                    <i className="bi bi-file-earmark-medical fs-2 text-muted mb-2 d-block"></i>
+                    <p className="text-secondary mb-0">Nenhum prontuário criado ainda.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Seção Evolução */}
+          <div className="row g-4 mb-4">
+            <div className="col-lg-6">
+              <div className="premium-card p-4">
+                <h2 className="h5 fw-bold mb-4">Registrar evolução</h2>
+
+                <form onSubmit={handleSaveEvolucao}>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold" htmlFor="data-evolucao">Data da sessão</label>
+                    <input
+                      id="data-evolucao"
+                      type="date"
+                      className="form-control"
+                      value={dataEvolucao}
+                      onChange={(e) => setDataEvolucao(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold" htmlFor="evolucao-sessao">Evolução da sessão</label>
+                    <textarea
+                      id="evolucao-sessao"
+                      className="form-control"
+                      rows="3"
+                      placeholder="Descreva o progresso e as observações da sessão..."
+                      value={evolucaoSessao}
+                      onChange={(e) => setEvolucaoSessao(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold" htmlFor="conduta">Conduta</label>
+                    <textarea
+                      id="conduta"
+                      className="form-control"
+                      rows="3"
+                      placeholder="Indique a conduta clínica adotada..."
+                      value={conduta}
+                      onChange={(e) => setConduta(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold" htmlFor="notas-privadas">Notas privadas</label>
+                    <textarea
+                      id="notas-privadas"
+                      className="form-control"
+                      rows="3"
+                      placeholder="Observações pessoais para arquivo (não será compartilhado)..."
+                      value={notasPrivadas}
+                      onChange={(e) => setNotasPrivadas(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-pm-primary rounded-pill w-100 py-2"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Registrando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-check-circle me-2"></i>Registrar evolução
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Evoluções Existentes */}
+            <div className="col-lg-6">
+              <div className="premium-card p-4 h-100">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h2 className="h5 fw-bold mb-0">Evoluções registradas</h2>
+                  <span className="badge bg-primary rounded-pill">{evolucoes.length}</span>
+                </div>
+
+                {evolucoes.length === 0 ? (
+                  <div className="soft-card p-4 text-center">
+                    <i className="bi bi-graph-up fs-2 text-muted mb-2 d-block"></i>
+                    <p className="text-secondary mb-0">Nenhuma evolução registrada ainda.</p>
+                  </div>
+                ) : (
+                  <div className="d-grid gap-3" style={{ maxHeight: "500px", overflowY: "auto" }}>
+                    {evolucoes.map((evo) => (
+                      <div className="soft-card p-3" key={evo.__backendId} style={{ borderLeft: "4px solid var(--pm-accent)" }}>
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <h3 className="h6 fw-bold mb-1">
+                              <i className="bi bi-calendar me-2"></i>
+                              {new Date(evo.data_evolucao).toLocaleDateString("pt-BR")}
+                            </h3>
+                            <p className="text-secondary small mb-2">{evo.evolucao_sessao}</p>
+                            <div className="small">
+                              <strong>Conduta:</strong> {evo.conduta}
+                            </div>
+                            {evo.notas_privadas && (
+                              <div className="small text-muted mt-2">
+                                <i className="bi bi-lock me-1"></i>
+                                <strong>Notas:</strong> {evo.notas_privadas}
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            className="btn btn-sm btn-outline-danger rounded-pill"
+                            onClick={() => handleDeleteEvolucao(evo)}
+                            disabled={loading}
+                            title="Deletar evolução"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
     function App() {
       const [route, setRoute] = useState("landing");
 
@@ -886,7 +1953,10 @@
         if (route === "agenda") return <Agenda go={go} />;
         if (route === "criar-agendamento") return <CreateAppointment go={go} />;
         if (route === "pacientes") return <Patients go={go} />;
+        if (route === "prontuario") return <MedicalRecord go={go} />;
         if (route === "criar-paciente") return <CreatePatient go={go} />;
+        if (route === "espaços") return <Spaces go={go} />;
+        if (route === "bloqueio-horarios") return <BlockSchedule go={go} />;
         if (route === "financeiro") return <Finance go={go} />;
         if (route === "relatorios") return <Reports go={go} />;
         if (route === "perfil") return <Profile go={go} />;
@@ -899,5 +1969,5 @@
 
     ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ff71a3ba402139e',t:'MTc3OTQwMzQzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0a9ce6da2ff648d',t:'MTc4MTI3NzI3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

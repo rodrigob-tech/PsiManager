@@ -9,7 +9,7 @@
       overflow: hidden;
       background: #f6f7fb;
     }
-
+    
     :root {
       --pm-bg: #f6f7fb;
       --pm-surface: #ffffff;
@@ -246,6 +246,34 @@
     .route-fade {
       animation: fadeUp 0.36s ease both;
     }
+
+/* Correção de cores de texto do PsiManager */
+
+.pm-text-main {
+  color: var(--pm-text) !important;
+  font-weight: 300
+}
+
+.pm-text-muted {
+  color: var(--pm-muted) !important;
+}
+
+.pm-table-header th {
+  color: var(--pm-text) !important;
+  font-weight: 800;
+}
+
+.metric-label {
+  color: var(--pm-text) !important;
+  font-weight: 700;
+}
+
+.metric-helper {
+  color: var(--pm-text) !important;
+}
+
+
+
 
     @keyframes fadeUp {
       from {

@@ -214,19 +214,22 @@ export default function PaymentForm({
       </div>
 
       <div className="d-flex justify-content-end gap-2 mt-4">
+        
+
+        <button type="submit" className="btn btn-pm-primary rounded-pill px-4">
+          <i className="bi bi-check me-1"></i>
+          {editingPayment ? "Atualizar pagamento" : "Registrar pagamento"}
+        </button>
         {editingPayment && (
           <button
             type="button"
-            className="btn btn-pm-ghost rounded-pill px-4"
+            className="btn btn-danger rounded-pill px-4"
             onClick={onCancelEdit}
           >
+            <i className="bi bi-trash me-1"></i>
             Cancelar edição
           </button>
         )}
-
-        <button type="submit" className="btn btn-pm-primary rounded-pill px-4">
-          {editingPayment ? "Atualizar pagamento" : "Registrar pagamento"}
-        </button>
       </div>
     </form>
   );

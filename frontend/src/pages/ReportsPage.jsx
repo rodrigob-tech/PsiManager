@@ -207,21 +207,24 @@ export default function ReportsPage() {
               type="submit"
               className="btn btn-pm-primary rounded-pill px-4"
             >
+              <i className="bi bi-funnel me-1"></i>
               Filtrar
             </button>
 
             <button
               type="button"
-              className="btn btn-pm-ghost rounded-pill px-4"
+              className="btn btn-warning rounded-pill px-4"
               onClick={handleClearFilters}
             >
+              <i className="bi bi-eraser me-1"></i>
               Limpar
             </button>
             <button
               type="button"
-              className="btn btn-outline-primary rounded-pill px-4"
+              className="btn btn-info rounded-pill px-4"
               onClick={handleOpenFinancialReportPdf}
             >
+              <i className="bi bi-filetype-pdf me-1"></i>
               Exportar PDF
             </button>
           </div>
@@ -279,22 +282,22 @@ export default function ReportsPage() {
 
                 <div className="d-grid gap-3">
                   <div className="soft-card p-3 d-flex justify-content-between">
-                    <span className="text-secondary">Agendados</span>
+                    <span className="fw-bold">Agendados</span>
                     <strong>{appointmentsByStatus.scheduled || 0}</strong>
                   </div>
 
                   <div className="soft-card p-3 d-flex justify-content-between">
-                    <span className="text-secondary">Realizados</span>
+                    <span className="fw-bold">Realizados</span>
                     <strong>{appointmentsByStatus.done || 0}</strong>
                   </div>
 
                   <div className="soft-card p-3 d-flex justify-content-between">
-                    <span className="text-secondary">Cancelados</span>
+                    <span className="fw-bold">Cancelados</span>
                     <strong>{appointmentsByStatus.canceled || 0}</strong>
                   </div>
 
                   <div className="soft-card p-3 d-flex justify-content-between">
-                    <span className="text-secondary">Taxa de realização</span>
+                    <span className="fw-bold">Taxa de realização</span>
                     <strong>{completionRate}%</strong>
                   </div>
                 </div>
@@ -315,7 +318,7 @@ export default function ReportsPage() {
                   <div className="table-responsive">
                     <table className="table align-middle">
                       <thead>
-                        <tr className="text-secondary">
+                        <tr className="pm-text-table-header">
                           <th>Psicólogo</th>
                           <th>Agendamentos</th>
                           <th>Receita</th>
@@ -328,7 +331,8 @@ export default function ReportsPage() {
                             <td>
                               <strong>{item.psychologistName}</strong>
                             </td>
-                            <td>{item.appointmentsCount}</td>
+                            <td>
+                              <strong>{item.appointmentsCount}</strong></td>
                             <td>
                               <strong>{formatCurrency(item.revenue)}</strong>
                             </td>
@@ -357,7 +361,7 @@ export default function ReportsPage() {
                   <div className="table-responsive">
                     <table className="table align-middle">
                       <thead>
-                        <tr className="text-secondary">
+                        <tr className="pm-text-table-header">
                           <th>Paciente</th>
                           <th>Data</th>
                           <th>Status</th>
@@ -408,7 +412,7 @@ export default function ReportsPage() {
                   <div className="table-responsive">
                     <table className="table align-middle">
                       <thead>
-                        <tr className="text-secondary">
+                        <tr className="pm-text-table-header">
                           <th>Paciente</th>
                           <th>Valor</th>
                           <th>Status</th>

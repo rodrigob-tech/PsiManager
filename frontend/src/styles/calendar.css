@@ -1,4 +1,5 @@
 .fc {
+  font-family: Arial, sans-serif;
   font-family: inherit;
 }
 
@@ -9,11 +10,29 @@
 }
 
 .fc .fc-button {
+  background: #1976d2 !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
   border-radius: 999px !important;
   font-weight: 600 !important;
   box-shadow: none !important;
 }
+.fc .fc-button:hover {
+  background: #1565c0 !important;
+}
 
+.fc .fc-button:disabled {
+  background: #90caf9 !important;
+}
+
+.fc .fc-daygrid-day-frame,
+.fc .fc-timegrid-slot,
+.fc .fc-scrollgrid {
+  background: #fff;
+  box-shadow: none !important;
+}
 .fc .fc-col-header-cell {
   background: #f8faff;
   color: #374151;
@@ -28,6 +47,7 @@
 }
 
 .fc .fc-event {
+  
   border: none !important;
   border-radius: 10px !important;
   padding: 2px 6px !important;

@@ -6,7 +6,7 @@
             <span className="status-pill">{trend}</span>
           </div>
           <div className="fs-2 fw-bold mt-3">{value}</div>
-          <div className="text-secondary">{label}</div>
+          <div className="metric-label">{label}</div>
         </div>
       );
     }
