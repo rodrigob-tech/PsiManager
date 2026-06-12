@@ -1,5 +1,5 @@
 .fc {
-  font-family: Arial, sans-serif;
+  font-family: inherit;
 }
 
 .fc .fc-toolbar-title {
@@ -9,26 +9,9 @@
 }
 
 .fc .fc-button {
-  background: #1976d2 !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 8px !important;
-  padding: 8px 12px !important;
+  border-radius: 999px !important;
   font-weight: 600 !important;
-}
-
-.fc .fc-button:hover {
-  background: #1565c0 !important;
-}
-
-.fc .fc-button:disabled {
-  background: #90caf9 !important;
-}
-
-.fc .fc-daygrid-day-frame,
-.fc .fc-timegrid-slot,
-.fc .fc-scrollgrid {
-  background: #fff;
+  box-shadow: none !important;
 }
 
 .fc .fc-col-header-cell {
@@ -46,10 +29,14 @@
 
 .fc .fc-event {
   border: none !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   padding: 2px 6px !important;
   font-size: 0.85rem !important;
   font-weight: 600 !important;
+}
+
+.fc .fc-bg-event {
+  opacity: 1 !important;
 }
 
 .fc .fc-timegrid-axis,
@@ -59,11 +46,36 @@
 }
 
 .fc .fc-day-today {
-  background: #eef6ff !important;
+  background: rgba(24, 188, 156, 0.08) !important;
 }
 
 .fc .fc-scrollgrid {
-  border-radius: 12px !important;
+  border-radius: 14px !important;
   overflow: hidden;
   border: 1px solid #e5e7eb !important;
+}
+
+.calendar-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.calendar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8f9fc;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #444;
+}
+
+.calendar-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
 }
