@@ -64,9 +64,19 @@ function AppLayout() {
 
       <main>
         <Routes>
+
+          <Route
+            path="/"
+            element={
+              <AdminProtectedRoute>
+                <Navigate to="/admin/dashboard" replace />
+              </AdminProtectedRoute>
+            }
+          />
+
           <Route path="/login-admin" element={<UserLoginPage />} />
 
-          
+
 
           <Route
             path="/admin/agenda"
@@ -165,11 +175,11 @@ function AppLayout() {
               </AdminProtectedRoute>
             }
           />
-         
 
-          
 
-         
+
+
+
 
           <Route
             path="/landing-page"

@@ -27,7 +27,7 @@ import {
     updateSpace,
     deleteSpace
 } from "../services/spaceService";
-import { getUserToken } from "../storages/userAuthStorage";
+import { getUserToken, getUserData } from "../storages/userAuthStorage";
 import { getPsychologists } from "../services/userService";
 import DashboardLayout from "../components/layout/DashboardLayout";
 
@@ -38,6 +38,7 @@ export default function AdminAgendaPage() {
     const [selectedSpaceFilter, setSelectedSpaceFilter] = useState("all");
     const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
     const [showSidebar, setShowSidebar] = useState(true);
+    const loggedUser = getUserData();
     async function loadData() {
         try {
             const token = getUserToken();
@@ -58,8 +59,19 @@ export default function AdminAgendaPage() {
                 getSpaces(authHeaders),
                 getPsychologists(authHeaders)
             ]);
-            const appointmentEvents = mapAppointmentsToEvents(appointmentsResponse.data);
-            const blockedEvents = mapBlockedTimesToEvents(blockedTimesResponse.data);
+            const appointments = appointmentsResponse.data || [];
+            const blockedTimes = blockedTimesResponse.data || [];
+
+            const visibleAppointments =
+                loggedUser?.role === "PSYCHOLOGIST"
+                    ? appointments.filter(
+                        (appointment) => appointment.psychologistId === loggedUser.id
+                    )
+                    : appointments;
+
+            const appointmentEvents = mapAppointmentsToEvents(visibleAppointments);
+            const blockedEvents = mapBlockedTimesToEvents(blockedTimes);
+
             setEvents([...appointmentEvents, ...blockedEvents]);
             setSpaces(spacesResponse.data);
         } catch (error) {
@@ -91,7 +103,7 @@ export default function AdminAgendaPage() {
             selectedSpaceFilter === "all" || eventSpace === selectedSpaceFilter;
 
 
-        
+
         return matchesStatus && matchesSpace;
     });
 
@@ -99,16 +111,16 @@ export default function AdminAgendaPage() {
         loadData();
     }, []);
     function getStatusLabel(status) {
-            const statusLabels = {
-                scheduled: "Agendado",
-                confirmed: "Confirmado",
-                pending: "Pendente",
-                canceled: "Cancelado",
-                done: "Concluído",
-            };
+        const statusLabels = {
+            scheduled: "Agendado",
+            confirmed: "Confirmado",
+            pending: "Pendente",
+            canceled: "Cancelado",
+            done: "Concluído",
+        };
 
-            return statusLabels[status] || status || "Não informado";
-        }
+        return statusLabels[status] || status || "Não informado";
+    }
     return (
         <DashboardLayout
             title="Calendário Geral"

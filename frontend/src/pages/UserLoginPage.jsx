@@ -40,7 +40,7 @@ export default function UserLoginPage() {
         user: response.data.user
       });
 
-      navigate("/", { replace: true });
+      navigate("/admin/dashboard", { replace: true });
     } catch (error) {
       setError(error.response?.data?.error || "Erro ao fazer login admin");
     } finally {
