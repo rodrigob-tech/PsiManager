@@ -14,7 +14,10 @@ const navItems = [
   { to: "/admin/pacientes", label: "Pacientes", icon: "bi-people" },
   { to: "/admin/agendamentos", label: "Agendamentos", icon: "bi-calendar-plus" },
   { to: "/admin/espacos", label: "Espaços", icon: "bi-building" },
-  { to: "/admin/bloqueios", label: "Bloqueios", icon: "bi-calendar-x" },
+  
+  ...(isAdmin
+    ? [{ to: "/admin/bloqueios", label: "Bloqueios", icon: "bi-calendar-x" }]
+    : []),
   { to: "/admin/finance", label: "Financeiro", icon: "bi-wallet2" },
   ...(isAdmin
     ? [{ to: "/admin/clinica", label: "Clínica", icon: "bi-building-gear" }]
