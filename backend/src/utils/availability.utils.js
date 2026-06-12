@@ -53,10 +53,39 @@ export function isWithinFutureLimit(startDate) {
 export function buildSlotEnd(startDate) {
   return addMinutes(startDate, APPOINTMENT_DURATION_MINUTES);
 }
+function getSaoPauloTimeParts(date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Sao_Paulo",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
 
+  const map = Object.fromEntries(
+    parts.map((part) => [part.type, part.value])
+  );
+
+  return {
+    hour: Number(map.hour),
+    minute: Number(map.minute),
+  };
+}
+
+function getMinutesInSaoPaulo(date) {
+  const { hour, minute } = getSaoPauloTimeParts(date);
+  return hour * 60 + minute;
+}
 export function isInsideBusinessHours(startDate, endDate) {
-  const { dayStart, dayEnd } = buildBusinessWindow(startDate);
-  return startDate >= dayStart && endDate <= dayEnd;
+  const startMinutes = getMinutesInSaoPaulo(startDate);
+  const endMinutes = getMinutesInSaoPaulo(endDate);
+
+  const businessStartMinutes = BUSINESS_HOURS.startHour * 60;
+  const businessEndMinutes = BUSINESS_HOURS.endHour * 60;
+
+  return (
+    startMinutes >= businessStartMinutes &&
+    endMinutes <= businessEndMinutes
+  );
 }
 
 export function intervalsOverlap(startA, endA, startB, endB) {
